@@ -394,7 +394,6 @@ public:
    float DsvpvDistance_2D[DZEROCOUNTMAX];
    float DsvpvDisErr_2D[DZEROCOUNTMAX];
    float Dalpha[DZEROCOUNTMAX];
-   int Dgen[DZEROCOUNTMAX];
    float Ddtheta[DZEROCOUNTMAX];
 public:
    DzeroTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntDkpi");
@@ -738,7 +737,6 @@ public:
    std::vector<float> *DsvpvDisErr_2D;
    std::vector<float> *Dalpha;
    std::vector<float> *Ddtheta;
-   std::vector<int> *Dgen;
    int nTrackInAcceptanceHP;
 
    //MC only quantities
