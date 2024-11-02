@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
   bool IsData = CL.GetBool("IsData", false);
   string PFTreeName = "particleFlowAnalyser/pftree";
   PFTreeName = CL.Get("PFTree", PFTreeName);
+  string DGenTreeName = "Dfinder/ntGen";
+  DGenTreeName = CL.Get("DGenTree", DGenTreeName);
 
   TFile OutputFile(OutputFileName.c_str(), "RECREATE");
   TTree Tree("Tree",
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
     SkimTreeMessenger MSkim(InputFile);
     TriggerTreeMessenger MTrigger(InputFile);
     DzeroTreeMessenger MDzero(InputFile);
-    DzeroGenTreeMessenger MDzeroGen(InputFile);
+    DzeroGenTreeMessenger MDzeroGen(InputFile, DGenTreeName);
     ZDCTreeMessenger MZDC(InputFile);
     METFilterTreeMessenger MFilter(InputFile);
 
@@ -121,7 +123,16 @@ int main(int argc, char *argv[]) {
       /////////////////////////////////////
       ////////// Event selection //////////
       /////////////////////////////////////
-
+      if (IsData == false){
+        for (int iDGen = 0; iDGen < MDzeroGen.Gsize; iDGen++){
+          MDzeroUPC.Gpt->push_back(MDzeroGen.Gpt[iDGen]);
+          MDzeroUPC.Gy->push_back(MDzeroGen.Gy[iDGen]);
+          MDzeroUPC.GpdgId->push_back(MDzeroGen.GpdgId[iDGen]);
+          MDzeroUPC.GisSignal->push_back(MDzeroGen.GisSignal[iDGen]);
+          MDzeroUPC.GcollisionId->push_back(MDzeroGen.GcollisionId[iDGen]);
+          MDzeroUPC.GSignalType->push_back(MDzeroGen.GSignalType[iDGen]);
+        }
+      }
       if (IsData == true) {
         int pprimaryVertexFilter = MSkim.PVFilter;
         int pclusterCompatibilityFilter = MSkim.ClusterCompatibilityFilter;
@@ -173,16 +184,6 @@ int main(int argc, char *argv[]) {
       }
       MDzeroUPC.nTrackInAcceptanceHP = nTrackInAcceptanceHP;
 
-      if (IsData == false){
-        for (int iDGen = 0; iDGen < MDzeroGen.Gsize; iDGen++){
-          MDzeroUPC.Gpt->push_back(MDzeroGen.Gpt[iDGen]);
-          MDzeroUPC.Gy->push_back(MDzeroGen.Gy[iDGen]);
-          MDzeroUPC.GpdgId->push_back(MDzeroGen.GpdgId[iDGen]);
-          MDzeroUPC.GisSignal->push_back(MDzeroGen.GisSignal[iDGen]);
-          MDzeroUPC.GcollisionId->push_back(MDzeroGen.GcollisionId[iDGen]);
-          MDzeroUPC.GSignalType->push_back(MDzeroGen.GSignalType[iDGen]);
-        }
-      }
       for (int iD = 0; iD < MDzero.Dsize; iD++) {
         if (MDzero.Dpt[iD] < MinDzeroPT ||
             MDzero.PassUPCDzero2023Cut(iD) == false)

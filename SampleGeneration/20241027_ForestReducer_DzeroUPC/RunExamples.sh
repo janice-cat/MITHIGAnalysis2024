@@ -14,16 +14,16 @@ mkdir -p Output/
    --MinDzeroPT 1.0 \
    --IsData true \
    --PFTree particleFlowAnalyser/pftree \
-
 ###################
 ### MC Gen PbPb ###
 ###################
 
-./Execute --Input ../../SamplesForest23HIVertex/Run23UPC_MC_pthat0_gammaN_Partial.root \
-   --Output Output/output_30_MC.root \
+./Execute --Input /home/data/public/hannah/mc_productions/OfficialMC_pTHat2/UnmergedForests/ForcedD0Decay100M_BeamA/HiForestMiniAOD_44.root \
+   --Output Output/output_44.root \
    --Year 2023 \
    --MinDzeroPT 1.0 \
    --IsData false \
    --PFTree particleFlowAnalyser/pftree \
+   --DGenTree Dfinder/ntGen
 
 

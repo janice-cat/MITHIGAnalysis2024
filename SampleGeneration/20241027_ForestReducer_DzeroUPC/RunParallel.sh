@@ -3,12 +3,12 @@
 OUTPUT="output"
 counter=0
 MAXCORES=100
-filelist="list.txt"
+filelist="/home/ginnocen/MITHIGAnalysis2024/sparecode/output.txt"
 MERGEDOUTPUT="MergedOutput.root"
 rm $MERGEDOUTPUT
 
 # Check the number of physical CPUs
-NUM_PHYSICAL_CPUS=$(sysctl -n hw.physicalcpu)
+#NUM_PHYSICAL_CPUS=$(sysctl -n hw.physicalcpu)
 
 ## Verify that MAXCORES is not larger than the number of physical CPUs
 #if (( MAXCORES > NUM_PHYSICAL_CPUS )); then
@@ -17,7 +17,7 @@ NUM_PHYSICAL_CPUS=$(sysctl -n hw.physicalcpu)
 #fi
 
 # Remove the file if it exists, suppress error if it doesn't
-rm -f "$filelist"
+#rm -f "$filelist"
 
 # Create the output directory if it doesn't exist
 mkdir -p "$OUTPUT"
@@ -26,7 +26,7 @@ mkdir -p "$OUTPUT"
 
 #ls  /eos/cms/store/group/phys_heavyions/ginnocen/PbPb2018_gtoccbar/20241023_DiJetpThat15PbPb2018gtoccbar_v1/DiJet_pThat-15_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/HINPbPbSpring21MiniAOD-FixL1CaloGT_112X_upgrade2018_realistic_HI_v9-v1/MINIAODSIM/DiJet_pThat-15_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/20241023_DiJetpThat15PbPb2018gtoccbar_v1/241023_225656/000*/*.root > "$filelist"
 #ls /eos/cms/store/group/phys_heavyions/jdlang/PbPbUPC2023/2023config_2023RerecoHIForward0/HIForward0/crab_2023config_2023RerecoHIForward0/241024_101446/000*/*.root > "$filelist"
-ls /home/data/public/jdlang/Run23UPC_Rereco24_Private/Run23UPC_Rereco24_HIForward*.root > "$filelist"
+#ls /eos/cms/store/group/phys_heavyions/jdlang/run3MC/Run3UPC2024_Rereco24HiVtx_MC_pthat0_gammaN_100M/PYTHIA8_2024Run3/crab_Run3UPC2024_Rereco24HiVtx_MC_pthat0_gammaN_100M/241031_225819/0000/* > "$filelist"
 #ls Samples/HiForestAOD_*_Data_pp.root > "$filelist"
 
 # Check if the filelist is empty
@@ -45,7 +45,7 @@ while IFS= read -r file; do
             --Output "$OUTPUT/output_$counter.root" \
             --Year 2023 \
             --IsData true \
-            --MinDzeroPT 1.0 \
+            --MinDzeroPT 2.0 \
             --PFTree particleFlowAnalyser/pftree &
     ((counter++))
     if (( counter % $MAXCORES == 0 )); then
