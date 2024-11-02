@@ -181,6 +181,7 @@ int main(int argc, char *argv[]) {
           MDzeroUPC.GisSignal->push_back(MDzeroGen.GisSignal[iDGen]);
           MDzeroUPC.GcollisionId->push_back(MDzeroGen.GcollisionId[iDGen]);
           MDzeroUPC.GSignalType->push_back(MDzeroGen.GSignalType[iDGen]);
+          MDzeroUPC.Dgen->push_back(MDzero.Dgen[iDGen]);
         }
       }
       for (int iD = 0; iD < MDzero.Dsize; iD++) {
