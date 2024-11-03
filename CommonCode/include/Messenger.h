@@ -724,6 +724,8 @@ public:
    long long Event;
    int Lumi;
    float VX, VY, VZ, VXError, VYError, VZError;
+   int isL1ZDCOr;
+   int isL1ZDCXORJet8;
    int gammaN, Ngamma;
    std::vector<float> *Dpt;
    std::vector<float> *Dphi;
@@ -758,12 +760,12 @@ private:
    bool Initialized;
 
 public:
-   DzeroUPCTreeMessenger(TFile &File, std::string TreeName = "tree");
-   DzeroUPCTreeMessenger(TFile *File, std::string TreeName = "tree");
-   DzeroUPCTreeMessenger(TTree *DzeroUPCTree = nullptr);
+   DzeroUPCTreeMessenger(TFile &File, std::string TreeName = "tree", bool Debug = false);
+   DzeroUPCTreeMessenger(TFile *File, std::string TreeName = "tree", bool Debug = false);
+   DzeroUPCTreeMessenger(TTree *DzeroUPCTree = nullptr, bool Debug = false);
    ~DzeroUPCTreeMessenger();
-   bool Initialize(TTree *DzeroUPCTree);
-   bool Initialize();
+   bool Initialize(TTree *DzeroUPCTree, bool Debug = false);
+   bool Initialize(bool Debug = false);
    int GetEntries();
    bool GetEntry(int iEntry);
    bool SetBranch(TTree *T);

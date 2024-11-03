@@ -153,12 +153,15 @@ int main(int argc, char *argv[]) {
             MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400");
         int HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_2023 =
             MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000");
-        if (
-            HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000_2023 == 0 &&
-            HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000_2023 == 0 &&
-            HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_2023 == 0 &&
-            HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_2023 == 0)
+        int isL1ZDCOr = HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_2023 ||
+                        HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_2023;
+        int isL1ZDCXORJet8 = HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000_2023 ||
+			     HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000_2023;
+        if (isL1ZDCOr == 0 && isL1ZDCXORJet8 == 0)
           continue;
+
+        MDzeroUPC.isL1ZDCOr = isL1ZDCOr;
+        MDzeroUPC.isL1ZDCXORJet8 = isL1ZDCXORJet8;
         bool ZDCgammaN = (MZDC.sumMinus > 1100. && MZDC.sumPlus < 1100.);
         bool ZDCNgamma = (MZDC.sumMinus < 1100. && MZDC.sumPlus > 1100.);
 

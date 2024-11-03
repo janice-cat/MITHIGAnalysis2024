@@ -2692,16 +2692,16 @@ bool ZHadronMessenger::FillEntry()
    return true;
 }
 
-DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TFile &File, std::string TreeName)
+DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TFile &File, std::string TreeName, bool Debug)
 {
    Initialized = false;
    WriteMode = false;
 
    Tree = (TTree *)File.Get(TreeName.c_str());
-   Initialize();
+   Initialize(Debug);
 }
 
-DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TFile *File, std::string TreeName)
+DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TFile *File, std::string TreeName, bool Debug)
 {
    Initialized = false;
    WriteMode = false;
@@ -2710,15 +2710,15 @@ DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TFile *File, std::string TreeName)
       Tree = (TTree *)File->Get(TreeName.c_str());
    else
       Tree = nullptr;
-   Initialize();
+   Initialize(Debug);
 }
 
-DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TTree *DzeroUPCTree)
+DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TTree *DzeroUPCTree, bool Debug)
 {
    Initialized = false;
    WriteMode = false;
 
-   Initialize(DzeroUPCTree);
+   Initialize(DzeroUPCTree, Debug);
 }
 
 DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
@@ -2747,13 +2747,13 @@ DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
    }
 }
 
-bool DzeroUPCTreeMessenger::Initialize(TTree *DzeroUPCTree)
+bool DzeroUPCTreeMessenger::Initialize(TTree *DzeroUPCTree, bool Debug)
 {
    Tree = DzeroUPCTree;
-   return Initialize();
+   return Initialize(Debug);
 }
 
-bool DzeroUPCTreeMessenger::Initialize()
+bool DzeroUPCTreeMessenger::Initialize(bool Debug)
 {
    if(Tree == nullptr)
       return false;
@@ -2790,6 +2790,8 @@ bool DzeroUPCTreeMessenger::Initialize()
    Tree->SetBranchAddress("VZError", &VZError);
    Tree->SetBranchAddress("gammaN", &gammaN);
    Tree->SetBranchAddress("Ngamma", &Ngamma);
+   Tree->SetBranchAddress("isL1ZDCOr", &isL1ZDCOr);
+   Tree->SetBranchAddress("isL1ZDCXORJet8", &isL1ZDCXORJet8);
    Tree->SetBranchAddress("Dpt", &Dpt);
    Tree->SetBranchAddress("Dy", &Dy);
    Tree->SetBranchAddress("Dmass", &Dmass);
@@ -2893,6 +2895,8 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("VZError",               &VZError, "VZError/F");
    Tree->Branch("gammaN",                &gammaN, "gammaN/I");
    Tree->Branch("Ngamma",                &Ngamma, "Ngamma/I");
+   Tree->Branch("isL1ZDCOr",             &isL1ZDCOr, "isL1ZDCOr/I");
+   Tree->Branch("isL1ZDCXORJet8",        &isL1ZDCXORJet8, "isL1ZDCXORJet8/I");
    Tree->Branch("Dpt",                   &Dpt);
    Tree->Branch("Dy",                    &Dy);
    Tree->Branch("Dmass",                 &Dmass);
@@ -2929,6 +2933,8 @@ void DzeroUPCTreeMessenger::Clear()
    VZError = 0;
    gammaN = -1;
    Ngamma = -1;
+   isL1ZDCOr = 0;
+   isL1ZDCXORJet8 = 0;
    Dpt->clear();
    Dy->clear();
    Dmass->clear();
@@ -2964,6 +2970,7 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    VZError      = M.VZError;
    gammaN       = M.gammaN;
    Ngamma       = M.Ngamma;
+   isL1ZDCOr    = M.isL1ZDCOr;
    if(Dpt != nullptr && M.Dpt != nullptr)   *Dpt = *(M.Dpt);
    if(Dy != nullptr && M.Dy != nullptr)   *Dy = *(M.Dy);
    if(Dmass != nullptr && M.Dmass != nullptr)   *Dmass = *(M.Dmass);
