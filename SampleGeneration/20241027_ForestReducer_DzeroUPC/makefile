@@ -1,12 +1,12 @@
 default: TestRun
 
 TestRun: Execute
-	./Execute --Input ../../Samples/SamplesForest23HIVertex/HiForestMiniAOD_UPCPbPb23_HiVertex_279.root \
+	./Execute --Input /data/NewSkims23_24/20241102_ForestOldReco23sample_Dataexample/HiForestMiniAOD_UPCPbPb23_HiVertex_279.root \
                   --Output SkimReco_UPCPbPb23_HiVertex_279.root --Year 2023 --MinDzeroPT 2.0 --IsData true \
                   --PFTree particleFlowAnalyser/pftree
 
 TestRunBase: Execute
-	./Execute --Input ../../Samples/SamplesForest23HIVertex/HiForestMiniAOD_UPCPbPb23_HiVertex_279.root \
+	./Execute --Input /data/NewSkims23_24/20241102_ForestOldReco23sample_Dataexample/HiForestMiniAOD_UPCPbPb23_HiVertex_279.root \
                   --Output SkimReco_UPCPbPb23_HiVertex_279.root --Year 2023 --MinDzeroPT 2.0 --IsData true \
                   --PFTree particleFlowAnalyser/pftree
 

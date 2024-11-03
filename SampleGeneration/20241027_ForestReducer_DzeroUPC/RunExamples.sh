@@ -7,13 +7,13 @@ mkdir -p Output/
 ### Data PbPb ###
 #################
 
-#./Execute --Input /eos/cms/store/group/phys_heavyions/jdlang/PbPbUPC2023/2023config_2023RerecoHIForward0/HIForward0/crab_2023config_2023RerecoHIForward0/241024_101446/0001/HiForestMiniAOD_1703.root \
-./Execute --Input ../../SamplesForest23HIVertex/HiForestMiniAOD_UPCPbPb23_HiVertex_279.root \
+./Execute --Input /data/NewSkims23_24/20241102_ForestOldReco23sample_Dataexample/HiForestMiniAOD_UPCPbPb23_HiVertex_279.root \
    --Output Output/example.root \
    --Year 2023 \
    --MinDzeroPT 1.0 \
    --IsData true \
    --PFTree particleFlowAnalyser/pftree \
+
 ###################
 ### MC Gen PbPb ###
 ###################
@@ -25,5 +25,3 @@ mkdir -p Output/
    --IsData false \
    --PFTree particleFlowAnalyser/pftree \
    --DGenTree Dfinder/ntGen
-
-
