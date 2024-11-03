@@ -48,10 +48,6 @@ void saveParametersToHistograms(const Parameters& par, TFile* outf) {
     hMaxDalpha->SetBinContent(1, par.MaxDalpha);
     TH1D* hScaleFactor = new TH1D("parScaleFactor", "parScaleFactor", 1, 0, 1);
     hScaleFactor->SetBinContent(1, par.scaleFactor);
-    TH1D* hNThread = new TH1D("parNThread", "parNThread", 1, 0, 1);
-    hNThread->SetBinContent(1, par.nThread); 
-    TH1D* hNChunk = new TH1D("parNChunk", "parNChunk", 1, 0, 1);
-    hNChunk->SetBinContent(1, par.nChunk);
     
     // Write histograms to the output file
     hMinDzeroPT->Write();

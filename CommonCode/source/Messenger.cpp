@@ -2931,8 +2931,8 @@ void DzeroUPCTreeMessenger::Clear()
    VXError = 0;
    VYError = 0;
    VZError = 0;
-   gammaN = -1;
-   Ngamma = -1;
+   gammaN = 0;
+   Ngamma = 0;
    isL1ZDCOr = 0;
    isL1ZDCXORJet8 = 0;
    Dpt->clear();

@@ -10,8 +10,8 @@
 #define JETCOUNTMAX 500
 #define GENCOUNTMAX 250
 #define VERTEXCOUNTMAX 200
-#define DZEROCOUNTMAX 10000
-#define DZEROGENCOUNTMAX 300
+#define DZEROCOUNTMAX 10000 //FIXME: to be fined tuned
+#define DZEROGENCOUNTMAX 300 //FIXME: to be fined tuned
 #define TRACKCOUNTMAX 10000
 #define PLANEMAX 200
 #define MUMAX 50
@@ -403,7 +403,7 @@ public:
    bool Initialize(TTree *DzeroTree);
    bool Initialize();
    bool GetEntry(int iEntry);
-   bool PassUPCDzero2023Cut(int index);
+   bool PassUPCDzero2023Cut(int index); //FIXME: to be fined tuned
 };
 
 
@@ -644,7 +644,7 @@ public:
    float ExtraZWeight[12];
 
    int NVertex;
-   float VX, VY, VZ, VXError, VYError, VZError;
+   float VX, VY, VZ, VXError, VYError, VZError; 
    int NPU;
    
    std::vector<float> *zMass;
@@ -723,6 +723,7 @@ public:
    int Run;
    long long Event;
    int Lumi;
+   //FIXME: these refer to best vertex positions calculated from the track tree
    float VX, VY, VZ, VXError, VYError, VZError;
    int isL1ZDCOr;
    int isL1ZDCXORJet8;
@@ -753,7 +754,7 @@ public:
    std::vector<int> *GSignalType;
 
 public:   // Derived quantities
-   bool GoodPhotonuclear;
+   bool GoodPhotonuclear; //FIXME: currently not implemented
 
 private:
    bool WriteMode;
