@@ -7,7 +7,7 @@ rm SkimReco.root
 rm list.txt
 rm -rf output
 rm *.txt*
-rm Skim*.root
+rm SkimReco.root
 rm .DS_Store
 
 cd /home/ginnocen/CMSSW_13_2_6_patch2/src
