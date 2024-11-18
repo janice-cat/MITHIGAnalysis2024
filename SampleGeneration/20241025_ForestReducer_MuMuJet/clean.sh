@@ -1,7 +1,7 @@
-rm ExecuteDzeroUPC
-rm MassFit
+rm Execute
 rm -rf ../../CommonCode/binary/
 rm -rf ../../CommonCode/library/
+rm MergedOutput.root
 rm -rf Output
 rm SkimReco.root
 rm list.txt
@@ -20,6 +20,6 @@ source SetupAnalysis.sh
 cd CommonCode/
 make
 cd ..
-cd MainAnalysis/20241029_DzeroUPC/
+cd SampleGeneration/20241025_ForestReducer_MuMuJet
 make
 rm Skim*.root

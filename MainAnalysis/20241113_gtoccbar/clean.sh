@@ -1,5 +1,4 @@
-rm ExecuteDzeroUPC
-rm MassFit
+rm Execute*
 rm -rf ../../CommonCode/binary/
 rm -rf ../../CommonCode/library/
 rm -rf Output
@@ -20,6 +19,6 @@ source SetupAnalysis.sh
 cd CommonCode/
 make
 cd ..
-cd MainAnalysis/20241029_DzeroUPC/
+cd /home/ginnocen/MITHIGAnalysis2024/MainAnalysis/20241113_gtoccbar
 make
 rm Skim*.root

@@ -32,6 +32,7 @@ class PbPbTrackTreeMessenger;
 class PbPbUPCTrackTreeMessenger;
 class ZDCTreeMessenger;
 class DzeroTreeMessenger;
+class DzeroGenTreeMessenger;
 class HiEventTreeMessenger
 {
 public:
@@ -396,6 +397,8 @@ public:
    float Dalpha[DZEROCOUNTMAX];
    float Ddtheta[DZEROCOUNTMAX];
    int Dgen[DZEROCOUNTMAX];
+   float Dgenpt[DZEROCOUNTMAX];
+   int DgenBAncestorpdgId[DZEROCOUNTMAX];
 public:
    DzeroTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntDkpi");
    DzeroTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntDkpi");
@@ -414,10 +417,11 @@ public:
    int Gsize;
    float Gpt[DZEROGENCOUNTMAX];
    float Gy[DZEROGENCOUNTMAX];
-   float GpdgId[DZEROGENCOUNTMAX];
-   float GisSignal[DZEROGENCOUNTMAX];
-   float GcollisionId[DZEROGENCOUNTMAX];
-   float GSignalType[DZEROGENCOUNTMAX];
+   int GpdgId[DZEROGENCOUNTMAX];
+   int GisSignal[DZEROGENCOUNTMAX];
+   int GcollisionId[DZEROGENCOUNTMAX];
+   int GSignalType[DZEROGENCOUNTMAX];
+   int GBAncestorpdgId[DZEROGENCOUNTMAX];
 public:
    DzeroGenTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntGenDkpi");
    DzeroGenTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntGenDkpi");
@@ -724,10 +728,22 @@ public:
    long long Event;
    int Lumi;
    //FIXME: these refer to best vertex positions calculated from the track tree
-   float VX, VY, VZ, VXError, VYError, VZError;
-   int isL1ZDCOr;
-   int isL1ZDCXORJet8;
-   int gammaN, Ngamma;
+   float VX, VY, VZ, VXError, VYError, VZError; //best vertex from track tree
+   int nVtx;
+   bool isL1ZDCOr, isL1ZDCXORJet8, isL1ZDCXORJet12, isL1ZDCXORJet16;
+   bool selectedBkgFilter, selectedVtxFilter;
+   float ZDCsumPlus;
+   float ZDCsumMinus;
+   float HFEMaxPlus;
+   float HFEMaxMinus;
+   //booleans
+   bool ZDCgammaN, ZDCNgamma;
+   bool gapgammaN, gapNgamma;
+   std::vector<bool>  *gammaN;
+   std::vector<bool>  *Ngamma;
+   int nTrackInAcceptanceHP;
+   //D reco quantities
+   int Dsize;
    std::vector<float> *Dpt;
    std::vector<float> *Dphi;
    std::vector<float> *Dy;
@@ -741,17 +757,18 @@ public:
    std::vector<float> *DsvpvDisErr_2D;
    std::vector<float> *Dalpha;
    std::vector<float> *Ddtheta;
+   std::vector<bool>  *DpassCut;
    std::vector<int> *Dgen;
-   int nTrackInAcceptanceHP;
-
+   std::vector<bool> *DisSignalCalc;
+   std::vector<bool> *DisSignalCalcPrompt;
+   std::vector<bool> *DisSignalCalcFeeddown;
    //MC only quantities
    int Gsize;
    std::vector<float> *Gpt;
    std::vector<float> *Gy;
-   std::vector<int> *GpdgId;
-   std::vector<int> *GisSignal;
-   std::vector<int> *GcollisionId;
-   std::vector<int> *GSignalType;
+   std::vector<bool> *GisSignalCalc;
+   std::vector<bool> *GisSignalCalcPrompt;
+   std::vector<bool> *GisSignalCalcFeeddown;
 
 public:   // Derived quantities
    bool GoodPhotonuclear; //FIXME: currently not implemented
@@ -772,6 +789,52 @@ public:
    bool SetBranch(TTree *T);
    void Clear();
    void CopyNonTrack(DzeroUPCTreeMessenger &M);
+   bool FillEntry();
+};
+
+class MuMuJetMessenger
+{
+public:
+   TTree *Tree;
+   int Run;
+   long long Event;
+   int Lumi;
+   int hiBin;
+   float hiHF;
+   int NVertex;
+   float VX, VY, VZ, VXError, VYError, VZError;
+   int NPU;
+   //std::vectors
+   std::vector<float> *MuMuMass;
+   std::vector<float> *MuMuEta;
+   std::vector<float> *MuMuY;
+   std::vector<float> *MuMuPhi;
+   std::vector<float> *MuMuPt;
+   std::vector<float> *muEta1;
+   std::vector<float> *muEta2;
+   std::vector<float> *muPhi1;
+   std::vector<float> *muPhi2;
+   std::vector<float> *muPt1;
+   std::vector<float> *muPt2;
+   std::vector<float> *muDeta;
+   std::vector<float> *muDphi;
+   std::vector<float> *muDR;
+   std::vector<float> *muDphiS;
+private:
+   bool WriteMode;
+   bool Initialized;
+public:
+   MuMuJetMessenger(TFile &File, std::string TreeName = "tree");
+   MuMuJetMessenger(TFile *File, std::string TreeName = "tree");
+   MuMuJetMessenger(TTree *MuMuJetTree = nullptr);
+   ~MuMuJetMessenger();
+   bool Initialize(TTree *MuMuJetTree);
+   bool Initialize();
+   int GetEntries();
+   bool GetEntry(int iEntry);
+   bool SetBranch(TTree *T);
+   void Clear();
+   void CopyNonTrack(MuMuJetMessenger &M);
    bool FillEntry();
 };
 

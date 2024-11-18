@@ -138,7 +138,7 @@ bool METFilterTreeMessenger::Initialize()
   if (Tree->GetBranch("cscTightHalo2015Filter"))
     Tree->SetBranchAddress("cscTightHalo2015Filter", &cscTightHalo2015Filter);
   else
-    cscTightHalo2015Filter = false;
+    cscTightHalo2015Filter = true;
   return true;
 }
 bool METFilterTreeMessenger::GetEntry(int iEntry)
@@ -808,7 +808,13 @@ void TriggerTreeMessenger::FillTriggerNames()
 {
    Name.clear();
    Decision.clear();
-   
+   // 2024 triggers UPCs
+   Name.push_back("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v13");
+   Name.push_back("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000_v2");
+   Name.push_back("HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster10000_v1");
+   Name.push_back("HLT_HIUPC_SingleJet12_ZDC1nXOR_MaxPixelCluster10000_v1");
+   Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000_v1");
+
    // 2023 triggers UPCs
    Name.push_back("HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000_v2");
    Name.push_back("HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000_v1");
@@ -1479,6 +1485,8 @@ bool DzeroTreeMessenger::Initialize()
    Tree->SetBranchAddress("Dalpha", &Dalpha);
    Tree->SetBranchAddress("Ddtheta", &Ddtheta);
    Tree->SetBranchAddress("Dgen", &Dgen);
+   Tree->SetBranchAddress("Dgenpt", &Dgenpt);
+   Tree->SetBranchAddress("DgenBAncestorpdgId", &DgenBAncestorpdgId);
 
    return true;
 }
@@ -1553,6 +1561,7 @@ bool DzeroGenTreeMessenger::Initialize()
    Tree->SetBranchAddress("GisSignal", &GisSignal);
    Tree->SetBranchAddress("GcollisionId", &GcollisionId);
    Tree->SetBranchAddress("GSignalType", &GSignalType);
+   Tree->SetBranchAddress("GBAncestorpdgId", &GBAncestorpdgId);
 
    return true;
 }
@@ -2725,7 +2734,10 @@ DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
 {
    if(Initialized == true && WriteMode == true)
    {
+      delete gammaN;
+      delete Ngamma;
       delete Dpt;
+      delete DpassCut;
       delete Dy;
       delete Dmass;
       delete Dtrk1Pt;
@@ -2738,12 +2750,14 @@ DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
       delete Dalpha;
       delete Ddtheta;
       delete Dgen;
+      delete DisSignalCalc;
+      delete DisSignalCalcPrompt;
+      delete DisSignalCalcFeeddown;
       delete Gpt;
       delete Gy;
-      delete GpdgId;
-      delete GisSignal;
-      delete GcollisionId;
-      delete GSignalType;
+      delete GisSignalCalc;
+      delete GisSignalCalcPrompt;
+      delete GisSignalCalcFeeddown;
    }
 }
 
@@ -2759,7 +2773,10 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
       return false;
 
    Initialized = true;
+   Ngamma = nullptr;
+   gammaN = nullptr;
    Dpt = nullptr;
+   DpassCut = nullptr;
    Dy = nullptr;
    Dmass = nullptr;
    Dtrk1Pt = nullptr;
@@ -2772,12 +2789,14 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Dalpha = nullptr;
    Ddtheta = nullptr;
    Dgen = nullptr;
+   DisSignalCalc = nullptr;
+   DisSignalCalcPrompt = nullptr;
+   DisSignalCalcFeeddown = nullptr;
    Gpt = nullptr;
    Gy = nullptr;
-   GpdgId = nullptr;
-   GisSignal = nullptr;
-   GcollisionId = nullptr;
-   GSignalType = nullptr;
+   GisSignalCalc = nullptr;
+   GisSignalCalcPrompt = nullptr;
+   GisSignalCalcFeeddown = nullptr;
 
    Tree->SetBranchAddress("Run", &Run);
    Tree->SetBranchAddress("Event", &Event);
@@ -2788,12 +2807,25 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("VXError", &VXError);
    Tree->SetBranchAddress("VYError", &VYError);
    Tree->SetBranchAddress("VZError", &VZError);
-   Tree->SetBranchAddress("gammaN", &gammaN);
-   Tree->SetBranchAddress("Ngamma", &Ngamma);
+   Tree->SetBranchAddress("nVtx", &nVtx);
    Tree->SetBranchAddress("isL1ZDCOr", &isL1ZDCOr);
    Tree->SetBranchAddress("isL1ZDCXORJet8", &isL1ZDCXORJet8);
+   Tree->SetBranchAddress("isL1ZDCXORJet12", &isL1ZDCXORJet12);
+   Tree->SetBranchAddress("isL1ZDCXORJet16", &isL1ZDCXORJet16);
+   Tree->SetBranchAddress("selectedBkgFilter", &selectedBkgFilter);
+   Tree->SetBranchAddress("selectedVtxFilter", &selectedVtxFilter);
+   Tree->SetBranchAddress("ZDCsumPlus", &ZDCsumPlus);
+   Tree->SetBranchAddress("ZDCsumMinus", &ZDCsumMinus);
+   Tree->SetBranchAddress("HFEMaxPlus", &HFEMaxPlus);
+   Tree->SetBranchAddress("HFEMaxMinus", &HFEMaxMinus);
+   Tree->SetBranchAddress("ZDCgammaN", &ZDCgammaN);
+   Tree->SetBranchAddress("ZDCNgamma", &ZDCNgamma);
+   Tree->SetBranchAddress("gapgammaN", &gapgammaN);
+   Tree->SetBranchAddress("gapNgamma", &gapNgamma);
+   Tree->SetBranchAddress("gammaN", &gammaN);
+   Tree->SetBranchAddress("Ngamma", &Ngamma);
    Tree->SetBranchAddress("nTrackInAcceptanceHP", &nTrackInAcceptanceHP);
-
+   Tree->SetBranchAddress("Dsize", &Dsize);
    Tree->SetBranchAddress("Dpt", &Dpt);
    Tree->SetBranchAddress("Dy", &Dy);
    Tree->SetBranchAddress("Dmass", &Dmass);
@@ -2806,13 +2838,17 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("DsvpvDisErr_2D", &DsvpvDisErr_2D);
    Tree->SetBranchAddress("Dalpha", &Dalpha);
    Tree->SetBranchAddress("Ddtheta", &Ddtheta);
+   Tree->SetBranchAddress("DpassCut", &DpassCut);
    Tree->SetBranchAddress("Dgen", &Dgen);
+   Tree->SetBranchAddress("DisSignalCalc", &DisSignalCalc);
+   Tree->SetBranchAddress("DisSignalCalcPrompt", &DisSignalCalcPrompt);
+   Tree->SetBranchAddress("DisSignalCalcFeeddown", &DisSignalCalcFeeddown);
+   Tree->SetBranchAddress("Gsize", &Gsize);
    Tree->SetBranchAddress("Gpt", &Gpt);
    Tree->SetBranchAddress("Gy", &Gy);
-   Tree->SetBranchAddress("GpdgId", &GpdgId);
-   Tree->SetBranchAddress("GisSignal", &GisSignal);
-   Tree->SetBranchAddress("GcollisionId", &GcollisionId);
-   Tree->SetBranchAddress("GSignalType", &GSignalType);
+   Tree->SetBranchAddress("GisSignalCalc", &GisSignalCalc);
+   Tree->SetBranchAddress("GisSignalCalcPrompt", &GisSignalCalcPrompt);
+   Tree->SetBranchAddress("GisSignalCalcFeeddown", &GisSignalCalcFeeddown);
    return true;
 }
 
@@ -2829,30 +2865,6 @@ bool DzeroUPCTreeMessenger::GetEntry(int iEntry)
       return false;
 
    Tree->GetEntry(iEntry);
-   //GoodPhotonuclear = true;
-   // fill derived quantities
-   /*
-   GoodGenZ = true;
-   if(genZY == nullptr)
-      GoodGenZ = false;
-   else if(genZY->size() == 0)
-      GoodGenZ = false;
-   else
-   {
-      if(genZMass->at(0) > 120 || genZMass->at(0) < 60)   GoodGenZ = false;
-      if(genZY->at(0) < -2.4 || genZY->at(0) > 2.4)       GoodGenZ = false;
-   }
-   GoodRecoZ = true;
-   if(zY == nullptr)
-      GoodRecoZ = false;
-   else if(zY->size() == 0)
-      GoodRecoZ = false;
-   else
-   {
-      if(zMass->at(0) > 120 || zMass->at(0) < 60)   GoodRecoZ = false;
-      if(zY->at(0) < -2.4 || zY->at(0) > 2.4)       GoodRecoZ = false;
-   }
-   */
    return true;
 }
 
@@ -2864,7 +2876,10 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Initialized = true;
    WriteMode = true;
 
+   gammaN = new std::vector<bool>();
+   Ngamma = new std::vector<bool>();
    Dpt = new std::vector<float>();
+   DpassCut = new std::vector<bool>();
    Dy = new std::vector<float>();
    Dmass = new std::vector<float>();
    Dtrk1Pt = new std::vector<float>();
@@ -2876,15 +2891,19 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    DsvpvDisErr_2D = new std::vector<float>();
    Dalpha = new std::vector<float>();
    Ddtheta = new std::vector<float>();
+   DpassCut = new std::vector<bool>();
    Dgen = new std::vector<int>();
+   DisSignalCalc = new std::vector<bool>();
+   DisSignalCalcPrompt = new std::vector<bool>();
+   DisSignalCalcFeeddown = new std::vector<bool>();
+
    Gpt = new std::vector<float>();
    Gy = new std::vector<float>();
-   GpdgId = new std::vector<int>();
-   GisSignal = new std::vector<int>();
-   GcollisionId = new std::vector<int>();
-   GSignalType = new std::vector<int>();
+   GisSignalCalc = new std::vector<bool>();
+   GisSignalCalcPrompt = new std::vector<bool>();
+   GisSignalCalcFeeddown = new std::vector<bool>();
 
-   Tree = T;
+  Tree = T;
 
    Tree->Branch("Run",                   &Run, "Run/I");
    Tree->Branch("Event",                 &Event, "Event/L");
@@ -2895,12 +2914,26 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("VXError",               &VXError, "VXError/F");
    Tree->Branch("VYError",               &VYError, "VYError/F");
    Tree->Branch("VZError",               &VZError, "VZError/F");
-   Tree->Branch("gammaN",                &gammaN, "gammaN/I");
-   Tree->Branch("Ngamma",                &Ngamma, "Ngamma/I");
-   Tree->Branch("isL1ZDCOr",             &isL1ZDCOr, "isL1ZDCOr/I");
-   Tree->Branch("isL1ZDCXORJet8",        &isL1ZDCXORJet8, "isL1ZDCXORJet8/I");
+   Tree->Branch("nVtx",                  &nVtx, "nVtx/I");
+   Tree->Branch("isL1ZDCOr",             &isL1ZDCOr, "isL1ZDCOr/O");
+   Tree->Branch("isL1ZDCXORJet8",        &isL1ZDCXORJet8, "isL1ZDCXORJet8/O");
+   Tree->Branch("isL1ZDCXORJet12",       &isL1ZDCXORJet12, "isL1ZDCXORJet12/O");
+   Tree->Branch("isL1ZDCXORJet16",       &isL1ZDCXORJet16, "isL1ZDCXORJet16/O");
+   Tree->Branch("selectedBkgFilter",     &selectedBkgFilter, "selectedBkgFilter/O");
+   Tree->Branch("selectedVtxFilter",     &selectedVtxFilter, "selectedVtxFilter/O");
+   Tree->Branch("ZDCgammaN",             &ZDCgammaN, "ZDCgammaN/O");
+   Tree->Branch("ZDCNgamma",             &ZDCNgamma, "ZDCNgamma/O");
+   Tree->Branch("gapgammaN",             &gapgammaN, "gapgammaN/O");
+   Tree->Branch("gapNgamma",             &gapNgamma, "gapNgamma/O");
+   Tree->Branch("gammaN",                &gammaN);
+   Tree->Branch("Ngamma",                &Ngamma);
+   Tree->Branch("ZDCsumPlus",            &ZDCsumPlus, "ZDCsumPlus/F");
+   Tree->Branch("ZDCsumMinus",           &ZDCsumMinus, "ZDCsumMinus/F");
+   Tree->Branch("HFEMaxPlus",            &HFEMaxPlus, "HFEMaxPlus/F");
+   Tree->Branch("HFEMaxMinus",           &HFEMaxMinus, "HFEMaxMinus/F");
    Tree->Branch("nTrackInAcceptanceHP",  &nTrackInAcceptanceHP, "nTrackInAcceptanceHP/I");
 
+   Tree->Branch("Dsize",                 &Dsize);
    Tree->Branch("Dpt",                   &Dpt);
    Tree->Branch("Dy",                    &Dy);
    Tree->Branch("Dmass",                 &Dmass);
@@ -2913,13 +2946,18 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("DsvpvDisErr_2D",        &DsvpvDisErr_2D);
    Tree->Branch("Dalpha",                &Dalpha);
    Tree->Branch("Ddtheta",               &Ddtheta);
+   Tree->Branch("DpassCut",              &DpassCut);
    Tree->Branch("Dgen",                  &Dgen);
+   Tree->Branch("DisSignalCalc",         &DisSignalCalc);
+   Tree->Branch("DisSignalCalcPrompt",   &DisSignalCalcPrompt);
+   Tree->Branch("DisSignalCalcFeeddown", &DisSignalCalcFeeddown);
+
+   Tree->Branch("Gsize",                 &Gsize);
    Tree->Branch("Gpt",                   &Gpt);
    Tree->Branch("Gy",                    &Gy);
-   Tree->Branch("GpdgId",                &GpdgId);
-   Tree->Branch("GisSignal",             &GisSignal);
-   Tree->Branch("GcollisionId",          &GcollisionId);
-   Tree->Branch("GSignalType",           &GSignalType);
+   Tree->Branch("GisSignalCalc",         &GisSignalCalc);
+   Tree->Branch("GisSignalCalcPrompt",   &GisSignalCalcPrompt);
+   Tree->Branch("GisSignalCalcFeeddown", &GisSignalCalcFeeddown);
    return true;
 }
 
@@ -2928,18 +2966,34 @@ void DzeroUPCTreeMessenger::Clear()
    if(Initialized == false)
       return;
 
-   VX = 0;
-   VY = 0;
-   VZ = 0;
-   VXError = 0;
-   VYError = 0;
-   VZError = 0;
-   gammaN = 0;
-   Ngamma = 0;
-   isL1ZDCOr = 0;
-   isL1ZDCXORJet8 = 0;
+   Run = -999;
+   Event = -999;
+   Lumi = -999;
+   VX = 0.;
+   VY = 0.;
+   VZ = 0.;
+   VXError = 0.;
+   VYError = 0.;
+   VZError = 0.;
+   nVtx = 0;
+   isL1ZDCOr = false;
+   isL1ZDCXORJet8 = false;
+   isL1ZDCXORJet12 = false;
+   isL1ZDCXORJet16 = false;
+   selectedBkgFilter = false;
+   selectedVtxFilter = false;
+   ZDCgammaN = false;
+   ZDCNgamma = false;
+   gapgammaN = false;
+   gapNgamma = false;
+   gammaN->clear();
+   Ngamma->clear();
+   ZDCsumPlus = -9999.;
+   ZDCsumMinus = -9999.;
+   HFEMaxPlus = 9999.;
+   HFEMaxMinus = 9999.;
    nTrackInAcceptanceHP = 0;
-
+   Dsize = 0;
    Dpt->clear();
    Dy->clear();
    Dmass->clear();
@@ -2952,32 +3006,49 @@ void DzeroUPCTreeMessenger::Clear()
    DsvpvDisErr_2D->clear();
    Dalpha->clear();
    Ddtheta->clear();
+   DpassCut->clear();
    Dgen->clear();
+   DisSignalCalc->clear();
+   DisSignalCalcPrompt->clear();
+   DisSignalCalcFeeddown->clear();
+   Gsize = 0;
    Gpt->clear();
    Gy->clear();
-   GpdgId->clear();
-   GisSignal->clear();
-   GcollisionId->clear();
-   GSignalType->clear();
+   GisSignalCalc->clear();
+   GisSignalCalcPrompt->clear();
+   GisSignalCalcFeeddown->clear();
 }
 
 void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
 {
-   Run            = M.Run;
-   Event          = M.Event;
-   Lumi           = M.Lumi;
-   VX             = M.VX;
-   VY             = M.VY;
-   VZ             = M.VZ;
-   VXError        = M.VXError;
-   VYError        = M.VYError;
-   VZError        = M.VZError;
-   gammaN         = M.gammaN;
-   Ngamma         = M.Ngamma;
-   isL1ZDCOr      = M.isL1ZDCOr;
-   isL1ZDCXORJet8 = M.isL1ZDCXORJet8;
+   Run                  = M.Run;
+   Event                = M.Event;
+   Lumi                 = M.Lumi;
+   VX                   = M.VX;
+   VY                   = M.VY;
+   VZ                   = M.VZ;
+   VXError              = M.VXError;
+   VYError              = M.VYError;
+   VZError              = M.VZError;
+   nVtx                 = M.nVtx;
+   isL1ZDCOr            = M.isL1ZDCOr;
+   isL1ZDCXORJet8       = M.isL1ZDCXORJet8;
+   isL1ZDCXORJet12      = M.isL1ZDCXORJet12;
+   isL1ZDCXORJet16      = M.isL1ZDCXORJet16;
+   selectedBkgFilter    = M.selectedBkgFilter;
+   selectedVtxFilter    = M.selectedVtxFilter;
+   ZDCsumPlus           = M.ZDCsumPlus;
+   ZDCsumMinus          = M.ZDCsumMinus;
+   HFEMaxPlus           = M.HFEMaxPlus;
+   HFEMaxMinus          = M.HFEMaxMinus;
+   ZDCgammaN            = M.ZDCgammaN;
+   ZDCNgamma            = M.ZDCNgamma;
+   gapgammaN            = M.gapgammaN;
+   gapNgamma            = M.gapNgamma;
+   if (gammaN != nullptr && M.gammaN != nullptr) *gammaN = *(M.gammaN);
+   if (Ngamma != nullptr && M.Ngamma != nullptr) *Ngamma = *(M.Ngamma);
    nTrackInAcceptanceHP = M.nTrackInAcceptanceHP;
-
+   Dsize          = M.Dsize;
    if(Dpt != nullptr && M.Dpt != nullptr)   *Dpt = *(M.Dpt);
    if(Dy != nullptr && M.Dy != nullptr)   *Dy = *(M.Dy);
    if(Dmass != nullptr && M.Dmass != nullptr)   *Dmass = *(M.Dmass);
@@ -2990,16 +3061,290 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    if(DsvpvDisErr_2D != nullptr && M.DsvpvDisErr_2D != nullptr)   *DsvpvDisErr_2D = *(M.DsvpvDisErr_2D);
    if(Dalpha != nullptr && M.Dalpha != nullptr)   *Dalpha = *(M.Dalpha);
    if(Ddtheta != nullptr && M.Ddtheta != nullptr)   *Ddtheta = *(M.Ddtheta);
+   if(DpassCut != nullptr && M.DpassCut != nullptr)   *DpassCut = *(M.DpassCut);
    if(Dgen != nullptr && M.Dgen != nullptr)   *Dgen = *(M.Dgen);
+   if(DisSignalCalc != nullptr && M.DisSignalCalc != nullptr)   *DisSignalCalc = *(M.DisSignalCalc);
+   if(DisSignalCalcPrompt != nullptr && M.DisSignalCalcPrompt != nullptr)   *DisSignalCalcPrompt = *(M.DisSignalCalcPrompt);
+   if(DisSignalCalcFeeddown != nullptr && M.DisSignalCalcFeeddown != nullptr)   *DisSignalCalcFeeddown = *(M.DisSignalCalcFeeddown);
+   Gsize          = M.Gsize;
    if(Gpt != nullptr && M.Gpt != nullptr)   *Gpt = *(M.Gpt);
    if(Gy != nullptr && M.Gy != nullptr)   *Gy = *(M.Gy);
-   if(GpdgId != nullptr && M.GpdgId != nullptr)   *GpdgId = *(M.GpdgId);
-   if(GisSignal != nullptr && M.GisSignal != nullptr)   *GisSignal = *(M.GisSignal);
-   if(GcollisionId != nullptr && M.GcollisionId != nullptr)   *GcollisionId = *(M.GcollisionId);
-   if(GSignalType != nullptr && M.GSignalType != nullptr)   *GSignalType = *(M.GSignalType);
+   if(GisSignalCalc != nullptr && M.GisSignalCalc != nullptr)   *GisSignalCalc = *(M.GisSignalCalc);
+   if(GisSignalCalcPrompt != nullptr && M.GisSignalCalcPrompt != nullptr)   *GisSignalCalcPrompt = *(M.GisSignalCalcPrompt);
+   if(GisSignalCalcFeeddown != nullptr && M.GisSignalCalcFeeddown != nullptr)   *GisSignalCalcFeeddown = *(M.GisSignalCalcFeeddown);
 }
 
 bool DzeroUPCTreeMessenger::FillEntry()
+{
+   if(Initialized == false)
+      return false;
+   if(WriteMode == false)
+      return false;
+
+   if(Tree == nullptr)
+      return false;
+
+   Tree->Fill();
+   Clear();
+
+   return true;
+}
+
+MuMuJetMessenger::MuMuJetMessenger(TFile &File, std::string TreeName)
+{
+   Initialized = false;
+   WriteMode = false;
+
+   Tree = (TTree *)File.Get(TreeName.c_str());
+   Initialize();
+}
+
+MuMuJetMessenger::MuMuJetMessenger(TFile *File, std::string TreeName)
+{
+   Initialized = false;
+   WriteMode = false;
+
+   if(File != nullptr)
+      Tree = (TTree *)File->Get(TreeName.c_str());
+   else
+      Tree = nullptr;
+   Initialize();
+}
+
+MuMuJetMessenger::MuMuJetMessenger(TTree *MuMuJetTree)
+{
+   Initialized = false;
+   WriteMode = false;
+
+   Initialize(MuMuJetTree);
+}
+
+MuMuJetMessenger::~MuMuJetMessenger()
+{
+   if(Initialized == true && WriteMode == true)
+   {
+      delete MuMuMass;
+      delete MuMuEta;
+      delete MuMuY;
+      delete MuMuPhi;
+      delete MuMuPt;
+      delete muEta1;
+      delete muEta2;
+      delete muPhi1;
+      delete muPhi2;
+      delete muPt1;
+      delete muPt2;
+      delete muDeta;
+      delete muDphi;
+      delete muDR;
+      delete muDphiS;
+   }
+}
+
+bool MuMuJetMessenger::Initialize(TTree *MuMuJetTree)
+{
+   Tree = MuMuJetTree;
+   return Initialize();
+}
+
+bool MuMuJetMessenger::Initialize()
+{
+   if(Tree == nullptr)
+      return false;
+
+   Initialized = true;
+   MuMuMass = nullptr;
+   MuMuEta = nullptr;
+   MuMuY = nullptr;
+   MuMuPhi = nullptr;
+   MuMuPt = nullptr;
+   muEta1 = nullptr;
+   muEta2 = nullptr;
+   muPhi1 = nullptr;
+   muPhi2 = nullptr;
+   muPt1 = nullptr;
+   muPt2 = nullptr;
+   muDeta = nullptr;
+   muDphi = nullptr;
+   muDR = nullptr;
+   muDphiS = nullptr;
+
+   Tree->SetBranchAddress("Run", &Run);
+   Tree->SetBranchAddress("Event", &Event);
+   Tree->SetBranchAddress("Lumi", &Lumi);
+   Tree->SetBranchAddress("hiBin", &hiBin);
+   Tree->SetBranchAddress("hiHF", &hiHF);
+   Tree->SetBranchAddress("NVertex", &NVertex);
+   Tree->SetBranchAddress("VX", &VX);
+   Tree->SetBranchAddress("VY", &VY);
+   Tree->SetBranchAddress("VZ", &VZ);
+   Tree->SetBranchAddress("VXError", &VXError);
+   Tree->SetBranchAddress("VYError", &VYError);
+   Tree->SetBranchAddress("VZError", &VZError);
+   Tree->SetBranchAddress("NPU", &NPU);
+   Tree->SetBranchAddress("MuMuMass", &MuMuMass);
+   Tree->SetBranchAddress("MuMuEta", &MuMuEta);
+   Tree->SetBranchAddress("MuMuY", &MuMuY);
+   Tree->SetBranchAddress("MuMuPhi", &MuMuPhi);
+   Tree->SetBranchAddress("MuMuPt", &MuMuPt);
+   Tree->SetBranchAddress("muEta1", &muEta1);
+   Tree->SetBranchAddress("muEta2", &muEta2);
+   Tree->SetBranchAddress("muPhi1", &muPhi1);
+   Tree->SetBranchAddress("muPhi2", &muPhi2);
+   Tree->SetBranchAddress("muPt1", &muPt1);
+   Tree->SetBranchAddress("muPt2", &muPt2);
+   Tree->SetBranchAddress("muDeta", &muDeta);
+   Tree->SetBranchAddress("muDphi", &muDphi);
+   Tree->SetBranchAddress("muDR", &muDR);
+   Tree->SetBranchAddress("muDphiS", &muDphiS);
+
+   return true;
+}
+
+int MuMuJetMessenger::GetEntries()
+{
+   if(Tree == nullptr)
+      return 0;
+   return Tree->GetEntries();
+}
+
+bool MuMuJetMessenger::GetEntry(int iEntry)
+{
+   if(Tree == nullptr)
+      return false;
+
+   Tree->GetEntry(iEntry);
+   return true;
+}
+
+bool MuMuJetMessenger::SetBranch(TTree *T)
+{
+   if(T == nullptr)
+      return false;
+
+   Initialized = true;
+   WriteMode = true;
+
+   MuMuMass = new std::vector<float>();
+   MuMuEta = new std::vector<float>();
+   MuMuY = new std::vector<float>();
+   MuMuPhi = new std::vector<float>();
+   MuMuPt = new std::vector<float>();
+   muEta1 = new std::vector<float>();
+   muEta2 = new std::vector<float>();
+   muPhi1 = new std::vector<float>();
+   muPhi2 = new std::vector<float>();
+   muPt1 = new std::vector<float>();
+   muPt2 = new std::vector<float>();
+   muDeta = new std::vector<float>();
+   muDphi = new std::vector<float>();
+   muDR = new std::vector<float>();
+   muDphiS = new std::vector<float>();
+
+   Tree = T;
+
+   Tree->Branch("Run", &Run, "Run/I");
+   Tree->Branch("Event", &Event, "Event/L");
+   Tree->Branch("Lumi", &Lumi, "Lumi/I");
+   Tree->Branch("hiBin", &hiBin, "hiBin/I");
+   Tree->Branch("hiHF", &hiHF, "hiHF/F");
+   Tree->Branch("NVertex", &NVertex, "NVertex/I");
+   Tree->Branch("VX", &VX, "VX/F");
+   Tree->Branch("VY", &VY, "VY/F");
+   Tree->Branch("VZ", &VZ, "VZ/F");
+   Tree->Branch("VXError", &VXError, "VXError/F");
+   Tree->Branch("VYError", &VYError, "VYError/F");
+   Tree->Branch("VZError", &VZError, "VZError/F");
+   Tree->Branch("NPU", &NPU, "NPU/I");
+   Tree->Branch("MuMuMass", &MuMuMass);
+   Tree->Branch("MuMuEta", &MuMuEta);
+   Tree->Branch("MuMuY", &MuMuY);
+   Tree->Branch("MuMuPhi", &MuMuPhi);
+   Tree->Branch("MuMuPt", &MuMuPt);
+   Tree->Branch("muEta1", &muEta1);
+   Tree->Branch("muEta2", &muEta2);
+   Tree->Branch("muPhi1", &muPhi1);
+   Tree->Branch("muPhi2", &muPhi2);
+   Tree->Branch("muPt1", &muPt1);
+   Tree->Branch("muPt2", &muPt2);
+   Tree->Branch("muDeta", &muDeta);
+   Tree->Branch("muDphi", &muDphi);
+   Tree->Branch("muDR", &muDR);
+   Tree->Branch("muDphiS", &muDphiS);
+
+   return true;
+}
+
+void MuMuJetMessenger::Clear()
+{
+   if(Initialized == false)
+      return;
+
+   Run = -999;
+   Event = -999;
+   Lumi = -999;
+   hiBin = -999;
+   hiHF = -999;
+   NVertex = 0;
+   VX = 0;
+   VY = 0;
+   VZ = 0;
+   VXError = 0;
+   VYError = 0;
+   VZError = 0;
+   NPU = 0;
+
+   MuMuMass->clear();
+   MuMuEta->clear();
+   MuMuY->clear();
+   MuMuPhi->clear();
+   MuMuPt->clear();
+   muEta1->clear();
+   muEta2->clear();
+   muPhi1->clear();
+   muPhi2->clear();
+   muPt1->clear();
+   muPt2->clear();
+   muDeta->clear();
+   muDphi->clear();
+   muDR->clear();
+   muDphiS->clear();
+}
+
+void MuMuJetMessenger::CopyNonTrack(MuMuJetMessenger &M)
+{
+   Run          = M.Run;
+   Event        = M.Event;
+   Lumi         = M.Lumi;
+   hiBin        = M.hiBin;
+   hiHF         = M.hiHF;
+   NVertex      = M.NVertex;
+   VX           = M.VX;
+   VY           = M.VY;
+   VZ           = M.VZ;
+   VXError      = M.VXError;
+   VYError      = M.VYError;
+   VZError      = M.VZError;
+   NPU          = M.NPU;
+ 
+   if(MuMuMass != nullptr && M.MuMuMass != nullptr)   *MuMuMass = *(M.MuMuMass);
+   if(MuMuEta != nullptr && M.MuMuEta != nullptr)   *MuMuEta = *(M.MuMuEta);
+   if(MuMuY != nullptr && M.MuMuY != nullptr)   *MuMuY = *(M.MuMuY);
+   if(MuMuPhi != nullptr && M.MuMuPhi != nullptr)   *MuMuPhi = *(M.MuMuPhi);
+   if(MuMuPt != nullptr && M.MuMuPt != nullptr)   *MuMuPt = *(M.MuMuPt);
+   if(muEta1 != nullptr && M.muEta1 != nullptr)   *muEta1 = *(M.muEta1);
+   if(muEta2 != nullptr && M.muEta2 != nullptr)   *muEta2 = *(M.muEta2);
+   if(muPhi1 != nullptr && M.muPhi1 != nullptr)   *muPhi1 = *(M.muPhi1);
+   if(muPhi2 != nullptr && M.muPhi2 != nullptr)   *muPhi2 = *(M.muPhi2);
+   if(muPt1 != nullptr && M.muPt1 != nullptr)   *muPt1 = *(M.muPt1);
+   if(muPt2 != nullptr && M.muPt2 != nullptr)   *muPt2 = *(M.muPt2);
+   if(muDeta != nullptr && M.muDeta != nullptr)   *muDeta = *(M.muDeta);
+   if(muDphi != nullptr && M.muDphi != nullptr)   *muDphi = *(M.muDphi);
+   if(muDR != nullptr && M.muDR != nullptr)   *muDR = *(M.muDR);
+   if(muDphiS != nullptr && M.muDphiS != nullptr)   *muDphiS = *(M.muDphiS);
+}
+
+bool MuMuJetMessenger::FillEntry()
 {
    if(Initialized == false)
       return false;
