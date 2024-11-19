@@ -1558,6 +1558,11 @@ bool DzeroGenTreeMessenger::Initialize()
    Tree->SetBranchAddress("Gpt", &Gpt);
    Tree->SetBranchAddress("Gy", &Gy);
    Tree->SetBranchAddress("GpdgId", &GpdgId);
+   Tree->SetBranchAddress("Gdau1pdgId", &Gdau1pdgId);
+   Tree->SetBranchAddress("Gdau2pdgId", &Gdau2pdgId);
+   Tree->SetBranchAddress("Gdau3pdgId", &Gdau3pdgId);
+   Tree->SetBranchAddress("Gdau4pdgId", &Gdau4pdgId);
+   Tree->SetBranchAddress("GnDa", &GnDa);
    Tree->SetBranchAddress("GisSignal", &GisSignal);
    Tree->SetBranchAddress("GcollisionId", &GcollisionId);
    Tree->SetBranchAddress("GSignalType", &GSignalType);
@@ -2753,6 +2758,9 @@ DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
       delete DisSignalCalc;
       delete DisSignalCalcPrompt;
       delete DisSignalCalcFeeddown;
+      delete DisSwapCalc;
+      delete DisD0CalcLeftSideBand;
+      delete DisD0CalcRightSideBand;
       delete Gpt;
       delete Gy;
       delete GisSignalCalc;
@@ -2792,6 +2800,9 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    DisSignalCalc = nullptr;
    DisSignalCalcPrompt = nullptr;
    DisSignalCalcFeeddown = nullptr;
+   DisSwapCalc = nullptr;
+   DisD0CalcLeftSideBand = nullptr;
+   DisD0CalcRightSideBand = nullptr;
    Gpt = nullptr;
    Gy = nullptr;
    GisSignalCalc = nullptr;
@@ -2843,6 +2854,9 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("DisSignalCalc", &DisSignalCalc);
    Tree->SetBranchAddress("DisSignalCalcPrompt", &DisSignalCalcPrompt);
    Tree->SetBranchAddress("DisSignalCalcFeeddown", &DisSignalCalcFeeddown);
+   Tree->SetBranchAddress("DisSwapCalc", &DisSwapCalc);
+   Tree->SetBranchAddress("DisD0CalcLeftSideBand", &DisD0CalcLeftSideBand);
+   Tree->SetBranchAddress("DisD0CalcRightSideBand", &DisD0CalcRightSideBand);
    Tree->SetBranchAddress("Gsize", &Gsize);
    Tree->SetBranchAddress("Gpt", &Gpt);
    Tree->SetBranchAddress("Gy", &Gy);
@@ -2896,6 +2910,9 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    DisSignalCalc = new std::vector<bool>();
    DisSignalCalcPrompt = new std::vector<bool>();
    DisSignalCalcFeeddown = new std::vector<bool>();
+   DisSwapCalc = new std::vector<bool>();
+   DisD0CalcLeftSideBand = new std::vector<bool>();
+   DisD0CalcRightSideBand = new std::vector<bool>();
 
    Gpt = new std::vector<float>();
    Gy = new std::vector<float>();
@@ -2951,6 +2968,9 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("DisSignalCalc",         &DisSignalCalc);
    Tree->Branch("DisSignalCalcPrompt",   &DisSignalCalcPrompt);
    Tree->Branch("DisSignalCalcFeeddown", &DisSignalCalcFeeddown);
+   Tree->Branch("DisSwapCalc",            &DisSwapCalc);
+   Tree->Branch("DisD0CalcLeftSideBand",              &DisD0CalcLeftSideBand);
+   Tree->Branch("DisD0CalcRightSideBand",            &DisD0CalcRightSideBand);
 
    Tree->Branch("Gsize",                 &Gsize);
    Tree->Branch("Gpt",                   &Gpt);
@@ -3011,6 +3031,9 @@ void DzeroUPCTreeMessenger::Clear()
    DisSignalCalc->clear();
    DisSignalCalcPrompt->clear();
    DisSignalCalcFeeddown->clear();
+   DisSwapCalc->clear();
+   DisD0CalcLeftSideBand->clear();
+   DisD0CalcRightSideBand->clear();
    Gsize = 0;
    Gpt->clear();
    Gy->clear();
@@ -3066,6 +3089,9 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    if(DisSignalCalc != nullptr && M.DisSignalCalc != nullptr)   *DisSignalCalc = *(M.DisSignalCalc);
    if(DisSignalCalcPrompt != nullptr && M.DisSignalCalcPrompt != nullptr)   *DisSignalCalcPrompt = *(M.DisSignalCalcPrompt);
    if(DisSignalCalcFeeddown != nullptr && M.DisSignalCalcFeeddown != nullptr)   *DisSignalCalcFeeddown = *(M.DisSignalCalcFeeddown);
+   if(DisSwapCalc != nullptr && M.DisSwapCalc != nullptr)   *DisSwapCalc = *(M.DisSwapCalc);
+   if(DisD0CalcLeftSideBand != nullptr && M.DisD0CalcLeftSideBand != nullptr)   *DisD0CalcLeftSideBand = *(M.DisD0CalcLeftSideBand);
+   if(DisD0CalcRightSideBand != nullptr && M.DisD0CalcRightSideBand != nullptr)   *DisD0CalcRightSideBand = *(M.DisD0CalcRightSideBand);
    Gsize          = M.Gsize;
    if(Gpt != nullptr && M.Gpt != nullptr)   *Gpt = *(M.Gpt);
    if(Gy != nullptr && M.Gy != nullptr)   *Gy = *(M.Gy);
