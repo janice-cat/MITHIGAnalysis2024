@@ -11,6 +11,7 @@
 #include <RooDataSet.h>
 #include <RooFitResult.h>
 #include <RooPlot.h>
+#include <RooWorkspace.h>
 #include <TCanvas.h>
 #include <TLatex.h>
 
@@ -583,7 +584,7 @@ void pipimc_fit(TTree *mctree, string rstDir,
   delete canvas;
 }
 
-void main_fit(TTree *datatree, string rstDir,
+void main_fit(TTree *datatree, string rstDir, string output,
               string sigldat, string swapdat,
               string pkkkdat, string pkppdat,
               string eventsdat,
@@ -690,6 +691,33 @@ void main_fit(TTree *datatree, string rstDir,
 
   canvas->SaveAs(Form("%s/fit_result.pdf", rstDir.c_str()));
 
+  // Create a RooWorkspace
+  TFile outputFile(Form("%s/%s", rstDir.c_str(), output.c_str()), "RECREATE");
+  RooWorkspace ws("ws");
+
+  // Import the combined model into the workspace
+  ws.import(model);
+
+  // Import all relevant parameters and datasets
+  ws.import(data); // RooDataSet
+  ws.import(siglPDF); // Signal PDF
+  ws.import(combPDF); // Combinatorics PDF
+  ws.import(swapPDF); // Swap PDF
+  ws.import(pkkkPDF); // Peaking KK PDF
+  ws.import(pkppPDF); // Peaking PiPi PDF
+
+  // Optionally, add the fit result
+  if (result) {
+    result->SetName("FitResult");
+    ws.import(*result);
+  }
+
+  // Save the workspace into a ROOT file
+  ws.Write();
+  outputFile.Close();
+
+  std::cout << "Model, parameters, and data saved in fit_results.root." << std::endl;
+
   delete canvas;
 }
 
@@ -716,7 +744,6 @@ int main(int argc, char *argv[]) {
   TTree *datatree = (TTree*) in_data_f->Get("nt");
   TFile *in_mc_f  = new TFile(mcInput.c_str());
   TTree *mctree = (TTree*) in_mc_f->Get("nt");
-  // TFile *outf = new TFile(output.c_str());
 
   string sigldat, swapdat, pkkkdat, pkppdat;
   string nevtdat;
@@ -750,7 +777,7 @@ int main(int argc, char *argv[]) {
     pipimc_fit(mctree, rstDir, pkppdat);
   }
 
-  main_fit(datatree, rstDir,
+  main_fit(datatree, rstDir, output,
            sigldat, swapdat, pkkkdat, pkppdat,
            nevtdat,
            doSyst_comb);

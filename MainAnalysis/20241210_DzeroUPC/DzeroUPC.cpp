@@ -105,7 +105,9 @@ public:
             continue;
           if (MDzeroUPC->Dy->at(j) > par.MaxDzeroY)
             continue;
-          if (MDzeroUPC->DpassCut->at(j) == false)
+          if (MDzeroUPC->DpassCut->at(j) == false ||
+              MDzeroUPC->Dtrk1Pt->at(j) < 1 ||
+              MDzeroUPC->Dtrk2Pt->at(j) < 1)
             continue;
           hDmass->Fill((*MDzeroUPC->Dmass)[j]);
           if (!par.IsData) {
