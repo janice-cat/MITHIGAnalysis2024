@@ -1,6 +1,8 @@
 #include <TTree.h>
 #include <TFile.h>
+#include <TDirectoryFile.h>
 #include <TChain.h>
+#include <TH1D.h>
 
 #include <RooAddPdf.h>
 #include <RooAbsPdf.h>
@@ -16,7 +18,6 @@
 #include <TCanvas.h>
 #include <TLatex.h>
 
-#include <iostream>
 #include "CommandLine.h" // Yi's Commandline bundle
 
 
@@ -32,6 +33,8 @@ using namespace RooFit;
 #include <fstream>
 #include <iomanip>
 #include <map>
+#include <sstream>
+#include <regex>
 
 using namespace std;
 
@@ -393,7 +396,8 @@ struct EventParams {
 };
 
 void sigswpmc_fit(TTree *mctree, string rstDir,
-                string& sigldat, string& swapdat) 
+                string& sigldat, string& swapdat,
+                string plotTitle)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing signal prefit ......" << std::endl;
@@ -432,6 +436,7 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
 
   // Plot the data and the fit result
   RooPlot* frame = m.frame();
+  frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
   model.plotOn(frame, Components(siglPDF), LineStyle(kSolid), LineColor(kRed));
@@ -472,7 +477,8 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
 }
 
 void kkmc_fit(TTree *mctree, string rstDir,
-              string& pkkkdat)
+              string& pkkkdat,
+              string plotTitle)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing kk prefit ......" << std::endl;
@@ -502,6 +508,7 @@ void kkmc_fit(TTree *mctree, string rstDir,
 
   // Plot the data and the fit result
   RooPlot* frame = m.frame();
+  frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
   frame->Draw();
@@ -530,7 +537,8 @@ void kkmc_fit(TTree *mctree, string rstDir,
 }
 
 void pipimc_fit(TTree *mctree, string rstDir,
-                string& pkppdat)
+                string& pkppdat,
+                string plotTitle)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing pipi prefit ......" << std::endl;
@@ -560,6 +568,7 @@ void pipimc_fit(TTree *mctree, string rstDir,
 
   // Plot the data and the fit result
   RooPlot* frame = m.frame();
+  frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
   frame->Draw();
@@ -591,7 +600,8 @@ void main_fit(TTree *datatree, string rstDir, string output,
               string sigldat, string swapdat,
               string pkkkdat, string pkppdat,
               string eventsdat,
-              bool doSyst_comb)
+              bool doSyst_comb,
+              string plotTitle)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing main fit ......" << std::endl;
@@ -660,6 +670,8 @@ void main_fit(TTree *datatree, string rstDir, string output,
 
   // Plot the data and the fit result
   RooPlot* frame = m.frame();
+  frame->SetTitle(plotTitle.c_str());
+  printf("Plot title: %s\n", plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
   model.plotOn(frame, Components(siglPDF), LineStyle(kSolid), LineColor(kRed));
@@ -748,6 +760,43 @@ int main(int argc, char *argv[]) {
   
   TFile *in_data_f  = new TFile(dataInput.c_str());
   TTree *datatree = (TTree*) in_data_f->Get("nt");
+
+  ///// to get the plot title
+  TDirectoryFile* dataDir = (TDirectoryFile*) in_data_f->Get("par");
+  if (!dataDir) {
+    std::cerr << "Error: Directory par not found in the file!" << std::endl;
+    return 1;
+  }
+
+  double parMinDzeroPT = -999.;
+  double parMaxDzeroPT = -999.;
+  double parMinDzeroY = -999.;
+  double parMaxDzeroY = -999.;
+  int parIsGammaN = -999.;
+  int parTriggerChoice = -999.;
+
+  TH1D* hist = nullptr;
+
+  hist = dynamic_cast<TH1D*>(dataDir->Get("parMinDzeroPT"));
+  if (hist) parMinDzeroPT = hist->GetBinContent(1);
+  hist = dynamic_cast<TH1D*>(dataDir->Get("parMaxDzeroPT"));
+  if (hist) parMaxDzeroPT = hist->GetBinContent(1);
+  hist = dynamic_cast<TH1D*>(dataDir->Get("parMinDzeroY"));
+  if (hist) parMinDzeroY = hist->GetBinContent(1);
+  hist = dynamic_cast<TH1D*>(dataDir->Get("parMaxDzeroY"));
+  if (hist) parMaxDzeroY = hist->GetBinContent(1);
+  hist = dynamic_cast<TH1D*>(dataDir->Get("parIsGammaN"));
+  if (hist) parIsGammaN = (int) hist->GetBinContent(1);
+  hist = dynamic_cast<TH1D*>(dataDir->Get("parTriggerChoice"));
+  if (hist) parTriggerChoice = (int) hist->GetBinContent(1);
+
+  // Construct the formatted string
+  std::ostringstream plotTitle;
+  plotTitle << parMinDzeroPT << " #leq D_{p_{T}} < " << parMaxDzeroPT
+            << " (GeV/#it{c}), " << parMinDzeroY << " #leq D_{y} < " << parMaxDzeroY
+            << (parIsGammaN == 1 ? ", #gammaN" : ", N#gamma")
+            << (parTriggerChoice == 1 ? ", ZDCOR" : ", ZDCXORJet8");
+
   TChain *mctree = new TChain("nt");
   for (auto file : mcInputs) mctree->Add(file.c_str());
 
@@ -770,23 +819,24 @@ int main(int argc, char *argv[]) {
   if (!(sigswpInputs.size()==1 && sigswpInputs[0].find(".dat")!=string::npos)) {
     TChain *sigswptree = new TChain("nt");
     for (auto file : sigswpInputs) sigswptree->Add(file.c_str());
-    sigswpmc_fit(sigswptree, rstDir, sigldat, swapdat);
+    sigswpmc_fit(sigswptree, rstDir, sigldat, swapdat, plotTitle.str());
   }
   if (!(KKmcInputs.size()==1 && KKmcInputs[0].find(".dat")!=string::npos)) {
     TChain *KKmctree = new TChain("nt");
     for (auto file : KKmcInputs) KKmctree->Add(file.c_str());
-    kkmc_fit(KKmctree, rstDir, pkkkdat);
+    kkmc_fit(KKmctree, rstDir, pkkkdat, plotTitle.str());
   }
   if (!(pipimcInputs.size()==1 && pipimcInputs[0].find(".dat")!=string::npos)) {
     TChain *pipimctree = new TChain("nt");
     for (auto file : pipimcInputs) pipimctree->Add(file.c_str());
-    pipimc_fit(mctree, rstDir, pkppdat);
+    pipimc_fit(mctree, rstDir, pkppdat, plotTitle.str());
   }
 
   main_fit(datatree, rstDir, output,
            sigldat, swapdat, pkkkdat, pkppdat,
            nevtdat,
-           doSyst_comb);
+           doSyst_comb,
+           plotTitle.str());
 
   return 0;
 }
