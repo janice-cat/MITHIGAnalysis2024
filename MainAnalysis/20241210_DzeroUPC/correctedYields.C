@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <iomanip> // For setting precision
 
 #include "TFile.h"
 #include "TDirectoryFile.h"
@@ -14,7 +16,7 @@
 using namespace std;
 using namespace RooFit;
 
-int getCorrectedYields(string rawYieldInput, string effInput)
+int getCorrectedYields(string rawYieldInput, string effInput, string outputMD)
 {
 
   TFile rawYieldFile(rawYieldInput.c_str());
@@ -139,6 +141,30 @@ int getCorrectedYields(string rawYieldInput, string effInput)
   std::cout << ", triggereff: " << triggereff;
   std::cout << ", cross: " << cross << " +/- " << crossErr << std::endl;
 
+  // Open the file in overwrite mode (std::ios::out)
+  std::ofstream outFile(outputMD.c_str(), std::ios::out);
+  if (!outFile) {
+    std::cerr << "Error: Cannot open output.md for writing!" << std::endl;
+    return 1;
+  }
+
+  // Write headers if the file is empty
+  if (outFile.tellp() == 0) {
+    outFile << "| effEvt | effD | raw yield | corrected yield (mb) |" << std::endl;
+    outFile << "|--------|------|-----------|----------------------|" << std::endl;
+  }
+
+  // Write numeric results to the table
+  outFile << "| " << std::fixed << std::setprecision(4)
+          << effEvt << " +/- " << hRatioEvtEff->GetBinError(1) // Error for effEvt
+          << " | " << effD << " +/- " << hRatioDEff->GetBinError(1) // Error for effD
+          << " | " << yield << " +/- " << yieldErr // Error for raw yield
+          << " | " << cross/1e6 << " +/- " << crossErr/1e6 // Error for corrected yield
+          << " |" << std::endl;
+
+  // Close the file
+  outFile.close();
+
   return 0;
 
 }
@@ -147,10 +173,11 @@ int getCorrectedYields(string rawYieldInput, string effInput)
 
 int main(int argc, char *argv[]) {
   CommandLine CL(argc, argv);
-  string rawYieldInput    = CL.Get      ("rawYieldInput",    "output.root"); // Input data file
-  string effInput         = CL.Get      ("effInput",      "output.root"); // Input mc file
+  string rawYieldInput    = CL.Get      ("rawYieldInput",    "output.root"); // Input raw yield file from MassFit
+  string effInput         = CL.Get      ("effInput",      "output.root"); // Input eff file from ExecuteDzeroUPC
+  string outputMD         = CL.Get      ("Output", "correctedYields.md");     // Output file
  
-  int retVal = getCorrectedYields(rawYieldInput, effInput);
+  int retVal = getCorrectedYields(rawYieldInput, effInput, outputMD);
 
   return retVal;
 }
