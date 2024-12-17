@@ -1,5 +1,6 @@
 #include <TTree.h>
 #include <TFile.h>
+#include <TChain.h>
 
 #include <RooAddPdf.h>
 #include <RooAbsPdf.h>
@@ -25,6 +26,8 @@ using namespace RooFit;
 #include <RooRealVar.h>
 #include <RooConstVar.h>
 #include <RooFormulaVar.h>
+#include <vector>
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -157,8 +160,8 @@ struct SignalParams : public ParamsBase {
 
   SignalParams() :
     mean("sig_mean", "[signal] mean", 1.86484, 1.85, 1.88),
-    sigma1("sig_sigma1", "[signal] width of first Gaussian", 0.03, 0.01, 0.1),
-    sigma2("sig_sigma2", "[signal] width of second Gaussian", 0.01, 0.005, 0.03),
+    sigma1("sig_sigma1", "[signal] width of first Gaussian", 0.03, 0.0048, 0.155),
+    sigma2("sig_sigma2", "[signal] width of second Gaussian", 0.01, 0.0048, 0.0465),
     frac1("sig_frac1", "[signal] fraction of first Gaussian", 0.1, 0.001, 0.5) 
   {
     // cout << "signal default" << endl;
@@ -209,7 +212,7 @@ struct SwapParams : public ParamsBase {
 
   SwapParams() :
     mean("swap_mean", "[swap] mean", 1.86484, 1.85, 1.88),
-    sigma("swap_sigma", "[swap] width of first Gaussian", 0.1, 0.08, 0.15) 
+    sigma("swap_sigma", "[swap] width of first Gaussian", 0.1, 0.03, 3.1)
   {
     params[mean.GetName()] = &mean;
     params[sigma.GetName()] = &sigma;
@@ -401,6 +404,13 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
   RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
+  // Import data
+  RooDataSet _data("_data", "dataset", RooArgSet(m, Dgen), Import(*mctree));
+  RooDataSet& data = *( (RooDataSet*) _data.reduce( "(Dgen == 23333 || Dgen == 41022 || Dgen == 41044) || "
+                                                    "(Dgen == 23344 || Dgen == 41122 || Dgen == 41144)") );
+
+  std::cout << "[Info] Number of entries: " << data.sumEntries() << std::endl;
+
   SignalParams sigl;
   SwapParams swap;
 
@@ -413,16 +423,9 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
   RooGaussian swapPDF("swap", "swap model", m, swap.mean, swap.sigma);
 
   // Define the combined model
-  RooRealVar nsig("nsig", "number of signal events", 500, 0, 10000);
-  RooRealVar nswp("nswp", "number of swap events", 500, 0, 10000);
+  RooRealVar nsig("nsig", "number of signal events", data.sumEntries()*0.5, 0, data.sumEntries());
+  RooRealVar nswp("nswp", "number of swap events", data.sumEntries()*0.5, 0, data.sumEntries());
   RooAddPdf model("model", "signal + swap", RooArgList(siglPDF, swapPDF), RooArgList(nsig, nswp));
-
-  // Import data
-  RooDataSet _data("_data", "dataset", RooArgSet(m, Dgen), Import(*mctree));
-  RooDataSet& data = *( (RooDataSet*) _data.reduce( "(Dgen == 23333 || Dgen == 41022 || Dgen == 41044) || "
-                                                    "(Dgen == 23344 || Dgen == 41122 || Dgen == 41144)") );
-
-  std::cout << "[Info] Number of entries: " << data.sumEntries() << std::endl;
 
   // Fit the model to data
   RooFitResult* result = model.fitTo(data, Save());
@@ -480,19 +483,19 @@ void kkmc_fit(TTree *mctree, string rstDir,
   RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
-  PeakingKKParams pkkk;
-
-  // Define the KK model: Crystal Ball
-  RooCBShape pkkkPDF("peaking_kk", "peaking background KK state", m, pkkk.mean, pkkk.sigma, pkkk.alpha, pkkk.n );
-  // Define the combined model
-  RooRealVar npkkk("npkkk", "number of signal events", 500, 0, 10000);
-  RooAddPdf model("model", "kk", RooArgList(pkkkPDF), RooArgList(npkkk));
-
   // Import data
   RooDataSet _data("_data", "dataset", RooArgSet(m, Dgen), Import(*mctree));
   RooDataSet& data = *( (RooDataSet*) _data.reduce( "Dgen == 333 && Dmass < 1.8648" ) );
 
   std::cout << "[Info] Number of entries: " << data.sumEntries() << std::endl;
+
+  PeakingKKParams pkkk;
+
+  // Define the KK model: Crystal Ball
+  RooCBShape pkkkPDF("peaking_kk", "peaking background KK state", m, pkkk.mean, pkkk.sigma, pkkk.alpha, pkkk.n );
+  // Define the combined model
+  RooRealVar npkkk("npkkk", "number of signal events", data.sumEntries(), 0, data.sumEntries()*1.1);
+  RooAddPdf model("model", "kk", RooArgList(pkkkPDF), RooArgList(npkkk));
 
   // Fit the model to data
   RooFitResult* result = model.fitTo(data, Save());
@@ -538,17 +541,17 @@ void pipimc_fit(TTree *mctree, string rstDir,
   RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
+  // Import data
+  RooDataSet _data("_data", "dataset", RooArgSet(m, Dgen), Import(*mctree));
+  RooDataSet& data = *( (RooDataSet*) _data.reduce( "Dgen == 333 && Dmass > 1.8648" ) );
+
   PeakingPiPiParams pkpp;
 
   // Define the pipi model: Crystal Ball
   RooCBShape pkppPDF("peaking_pipi", "peaking background pipi state", m, pkpp.mean, pkpp.sigma, pkpp.alpha, pkpp.n );
   // Define the combined model
-  RooRealVar npkpp("npkpp", "number of signal events", 500, 0, 10000);
+  RooRealVar npkpp("npkpp", "number of signal events", data.sumEntries(), 0, data.sumEntries()*1.1);
   RooAddPdf model("model", "pipi", RooArgList(pkppPDF), RooArgList(npkpp));
-
-  // Import data
-  RooDataSet _data("_data", "dataset", RooArgSet(m, Dgen), Import(*mctree));
-  RooDataSet& data = *( (RooDataSet*) _data.reduce( "Dgen == 333 && Dmass > 1.8648" ) );
 
   std::cout << "[Info] Number of entries: " << data.sumEntries() << std::endl;
 
@@ -725,13 +728,16 @@ void main_fit(TTree *datatree, string rstDir, string output,
 int main(int argc, char *argv[]) {
   CommandLine CL(argc, argv);
   string dataInput     = CL.Get      ("dataInput",    "output.root"); // Input data file
-  string mcInput       = CL.Get      ("mcInput",      "output.root"); // Input mc file
+  vector<string> mcInputs       = CL.GetStringVector("mcInputs",      "output.root"); // Input mc file
   
   ///// for the component modeling (optional: default is taking the MC sample to do the modeling)
   ///// if the user specify the prefitted shape parameters (.dat), then the main_fit will take those parameters without a prefit procedure directly
-  string sigswpInput   = CL.Get     ("sigswpInput",   mcInput.c_str()); // Input mc file for signal and swap component
-  string KKmcInput     = CL.Get      ("KKmcInput",    mcInput.c_str()); // Input mc file for D0 > K K component
-  string pipimcInput   = CL.Get      ("pipimcInput",  mcInput.c_str()); // Input mc file for D0 > pi pi component
+  vector<string> sigswpInputs   = CL.GetStringVector("sigswpInputs", 
+                                                      CL.Get("mcInputs") ); // Input mc file for signal and swap component
+  vector<string> KKmcInputs     = CL.GetStringVector("KKmcInputs",  
+                                                      CL.Get("mcInputs") ); // Input mc file for D0 > K K component
+  vector<string> pipimcInputs   = CL.GetStringVector("pipimcInputs",
+                                                      CL.Get("mcInputs") ); // Input mc file for D0 > pi pi component
   string neventsInput  = CL.Get      ("neventsInput",  ""); // for EventParams that contains the normalization info
 
   ///// for fitting systematics study
@@ -742,8 +748,8 @@ int main(int argc, char *argv[]) {
   
   TFile *in_data_f  = new TFile(dataInput.c_str());
   TTree *datatree = (TTree*) in_data_f->Get("nt");
-  TFile *in_mc_f  = new TFile(mcInput.c_str());
-  TTree *mctree = (TTree*) in_mc_f->Get("nt");
+  TChain *mctree = new TChain("nt");
+  for (auto file : mcInputs) mctree->Add(file.c_str());
 
   string sigldat, swapdat, pkkkdat, pkppdat;
   string nevtdat;
@@ -761,19 +767,19 @@ int main(int argc, char *argv[]) {
     nevtdat = neventsInput;
   }
 
-  if (sigswpInput.find(".dat")==string::npos) {
-    TFile *in_sigswp_f  = new TFile(sigswpInput.c_str());
-    TTree *sigswptree = (TTree*) in_sigswp_f->Get("nt");
+  if (!(sigswpInputs.size()==1 && sigswpInputs[0].find(".dat")!=string::npos)) {
+    TChain *sigswptree = new TChain("nt");
+    for (auto file : sigswpInputs) sigswptree->Add(file.c_str());
     sigswpmc_fit(sigswptree, rstDir, sigldat, swapdat);
   }
-  if (KKmcInput.find(".dat")==string::npos) {
-    TFile *in_KKmc_f  = new TFile(KKmcInput.c_str());
-    TTree *KKmctree = (TTree*) in_KKmc_f->Get("nt");
+  if (!(KKmcInputs.size()==1 && KKmcInputs[0].find(".dat")!=string::npos)) {
+    TChain *KKmctree = new TChain("nt");
+    for (auto file : KKmcInputs) KKmctree->Add(file.c_str());
     kkmc_fit(KKmctree, rstDir, pkkkdat);
   }
-  if (pipimcInput.find(".dat")==string::npos) {
-    TFile *in_pipimc_f  = new TFile(pipimcInput.c_str());
-    TTree *pipimctree = (TTree*) in_pipimc_f->Get("nt");
+  if (!(pipimcInputs.size()==1 && pipimcInputs[0].find(".dat")!=string::npos)) {
+    TChain *pipimctree = new TChain("nt");
+    for (auto file : pipimcInputs) pipimctree->Add(file.c_str());
     pipimc_fit(mctree, rstDir, pkppdat);
   }
 
