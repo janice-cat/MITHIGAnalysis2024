@@ -676,8 +676,8 @@ void main_fit(TTree *datatree, string rstDir, string output,
   model.plotOn(frame);
   model.plotOn(frame, Components(siglPDF), LineStyle(kSolid), LineColor(kRed));
   model.plotOn(frame, Components(swapPDF), LineStyle(kSolid), LineColor(kOrange+1));
-  model.plotOn(frame, Components(pkkkPDF), LineStyle(kSolid), LineColor(kTeal-7));
-  model.plotOn(frame, Components(pkppPDF), LineStyle(kSolid), LineColor(kViolet-3));
+  model.plotOn(frame, Components(pkkkPDF), LineStyle(kSolid), LineColor(kViolet-3));
+  model.plotOn(frame, Components(pkppPDF), LineStyle(kSolid), LineColor(kTeal-7));
   model.plotOn(frame, Components(combPDF), LineStyle(kDashed), LineColor(kGray));
   frame->Draw();
 
