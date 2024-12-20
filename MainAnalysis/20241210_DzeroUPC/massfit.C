@@ -3,6 +3,9 @@
 #include <TDirectoryFile.h>
 #include <TChain.h>
 #include <TH1D.h>
+#include <TMath.h>
+#include <TCanvas.h>
+#include <TLatex.h>
 
 #include <RooAddPdf.h>
 #include <RooAbsPdf.h>
@@ -15,8 +18,6 @@
 #include <RooFitResult.h>
 #include <RooPlot.h>
 #include <RooWorkspace.h>
-#include <TCanvas.h>
-#include <TLatex.h>
 
 #include "CommandLine.h" // Yi's Commandline bundle
 
@@ -37,6 +38,10 @@ using namespace RooFit;
 #include <regex>
 
 using namespace std;
+
+#define DMASSMIN 1.68
+#define DMASSMAX 2.05
+#define DMASSNBINS 74
 
 struct ParamsBase {
   std::map<std::string, RooRealVar*> params; // Store RooRealVar objects
@@ -405,7 +410,7 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
+  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
   // Import data
@@ -435,7 +440,7 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
   RooFitResult* result = model.fitTo(data, Save());
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame();
+  RooPlot* frame = m.frame(DMASSNBINS);
   frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
@@ -486,7 +491,7 @@ void kkmc_fit(TTree *mctree, string rstDir,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
+  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
   // Import data
@@ -507,7 +512,7 @@ void kkmc_fit(TTree *mctree, string rstDir,
   RooFitResult* result = model.fitTo(data, Save());
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame();
+  RooPlot* frame = m.frame(DMASSNBINS);
   frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
@@ -546,7 +551,7 @@ void pipimc_fit(TTree *mctree, string rstDir,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
+  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
   // Import data
@@ -567,7 +572,7 @@ void pipimc_fit(TTree *mctree, string rstDir,
   RooFitResult* result = model.fitTo(data, Save());
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame();
+  RooPlot* frame = m.frame(DMASSNBINS);
   frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
@@ -609,7 +614,7 @@ void main_fit(TTree *datatree, string rstDir, string output,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", 1.68, 2.05);
+  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
 
   // Import data
   RooDataSet data("data", "dataset", RooArgSet(m), Import(*datatree));
@@ -668,8 +673,35 @@ void main_fit(TTree *datatree, string rstDir, string output,
   // Fit the model to data
   RooFitResult* result = model.fitTo(data, Save());
 
+  // Create a RooWorkspace
+  TFile outputFile(Form("%s/%s", rstDir.c_str(), output.c_str()), "RECREATE");
+  RooWorkspace ws("ws");
+
+  // Import the combined model into the workspace
+  ws.import(model);
+
+  // Import all relevant parameters and datasets
+  ws.import(data); // RooDataSet
+  ws.import(siglPDF); // Signal PDF
+  ws.import(combPDF); // Combinatorics PDF
+  ws.import(swapPDF); // Swap PDF
+  ws.import(pkkkPDF); // Peaking KK PDF
+  ws.import(pkppPDF); // Peaking PiPi PDF
+
+  // Optionally, add the fit result
+  if (result) {
+    result->SetName("FitResult");
+    ws.import(*result);
+  }
+
+  // Save the workspace into a ROOT file
+  ws.Write();
+  outputFile.Close();
+
+  std::cout << "Model, parameters, and data saved in fit_results.root." << std::endl;
+
   // Plot the data and the fit result
-  RooPlot* frame = m.frame();
+  RooPlot* frame = m.frame(DMASSNBINS);
   frame->SetTitle(plotTitle.c_str());
   printf("Plot title: %s\n", plotTitle.c_str());
   data.plotOn(frame);
@@ -704,34 +736,35 @@ void main_fit(TTree *datatree, string rstDir, string output,
                                                     events.npkpp.getPropagatedError(*result)));
   latex.DrawLatex(xpos, ypos - 6 * ypos_step, Form("N_{Comb} = %.3f #pm %.3f", events.nbkg.getVal(), events.nbkg.getError()));
 
+
+  double SoverB = events.nsig.getVal()/TMath::Sqrt(events.nsig.getVal()+events.nbkg.getVal());
+
+  double nll_sb = model.createNLL(data)->getVal();
+
+  events.nsig.setVal(0);
+  events.nsig.setConstant(kTRUE); // Fix signal to 0
+  model.fitTo(data);
+  double nll_b = model.createNLL(data)->getVal();
+
+  // Compute the p-value from delta NLL
+  double deltaNLL = nll_b - nll_sb; // Replace with actual values
+  double test_stat = 2 * deltaNLL;
+  double p_value = TMath::Prob(test_stat, 1); // 1 dof
+
+  // Compute significance (Z-score)
+  double significance = TMath::Abs(TMath::NormQuantile(p_value));
+
+  std::cout << "=======================================================" << std::endl;
+  std::cout << "=    Significance summary ......" << std::endl;
+  std::cout << "=======================================================" << std::endl;
+  std::cout << "nll_b: " << nll_b << ", nll_sb: " << nll_sb << ", deltaNLL: " << deltaNLL << std::endl;
+  std::cout << "p-value: " << p_value << std::endl;
+  std::cout << "Significance: " << significance << " sigma" << std::endl;
+  latex.DrawLatex(0.20, ypos - 1 * ypos_step, Form("S/#sqrt{S+B} = %.1f", SoverB));
+  latex.DrawLatex(0.20, ypos - 2 * ypos_step, Form("p-value = %.3e", p_value));
+  latex.DrawLatex(0.20, ypos - 3 * ypos_step, Form("Significance = %.1f#sigma", significance));
+
   canvas->SaveAs(Form("%s/fit_result.pdf", rstDir.c_str()));
-
-  // Create a RooWorkspace
-  TFile outputFile(Form("%s/%s", rstDir.c_str(), output.c_str()), "RECREATE");
-  RooWorkspace ws("ws");
-
-  // Import the combined model into the workspace
-  ws.import(model);
-
-  // Import all relevant parameters and datasets
-  ws.import(data); // RooDataSet
-  ws.import(siglPDF); // Signal PDF
-  ws.import(combPDF); // Combinatorics PDF
-  ws.import(swapPDF); // Swap PDF
-  ws.import(pkkkPDF); // Peaking KK PDF
-  ws.import(pkppPDF); // Peaking PiPi PDF
-
-  // Optionally, add the fit result
-  if (result) {
-    result->SetName("FitResult");
-    ws.import(*result);
-  }
-
-  // Save the workspace into a ROOT file
-  ws.Write();
-  outputFile.Close();
-
-  std::cout << "Model, parameters, and data saved in fit_results.root." << std::endl;
 
   delete canvas;
 }
