@@ -31,6 +31,6 @@ jq -c '.MicroTrees[]' $FitSettingCard | while read MicroTree; do
   echo '================================================' >> $RstDir/fit.log
   echo '= Getting corrected yields:' >> $RstDir/fit.log
   echo '================================================' >> $RstDir/fit.log
-  cmd="./CorrectedYields --rawYieldInput $RstDir/fit.root --effInput $effmcInput"
+  cmd="./CorrectedYields --rawYieldInput $RstDir/fit.root --effInput $effmcInput --Output $RstDir/correctedYields.md"
   $cmd >> $RstDir/fit.log
 done

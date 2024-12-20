@@ -47,11 +47,11 @@ int getCorrectedYields(string rawYieldInput, string effInput, string outputMD)
 
 
   TFile effFile(effInput.c_str());
-  // TH1D* hNumEvtEff = (TH1D*) effFile.Get("hNumEvtEff");
-  // TH1D* hDenEvtEff = (TH1D*) effFile.Get("hDenEvtEff");
+  TH1D* hNumEvtEff = (TH1D*) effFile.Get("hNumEvtEff");
+  TH1D* hDenEvtEff = (TH1D*) effFile.Get("hDenEvtEff");
   TH1D* hRatioEvtEff = (TH1D*) effFile.Get("hRatioEvtEff");
-  // TH1D* hNumDEff = (TH1D*) effFile.Get("hNumDEff");
-  // TH1D* hDenDEff = (TH1D*) effFile.Get("hDenDEff");
+  TH1D* hNumDEff = (TH1D*) effFile.Get("hNumDEff");
+  TH1D* hDenDEff = (TH1D*) effFile.Get("hDenDEff");
   TH1D* hRatioDEff = (TH1D*) effFile.Get("hRatioDEff");
 
   std::cout << "eff(evt), eff(D): " << std::endl;
@@ -150,16 +150,29 @@ int getCorrectedYields(string rawYieldInput, string effInput, string outputMD)
 
   // Write headers if the file is empty
   if (outFile.tellp() == 0) {
-    outFile << "| effEvt | effD | raw yield | corrected yield (mb) |" << std::endl;
-    outFile << "|--------|------|-----------|----------------------|" << std::endl;
+    outFile << "| ptmin | ptmax | ymin | ymax |" << std::endl;
+    outFile << "|-------|-------|------|------|" << std::endl;
   }
 
-  // Write numeric results to the table
+  outFile << "| " << std::fixed << std::setprecision(4)
+          << parMinDzeroPT << " | " << parMaxDzeroPT
+          << " | " << parMinDzeroY << " | " << parMaxDzeroY
+          << " |" << std::endl;
+
+  outFile << "| effEvt | effD | raw yield | corrected yield (mb) |" << std::endl;
+
   outFile << "| " << std::fixed << std::setprecision(4)
           << effEvt << " +/- " << hRatioEvtEff->GetBinError(1) // Error for effEvt
           << " | " << effD << " +/- " << hRatioDEff->GetBinError(1) // Error for effD
           << " | " << yield << " +/- " << yieldErr // Error for raw yield
           << " | " << cross/1e6 << " +/- " << crossErr/1e6 // Error for corrected yield
+          << " |" << std::endl;
+
+  outFile << "| Num #(Evt) | Den #(Evt) | Num #(D) | Den #(D) |" << std::endl;
+  outFile << "| " << hNumEvtEff->GetBinContent(1)
+          << " | " << hDenEvtEff->GetBinContent(1)
+          << " | " << hNumDEff->GetBinContent(1)
+          << " | " << hDenDEff->GetBinContent(1)
           << " |" << std::endl;
 
   // Close the file
