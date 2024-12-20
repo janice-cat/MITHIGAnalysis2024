@@ -1,5 +1,6 @@
-CMSFOLDER=/home/$USER/CMSSW_13_2_4/src
-CURRENTFOLDER=$(pwd)
+CMSFOLDER=$HOME/CMSSW_14_1_4_patch5/src
+WORKFOLDER=$PWD
+
 if [ ! -d $CMSFOLDER ]; then
     echo "You need to define the folder where the CMSSW environment is located"
     exit 1
@@ -19,16 +20,17 @@ rm *.txt*
 rm SkimReco.root
 rm .DS_Store
 
+source /cvmfs/cms.cern.ch/cmsset_default.sh
 cd $CMSFOLDER
 cmsenv
-
-cd -
 echo "CMSSW environment is set up"
+
+cd $WORKFOLDER
 cd ../../
 source SetupAnalysis.sh
 cd CommonCode/
 make
 cd ..
-cd $CURRENTFOLDER
+cd $WORKFOLDER
 make
-rm Skim*.root
+rm skim*.root
