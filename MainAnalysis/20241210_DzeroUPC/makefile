@@ -15,5 +15,10 @@ CorrectedYields: correctedYields.C
 		-o CorrectedYields `root-config --cflags --glibs` -lRooFit -lRooFitCore \
 		$(ProjectBase)/CommonCode/library/Messenger.o
 
+PlotCrossSection: plotCrossSection.C
+	g++ plotCrossSection.C -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
+		-o PlotCrossSection `root-config --cflags --glibs` -lRooFit -lRooFitCore \
+		$(ProjectBase)/CommonCode/library/Messenger.o
+
 TestRun: ExecuteDzeroUPC
 	./ExecuteDzeroUPC --Input ../../Samples/SamplesSkims/MergedOutputJet830Oct.root --Output outputUPC.root
