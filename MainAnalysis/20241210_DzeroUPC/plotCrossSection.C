@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <algorithm> // For std::find
 
 using namespace std;
 
@@ -141,13 +142,16 @@ void plotCrossSection(vector<string>& inputPoints) {
   const int nPoints = inputPoints.size();
   std::vector<Point> PointsArr(nPoints);
 
+  /////////////////////////////////
+  // [TODO] Change all the containers into vector
+  /////////////////////////////////
   double fix_ptmin;
   double fix_ptmax;
   bool fix_IsGammaN;
-  double yValues[nPoints];
-  double yErrors[nPoints];
-  double crossSection[nPoints];
-  double crossErrors[nPoints];
+  vector<double> yValues(nPoints);
+  vector<double> yErrors(nPoints);
+  vector<double> crossSection(nPoints);
+  vector<double> crossErrors(nPoints);
   for (int i = 0; i < nPoints; ++i)
   {
     getPoint(inputPoints[i], PointsArr[i]);
@@ -175,6 +179,32 @@ void plotCrossSection(vector<string>& inputPoints) {
     crossErrors[i]  = p.correctedYieldError;
   }
   
+  vector<double> RFBXbins;
+  vector<double> RFBXbinErrors;
+  vector<double> RFBValues;
+  vector<double> RFBErrors;
+  for (int i = 0; i < nPoints; ++i)
+  {
+    // only compute for the forward region: +y for gammaN, -y for Ngamma
+    if ( fix_IsGammaN && yValues[i]<0) continue;
+    if (!fix_IsGammaN && yValues[i]>0) continue;
+
+    auto reflected_it = std::find(yValues.begin(), yValues.end(), -yValues[i]);
+
+    if (reflected_it!=yValues.end())
+    {
+      int reflected_idx = std::distance(yValues.begin(), reflected_it);
+      RFBXbins.push_back(yValues[i]);
+      RFBXbinErrors.push_back(yErrors[i]);
+      double RFB = crossSection[i]/crossSection[reflected_idx];
+      RFBValues.push_back(RFB);
+      RFBErrors.push_back(
+        RFB * TMath::Sqrt( TMath::Power(crossErrors[i]/crossSection[i], 2) +
+                           TMath::Power(crossErrors[reflected_idx]/crossSection[reflected_idx], 2) )
+        );
+    }
+  }
+
   /////////////////////////////////
   // 1. Plot the cross section
   /////////////////////////////////
@@ -196,7 +226,7 @@ void plotCrossSection(vector<string>& inputPoints) {
   hFrame->Draw(); // Draw the frame
 
   // Create a TGraphErrors object for data points
-  TGraphErrors* gr = new TGraphErrors(nPoints, yValues, crossSection, yErrors, crossErrors);
+  TGraphErrors* gr = new TGraphErrors(nPoints, yValues.data(), crossSection.data(), yErrors.data(), crossErrors.data());
   gr->SetMarkerStyle(20); // Solid circle marker
   gr->SetMarkerSize(1.2);
   gr->SetLineColor(kRed);
@@ -243,6 +273,50 @@ void plotCrossSection(vector<string>& inputPoints) {
   c1->Update();
   c1->SaveAs(Form("crossSectionPlot_%s.pdf",
                   (fix_IsGammaN)? "gammaN": "Ngamma")); // Save the plot
+
+  /////////////////////////////////
+  // 2. Plot RFB
+  /////////////////////////////////
+  // Create a histogram for axis setup
+  TH1F* hFrame2 = new TH1F("hFrame2", " ", 100, (fix_IsGammaN)? -0.2: -2.2, 
+                                                (fix_IsGammaN)?  2.2:  0.2);
+  hFrame2->GetYaxis()->SetTitle("RFB");
+  hFrame2->GetXaxis()->SetTitle(Form("%sD^{0} y", (fix_IsGammaN)? "+": "-"));
+  hFrame2->SetStats(0);
+  hFrame2->GetYaxis()->SetTitleOffset(1.5);
+  hFrame2->GetYaxis()->SetRangeUser(0, 0.6); // Y-axis range
+
+  hFrame2->Draw(); // Draw the frame
+
+  // Create a TGraphErrors object for data points
+  TGraphErrors* gr3 = new TGraphErrors(RFBXbins.size(), RFBXbins.data(), RFBValues.data(), RFBXbinErrors.data(), RFBErrors.data());
+  gr3->Print("all");
+  gr3->SetMarkerStyle(20); // Solid circle marker
+  gr3->SetMarkerSize(1.2);
+  gr3->SetLineColor(kBlack);
+  gr3->SetMarkerColor(kBlack);
+  gr3->SetLineWidth(2);
+  gr3->Draw("P E1 SAME"); // Draw with error bars
+
+  // Add legend
+  // TLegend* leg2 = new TLegend(0.1, 0.15, 0.48, 0.28);
+  // leg2->SetFillStyle(0);
+  // leg2->SetBorderSize(0);
+  // leg2->AddEntry(gr3, "New framework", "P");
+  // leg2->Draw();
+
+  // Add CMS Preliminary text
+  latex.DrawLatex(0.6, 0.82, Form("%d < D_{p_{T}} < %d (GeV/#it{c})", (int) fix_ptmin, (int) fix_ptmax));
+
+  /////////////////////////////////
+  // [TODO] The handling of naming could be done better, maybe outside the scope of the function
+  // and need to add pt bin info
+  /////////////////////////////////
+  // Update canvas
+  c1->Update();
+  c1->SaveAs(Form("RFBPlot_%s.pdf",
+                  (fix_IsGammaN)? "gammaN": "Ngamma")); // Save the plot
+
 }
 
 
