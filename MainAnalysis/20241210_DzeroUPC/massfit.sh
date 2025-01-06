@@ -2,6 +2,13 @@
 FitSettingCard=${1}
 FitDir=$(jq -r '.FitDir' $FitSettingCard)
 
+# Extract the directory path for fullAnalysis
+MicroTreeDir=$(jq -r '.MicroTrees[0].dataInput' $FitSettingCard | grep -o '^[^/]*')
+mkdir -p $MicroTreeDir
+if [[ $FitSettingCard == *"fitSettings/"* ]]; then
+	cp $FitSettingCard $MicroTreeDir/${FitDir}.json
+fi
+
 jq -c '.MicroTrees[]' $FitSettingCard | while read MicroTree; do
 	dataInput=$(echo $MicroTree | jq -r '.dataInput')
 	fitmcInputs=$(echo $MicroTree | jq -r '.fitmcInputs')
@@ -14,7 +21,14 @@ jq -c '.MicroTrees[]' $FitSettingCard | while read MicroTree; do
 	RstDir=$(dirname "$dataInput")
 	RstDir=${RstDir}/${FitDir}/
 	mkdir -p $RstDir
-	cp $FitSettingCard $RstDir/fitConfig.json
+	if [[ $FitSettingCard == *"fitSettings/"* ]]; then
+		# Create a new JSON with FitDir and the current MicroTree
+		newJson=$(jq -n --arg FitDir "$FitDir" --argjson MicroTree "$MicroTree" \
+				'{FitDir: $FitDir, MicroTrees: [$MicroTree]}')
+		echo "$newJson" > "${RstDir}/fitConfig.json"
+		echo "Created JSON: ${RstDir}/fitConfig.json"
+		# cp $FitSettingCard $RstDir/fitConfig.json
+	fi
 
   # Build the command dynamically
   cmd="./MassFit --dataInput $dataInput --mcInputs $fitmcInputs"
