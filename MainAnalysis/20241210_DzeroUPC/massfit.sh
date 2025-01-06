@@ -17,6 +17,7 @@ jq -c '.MicroTrees[]' $FitSettingCard | while read MicroTree; do
 	pipimcInputs=$(echo $MicroTree | jq -r '.pipimcInputs')
 	neventsInput=$(echo $MicroTree | jq -r '.neventsInput')
 	effmcInput=$(echo $MicroTree | jq -r '.effmcInput')
+	doSyst_sig=$(echo $MicroTree | jq -r '.doSyst_sig')
 	doSyst_comb=$(echo $MicroTree | jq -r '.doSyst_comb')
 	RstDir=$(dirname "$dataInput")
 	RstDir=${RstDir}/${FitDir}/
@@ -36,6 +37,7 @@ jq -c '.MicroTrees[]' $FitSettingCard | while read MicroTree; do
   [ "$KKmcInputs" != "null" ] && cmd="$cmd --KKmcInputs $KKmcInputs"
   [ "$pipimcInputs" != "null" ] && cmd="$cmd --pipimcInputs $pipimcInputs"
   [ "$neventsInput" != "null" ] && cmd="$cmd --neventsInput $neventsInput"
+  [ "$doSyst_sig" != "null" ] && cmd="$cmd --doSyst_sig $doSyst_sig"
   [ "$doSyst_comb" != "null" ] && cmd="$cmd --doSyst_comb $doSyst_comb"
   cmd="$cmd --Output fit.root --RstDir $RstDir"
 
