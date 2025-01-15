@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
   latex.DrawLatex(0.6, 0.82, Form("%d < D_{p_{T}} < %d (GeV/#it{c})", (int) MinDzeroPT, (int) MaxDzeroPT));
 
   c1->Update();
-  c1->SaveAs(Form("plot/%s/correctedYieldValuesPlot_pt%d-%d_IsGammaN%o.pdf",
+  c1->SaveAs(Form("%s/correctedYieldValuesPlot_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
   latex.DrawLatex(0.6, 0.82, Form("%d < D_{p_{T}} < %d (GeV/#it{c})", (int) MinDzeroPT, (int) MaxDzeroPT));
 
   c1->Update();
-  c1->SaveAs(Form("plot/%s/RFBPlot_pt%d-%d_IsGammaN%o.pdf",
+  c1->SaveAs(Form("%s/RFBPlot_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
             0, 1.05,
             yValues, effEvtValues, yErrors, effEvtErrors,
             latexText,
-            Form("plot/%s/evtEff_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/evtEff_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
             0, 500,
             yValues, numEvtValues, yErrors, numEvtErrors,
             latexText,
-            Form("plot/%s/evtNum_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/evtNum_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
             0, 500,
             yValues, denEvtValues, yErrors, denEvtErrors,
             latexText,
-            Form("plot/%s/evtDen_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/evtDen_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
             0, 1.05,
             yValues, effDValues, yErrors, effDErrors,
             latexText,
-            Form("plot/%s/DEff_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/DEff_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
             0, 0.2,
             yValues, effDValues, yErrors, effDErrors,
             latexText,
-            Form("plot/%s/DEff_zoom_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/DEff_zoom_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
             0, 40,
             yValues, numDValues, yErrors, numDErrors,
             latexText,
-            Form("plot/%s/DNum_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/DNum_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -419,7 +419,7 @@ int main(int argc, char *argv[])
             0, 500,
             yValues, denDValues, yErrors, denDErrors,
             latexText,
-            Form("plot/%s/DDen_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/DDen_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
             0, 280,
             yValues, rawYieldValues, yErrors, rawYieldErrors,
             latexText,
-            Form("plot/%s/RawYield_pt%d-%d_IsGammaN%o.pdf",
+            Form("%s/RawYield_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
