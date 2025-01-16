@@ -24,17 +24,17 @@ jq -c '.Plots[]' $PlotSettingCard | while read Plot; do
 	nominalFitRST=$(echo $Plot | jq -r '.nominalFitRST')
 
   cmd="./PlotCrossSection --PlotDir $PlotDir --MinDzeroPT $MinDzeroPT --MaxDzeroPT $MaxDzeroPT --IsGammaN $IsGammaN --InputPoints $InputPoints"
-			[ "$wSystLumi" != "null" ] && cms="$cmd --wSystLumi $wSystLumi"
-			[ "$wSystTrk" != "null" ] && cms="$cmd --wSystTrk $wSystTrk"
-			[ "$wSystBR" != "null" ] && cms="$cmd --wSystBR $wSystBR"
-			[ "$wSystEvtSel" != "null" ] && cms="$cmd --wSystEvtSel $wSystEvtSel"
-			[ "$wSystRapGapSel" != "null" ] && cms="$cmd --wSystRapGapSel $wSystRapGapSel"
-			[ "$wSystDsvpv" != "null" ] && cms="$cmd --wSystDsvpv $wSystDsvpv"
-			[ "$wSystDtrkPt" != "null" ] && cms="$cmd --wSystDtrkPt $wSystDtrkPt"
-			[ "$wSystFitSig" != "null" ] && cms="$cmd --wSystFitSig $wSystFitSig"
-			[ "$wSystFitComb" != "null" ] && cms="$cmd --wSystFitComb $wSystFitComb"
-			[ "$nominalSampleRST" != "null" ] && cms="$cmd --nominalSampleRST $nominalSampleRST"
-			[ "$nominalFitRST" != "null" ] && cms="$cmd --nominalFitRST $nominalFitRST"
+			[ "$wSystLumi" != "null" ] && cmd="$cmd --wSystLumi $wSystLumi"
+			[ "$wSystTrk" != "null" ] && cmd="$cmd --wSystTrk $wSystTrk"
+			[ "$wSystBR" != "null" ] && cmd="$cmd --wSystBR $wSystBR"
+			[ "$wSystEvtSel" != "null" ] && cmd="$cmd --wSystEvtSel $wSystEvtSel"
+			[ "$wSystRapGapSel" != "null" ] && cmd="$cmd --wSystRapGapSel $wSystRapGapSel"
+			[ "$wSystDsvpv" != "null" ] && cmd="$cmd --wSystDsvpv $wSystDsvpv"
+			[ "$wSystDtrkPt" != "null" ] && cmd="$cmd --wSystDtrkPt $wSystDtrkPt"
+			[ "$wSystFitSig" != "null" ] && cmd="$cmd --wSystFitSig $wSystFitSig"
+			[ "$wSystFitComb" != "null" ] && cmd="$cmd --wSystFitComb $wSystFitComb"
+			[ "$nominalSampleRST" != "null" ] && cmd="$cmd --nominalSampleRST $nominalSampleRST"
+			[ "$nominalFitRST" != "null" ] && cmd="$cmd --nominalFitRST $nominalFitRST"
 
 	$cmd >> $PlotDir/plot.log
 
