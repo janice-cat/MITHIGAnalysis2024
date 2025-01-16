@@ -61,7 +61,7 @@ while IFS= read -r file; do
             --Output "$OUTPUTMC/output_$counterMC.root" \
             --Year 2023 \
             --IsData false \
-            --IsGammaN $ISGAMMAN \
+            --IsGammaNMCtype $ISGAMMAN \
             --ApplyTriggerRejection 0 \
             --ApplyEventRejection false \
             --ApplyZDCGapRejection false \

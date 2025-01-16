@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
   // bool DoGenLevel                    = CL.GetBool("DoGenLevel", true);
   bool IsData = CL.GetBool("IsData", false);
-  bool IsGammaN = CL.GetBool("IsGammaN", true); // This is only meaningful when IsData==false. gammaN: BeamA, Ngamma: BeamB
+  bool IsGammaNMCtype = CL.GetBool("IsGammaNMCtype", true); // This is only meaningful when IsData==false. gammaN: BeamA, Ngamma: BeamB
   int Year = CL.GetInt("Year", 2023);
 
   double Fraction = CL.GetDouble("Fraction", 1.00);
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   // "OR":            keep D's that pass the OR logic of all D selections
   // "PAS":           reject !DpassCut23PAS
   // "LowPt":         reject !DpassCut23LowPt
-  // "PASSystDsvpv":  reject !DpassCut23PASSystDsvpv
+  // "PASSystDsvpvSig":reject !DpassCut23PASSystDsvpvSig
   // "PASSystDtrkPt": reject !DpassCut23PASSystDtrkPt
   string ApplyDRejection = toLower(CL.Get("ApplyDRejection", "no"));
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
   MDzeroUPC.SetBranch(&Tree);
 
   // Allowed ApplyDRejection in lowercase
-  std::set<std::string> allowedApplyDRejection = {"or", "ordered_or", "pas", "lowpt", "passystdsvpv", "passystdtrkpt", "no"};
+  std::set<std::string> allowedApplyDRejection = {"or", "pas", "lowpt", "passystdsvpvsig", "passystdtrkpt", "no"};
   // Validate the argument
   if (allowedApplyDRejection.find(ApplyDRejection) != allowedApplyDRejection.end()) {
     std::cout << "D filtering criterion: " << ApplyDRejection << std::endl;
@@ -226,31 +226,6 @@ int main(int argc, char *argv[]) {
         bool ZDCNgamma = (MZDC.sumMinus < ZDCMinus1nThreshold && MZDC.sumPlus > ZDCPlus1nThreshold);
         MDzeroUPC.ZDCgammaN = ZDCgammaN;
         MDzeroUPC.ZDCNgamma = ZDCNgamma;
-        // Loop through the specified ranges for gapgammaN and gapNgamma
-        // gammaN[4] and Ngamma[4] are nominal selection criteria
-        float EMaxHFPlus = GetMaxEnergyHF(&MPF, 3., 5.2);
-        float EMaxHFMinus = GetMaxEnergyHF(&MPF, -5.2, -3.);
-        MDzeroUPC.HFEMaxPlus = EMaxHFPlus;
-        MDzeroUPC.HFEMaxMinus = EMaxHFMinus;
-        bool gapgammaN = EMaxHFPlus < 9.2;
-        bool gapNgamma = EMaxHFMinus < 8.6;
-        MDzeroUPC.gapgammaN = gapgammaN;
-        MDzeroUPC.gapNgamma = gapNgamma;
-        bool gammaN_default = ZDCgammaN && gapgammaN;
-        bool Ngamma_default = ZDCNgamma && gapNgamma;
-        // if (ApplyZDCGapRejection && IsData && gammaN_default == false && Ngamma_default == false) continue;
-        for (const auto& gapgammaN_threshold : MDzeroUPC.gapEThresh_gammaN) {
-          bool gapgammaN_ = GetMaxEnergyHF(&MPF, 3.0, 5.2) < gapgammaN_threshold;
-          bool gammaN_ = ZDCgammaN && gapgammaN_;
-          MDzeroUPC.gammaN->push_back(gammaN_);
-        }
-        for (const auto& gapNgamma_threshold : MDzeroUPC.gapEThresh_Ngamma) {
-          bool gapNgamma_ = GetMaxEnergyHF(&MPF, -5.2, -3.0) < gapNgamma_threshold;
-          bool Ngamma_ = ZDCNgamma && gapNgamma_;
-          MDzeroUPC.Ngamma->push_back(Ngamma_);
-        }
-        /////// cut on the loosest rapidity gap selection
-        if (ApplyZDCGapRejection && IsData && MDzeroUPC.gammaN_EThreshLoose() == false && MDzeroUPC.Ngamma_EThreshLoose() == false) continue;
       } // end of if (IsData == true)
       else { // if (IsData == false)
         // MDzeroUPC.ZDCsumPlus = MZDC.sumPlus;
@@ -259,33 +234,38 @@ int main(int argc, char *argv[]) {
         bool selectedVtxFilter = MSkim.PVFilter == 1 && fabs(MTrackPbPbUPC.zVtx->at(0)) < 15.;
         MDzeroUPC.selectedBkgFilter = selectedBkgFilter;
         MDzeroUPC.selectedVtxFilter = selectedVtxFilter;
-        bool ZDCgammaN =  IsGammaN;
-        bool ZDCNgamma = !IsGammaN;
+        bool ZDCgammaN =  IsGammaNMCtype;
+        bool ZDCNgamma = !IsGammaNMCtype;
         MDzeroUPC.ZDCgammaN = ZDCgammaN;
         MDzeroUPC.ZDCNgamma = ZDCNgamma;
-        // Loop through the specified ranges for gapgammaN and gapNgamma
-        // gammaN[4] and Ngamma[4] are nominal selection criteria
-        float EMaxHFPlus = GetMaxEnergyHF(&MPF, 3., 5.2);
-        float EMaxHFMinus = GetMaxEnergyHF(&MPF, -5.2, -3.);
-        MDzeroUPC.HFEMaxPlus = EMaxHFPlus;
-        MDzeroUPC.HFEMaxMinus = EMaxHFMinus;
-        bool gapgammaN = EMaxHFPlus < 9.2;
-        bool gapNgamma = EMaxHFMinus < 8.6;
-        MDzeroUPC.gapgammaN = gapgammaN;
-        MDzeroUPC.gapNgamma = gapNgamma;
-        bool gammaN_default = ZDCgammaN && gapgammaN;
-        bool Ngamma_default = ZDCNgamma && gapNgamma;
-        for (const auto& gapgammaN_threshold : MDzeroUPC.gapEThresh_gammaN) {
-          bool gapgammaN_ = GetMaxEnergyHF(&MPF, 3.0, 5.2) < gapgammaN_threshold;
-          bool gammaN_ = ZDCgammaN && gapgammaN_;
-          MDzeroUPC.gammaN->push_back(gammaN_);
-        }
-        for (const auto& gapNgamma_threshold : MDzeroUPC.gapEThresh_Ngamma) {
-          bool gapNgamma_ = GetMaxEnergyHF(&MPF, -5.2, -3.0) < gapNgamma_threshold;
-          bool Ngamma_ = ZDCNgamma && gapNgamma_;
-          MDzeroUPC.Ngamma->push_back(Ngamma_);
-        }
       } // end of if (IsData == false)
+
+      // Loop through the specified ranges for gapgammaN and gapNgamma
+      // gammaN[4] and Ngamma[4] are nominal selection criteria
+      float EMaxHFPlus = GetMaxEnergyHF(&MPF, 3., 5.2);
+      float EMaxHFMinus = GetMaxEnergyHF(&MPF, -5.2, -3.);
+      MDzeroUPC.HFEMaxPlus = EMaxHFPlus;
+      MDzeroUPC.HFEMaxMinus = EMaxHFMinus;
+      bool gapgammaN = EMaxHFPlus < 9.2;
+      bool gapNgamma = EMaxHFMinus < 8.6;
+      MDzeroUPC.gapgammaN = gapgammaN;
+      MDzeroUPC.gapNgamma = gapNgamma;
+      bool gammaN_default = MDzeroUPC.ZDCgammaN && gapgammaN;
+      bool Ngamma_default = MDzeroUPC.ZDCNgamma && gapNgamma;
+      // if (ApplyZDCGapRejection && IsData && gammaN_default == false && Ngamma_default == false) continue;
+      for (const auto& gapgammaN_threshold : MDzeroUPC.gapEThresh_gammaN) {
+        bool gapgammaN_ = GetMaxEnergyHF(&MPF, 3.0, 5.2) < gapgammaN_threshold;
+        bool gammaN_ = MDzeroUPC.ZDCgammaN && gapgammaN_;
+        MDzeroUPC.gammaN->push_back(gammaN_);
+      }
+      for (const auto& gapNgamma_threshold : MDzeroUPC.gapEThresh_Ngamma) {
+        bool gapNgamma_ = GetMaxEnergyHF(&MPF, -5.2, -3.0) < gapNgamma_threshold;
+        bool Ngamma_ = MDzeroUPC.ZDCNgamma && gapNgamma_;
+        MDzeroUPC.Ngamma->push_back(Ngamma_);
+      }
+      /////// cut on the loosest rapidity gap selection
+      if (ApplyZDCGapRejection && IsData && MDzeroUPC.gammaN_EThreshLoose() == false && MDzeroUPC.Ngamma_EThreshLoose() == false) continue;
+
       int nTrackInAcceptanceHP = 0;
       for (int iTrack = 0; iTrack < MTrackPbPbUPC.nTrk; iTrack++) {
         if (MTrackPbPbUPC.trkPt->at(iTrack) <= 0.5)
@@ -301,7 +281,7 @@ int main(int argc, char *argv[]) {
       for (int iD = 0; iD < MDzero.Dsize; iD++) {
         bool DpassCut23PAS_           = DmesonSelectionPrelim23(MDzero, iD);
         bool DpassCut23LowPt_         = DmesonSelectionLowPt23(MDzero, iD);
-        bool DpassCut23PASSystDsvpv_  = DmesonSelectionPrelim23SystDsvpv(MDzero, iD);
+        bool DpassCut23PASSystDsvpvSig_  = DmesonSelectionPrelim23SystDsvpv(MDzero, iD);
         bool DpassCut23PASSystDtrkPt_ = DmesonSelectionPrelim23SystDtrkPt(MDzero, iD);
         if (IsData)
         {
@@ -309,7 +289,7 @@ int main(int argc, char *argv[]) {
           {
             if (!DpassCut23PAS_ &&
                 !DpassCut23LowPt_ &&
-                !DpassCut23PASSystDsvpv_ &&
+                !DpassCut23PASSystDsvpvSig_ &&
                 !DpassCut23PASSystDtrkPt_ ) continue;
           }
           // else if (ApplyDRejection=="ordered_or")
@@ -330,7 +310,7 @@ int main(int argc, char *argv[]) {
           // }
           else if (ApplyDRejection=="pas" && !DpassCut23PAS_) continue;
           else if (ApplyDRejection=="lowpt" && !DpassCut23LowPt_) continue;
-          else if (ApplyDRejection=="passystdsvpv" && !DpassCut23PASSystDsvpv_) continue;
+          else if (ApplyDRejection=="passystdsvpvsig" && !DpassCut23PASSystDsvpvSig_) continue;
           else if (ApplyDRejection=="passystdtrkpt" && !DpassCut23PASSystDtrkPt_) continue;
         }
         countSelDzero++;
@@ -348,7 +328,7 @@ int main(int argc, char *argv[]) {
         MDzeroUPC.Ddtheta->push_back(MDzero.Ddtheta[iD]);
         MDzeroUPC.DpassCut23PAS->push_back(DpassCut23PAS_);
         MDzeroUPC.DpassCut23LowPt->push_back(DpassCut23LowPt_);
-        MDzeroUPC.DpassCut23PASSystDsvpv->push_back(DpassCut23PASSystDsvpv_);
+        MDzeroUPC.DpassCut23PASSystDsvpvSig->push_back(DpassCut23PASSystDsvpvSig_);
         MDzeroUPC.DpassCut23PASSystDtrkPt->push_back(DpassCut23PASSystDtrkPt_);
         if (IsData == false) {
           MDzeroUPC.Dgen->push_back(MDzero.Dgen[iD]);

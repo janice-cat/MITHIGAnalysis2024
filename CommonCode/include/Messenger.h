@@ -788,7 +788,7 @@ public:
    std::vector<float> *Ddtheta;
    std::vector<bool> *DpassCut23PAS;
    std::vector<bool> *DpassCut23LowPt;
-   std::vector<bool> *DpassCut23PASSystDsvpv;
+   std::vector<bool> *DpassCut23PASSystDsvpvSig;
    std::vector<bool> *DpassCut23PASSystDtrkPt;
    std::vector<int> *Dgen;
    std::vector<bool> *DisSignalCalc;
@@ -802,6 +802,10 @@ public:
    std::vector<bool> *GisSignalCalcPrompt;
    std::vector<bool> *GisSignalCalcFeeddown;
 
+   ///////////////////
+   // Defining the rapidity gap energy threshold array for the systematics study -- 1
+   // [Change accordingly] function gammaN_EThresh*()
+   ///////////////////
    const int N_gapEThresh = 9;
    // from tight to loose
    const std::vector<float> gapEThresh_gammaN = {4.3, 5.5, 6.4, 7.8, 9.2, 10.6, 12.5, 15.0, 16.2};
@@ -828,6 +832,10 @@ public:
    void CopyNonTrack(DzeroUPCTreeMessenger &M);
    bool FillEntry();
 
+   ///////////////////
+   // Utility functions to examine passing a specific rapidity gap energy threshold -- 2
+   // [Change accordingly] the declaration of gapEThresh_*
+   ///////////////////
    bool gammaN_EThreshTight()   { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(0); }
    bool gammaN_EThreshLoose()   { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(N_gapEThresh-1); }
    bool gammaN_EThreshNominal() { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(N_gapEThresh/2); }

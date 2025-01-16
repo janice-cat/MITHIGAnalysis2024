@@ -44,7 +44,7 @@ mkdir -p Output/
 #   --Output Output/output_44.root \
 #   --Year 2023 \
 #   --IsData false \
-#   --IsGammaN true \
+#   --IsGammaNMCtype true \
 #   --ApplyTriggerRejection 0 \
 #   --ApplyEventRejection false \
 #   --ApplyZDCGapRejection false \
