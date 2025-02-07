@@ -518,7 +518,12 @@ bool JetTreeMessenger::Initialize()
       Tree->SetBranchAddress("refparton_flavor", &RefPartonFlavor);
    if(Tree->GetBranch("refparton_flavorForB"))
       Tree->SetBranchAddress("refparton_flavorForB", &RefPartonFlavorForB);
-   
+   if(Tree->GetBranch("mjtHadronFlavor"))
+      Tree->SetBranchAddress("mjtHadronFlavor", &MJTHadronFlavor);
+   if(Tree->GetBranch("mjtNcHad"))
+      Tree->SetBranchAddress("mjtNcHad", &MJTNcHad);
+   if(Tree->GetBranch("mjtNbHad"))
+      Tree->SetBranchAddress("mjtNbHad", &MJTNbHad);
    if(Tree->GetBranch("refSubJetPt"))
       Tree->SetBranchAddress("refSubJetPt", &RefGSubJetPT);
    else
@@ -1730,6 +1735,74 @@ bool MuTreeMessenger::DimuonPassTightCut(int index)
    return TightCut;
 }
 
+SingleMuTreeMessenger::SingleMuTreeMessenger(TFile &File, std::string TreeName)
+{
+   Tree = (TTree *)File.Get(TreeName.c_str());
+   Initialize();
+}
+
+SingleMuTreeMessenger::SingleMuTreeMessenger(TFile *File, std::string TreeName)
+{
+   if(File != nullptr)
+      Tree = (TTree *)File->Get(TreeName.c_str());
+   else
+      Tree = nullptr;
+   Initialize();
+}
+
+SingleMuTreeMessenger::SingleMuTreeMessenger(TTree *SingleMuTree)
+{
+   Initialize(SingleMuTree);
+}
+
+bool SingleMuTreeMessenger::Initialize(TTree *SingleMuTree)
+{
+   Tree = SingleMuTree;
+   return Initialize();
+}
+
+bool SingleMuTreeMessenger::Initialize(){
+
+  if(Tree == nullptr)
+    return false;
+
+    SingleMuPT = nullptr;
+    SingleMuEta = nullptr;
+    SingleMuPhi = nullptr;
+    SingleMuDxy = nullptr;
+    SingleMuDxyError = nullptr;
+    SingleMuDz = nullptr;
+    SingleMuDzError = nullptr;
+    SingleMuCharge = nullptr;
+    SingleMuIsGood = nullptr;
+    SingleMuIsGlobal = nullptr;
+    SingleMuIsTracker = nullptr;
+    SingleMuHybridSoft = nullptr;
+
+    Tree->SetBranchAddress("recoPt", &SingleMuPT);
+    Tree->SetBranchAddress("recoEta", &SingleMuEta);
+    Tree->SetBranchAddress("recoPhi", &SingleMuPhi);
+    Tree->SetBranchAddress("globalDxy", &SingleMuDxy);
+    Tree->SetBranchAddress("globalDxyErr", &SingleMuDxyError);
+    Tree->SetBranchAddress("globalDz", &SingleMuDz);
+    Tree->SetBranchAddress("globalDzErr", &SingleMuDzError);
+    Tree->SetBranchAddress("recoCharge", &SingleMuCharge);
+    Tree->SetBranchAddress("recoIsGood", &SingleMuIsGood);
+    Tree->SetBranchAddress("recoIsGlobal", &SingleMuIsGlobal);
+    Tree->SetBranchAddress("recoIsTracker", &SingleMuIsTracker);
+    Tree->SetBranchAddress("recoIDHybridSoft", &SingleMuHybridSoft);
+    return true;
+}
+
+bool SingleMuTreeMessenger::GetEntry(int iEntry)
+{
+  if(Tree == nullptr)
+    return false;
+
+  Tree->GetEntry(iEntry);
+  return true;
+}
+
 PbPbTrackTreeMessenger::PbPbTrackTreeMessenger(TFile &File, std::string TreeName)
 {
    Tree = (TTree *)File.Get(TreeName.c_str());
@@ -2740,7 +2813,12 @@ DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
       delete gammaN;
       delete Ngamma;
       delete Dpt;
-      delete DpassCut;
+      delete DpassCut23PAS;
+      delete DpassCut23LowPt;
+      delete DpassCut23PASSystDsvpvSig;
+      delete DpassCut23PASSystDtrkPt;
+      delete DpassCut23PASSystDalpha;
+      delete DpassCut23PASSystDchi2cl;
       delete Dy;
       delete Dmass;
       delete Dtrk1Pt;
@@ -2779,7 +2857,12 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Ngamma = nullptr;
    gammaN = nullptr;
    Dpt = nullptr;
-   DpassCut = nullptr;
+   DpassCut23PAS = nullptr;
+   DpassCut23LowPt = nullptr;
+   DpassCut23PASSystDsvpvSig = nullptr;
+   DpassCut23PASSystDtrkPt = nullptr;
+   DpassCut23PASSystDalpha = nullptr;
+   DpassCut23PASSystDchi2cl = nullptr;
    Dy = nullptr;
    Dmass = nullptr;
    Dtrk1Pt = nullptr;
@@ -2841,7 +2924,12 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("DsvpvDisErr_2D", &DsvpvDisErr_2D);
    Tree->SetBranchAddress("Dalpha", &Dalpha);
    Tree->SetBranchAddress("Ddtheta", &Ddtheta);
-   Tree->SetBranchAddress("DpassCut", &DpassCut);
+   Tree->SetBranchAddress("DpassCut23PAS", &DpassCut23PAS);
+   Tree->SetBranchAddress("DpassCut23LowPt", &DpassCut23LowPt);
+   Tree->SetBranchAddress("DpassCut23PASSystDsvpvSig", &DpassCut23PASSystDsvpvSig);
+   Tree->SetBranchAddress("DpassCut23PASSystDtrkPt", &DpassCut23PASSystDtrkPt);
+   Tree->SetBranchAddress("DpassCut23PASSystDalpha", &DpassCut23PASSystDalpha);
+   Tree->SetBranchAddress("DpassCut23PASSystDchi2cl", &DpassCut23PASSystDchi2cl);
    Tree->SetBranchAddress("Dgen", &Dgen);
    Tree->SetBranchAddress("DisSignalCalc", &DisSignalCalc);
    Tree->SetBranchAddress("DisSignalCalcPrompt", &DisSignalCalcPrompt);
@@ -2882,7 +2970,12 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    gammaN = new std::vector<bool>();
    Ngamma = new std::vector<bool>();
    Dpt = new std::vector<float>();
-   DpassCut = new std::vector<bool>();
+   DpassCut23PAS = new std::vector<bool>();
+   DpassCut23LowPt = new std::vector<bool>();
+   DpassCut23PASSystDsvpvSig = new std::vector<bool>();
+   DpassCut23PASSystDtrkPt = new std::vector<bool>();
+   DpassCut23PASSystDalpha = new std::vector<bool>();
+   DpassCut23PASSystDchi2cl = new std::vector<bool>();
    Dy = new std::vector<float>();
    Dmass = new std::vector<float>();
    Dtrk1Pt = new std::vector<float>();
@@ -2894,7 +2987,6 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    DsvpvDisErr_2D = new std::vector<float>();
    Dalpha = new std::vector<float>();
    Ddtheta = new std::vector<float>();
-   DpassCut = new std::vector<bool>();
    Dgen = new std::vector<int>();
    DisSignalCalc = new std::vector<bool>();
    DisSignalCalcPrompt = new std::vector<bool>();
@@ -2949,7 +3041,12 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("DsvpvDisErr_2D",        &DsvpvDisErr_2D);
    Tree->Branch("Dalpha",                &Dalpha);
    Tree->Branch("Ddtheta",               &Ddtheta);
-   Tree->Branch("DpassCut",              &DpassCut);
+   Tree->Branch("DpassCut23PAS",         &DpassCut23PAS);
+   Tree->Branch("DpassCut23LowPt",       &DpassCut23LowPt);
+   Tree->Branch("DpassCut23PASSystDsvpvSig",&DpassCut23PASSystDsvpvSig);
+   Tree->Branch("DpassCut23PASSystDtrkPt",&DpassCut23PASSystDtrkPt);
+   Tree->Branch("DpassCut23PASSystDalpha",&DpassCut23PASSystDalpha);
+   Tree->Branch("DpassCut23PASSystDchi2cl",&DpassCut23PASSystDchi2cl);
    Tree->Branch("Dgen",                  &Dgen);
    Tree->Branch("DisSignalCalc",         &DisSignalCalc);
    Tree->Branch("DisSignalCalcPrompt",   &DisSignalCalcPrompt);
@@ -3009,7 +3106,12 @@ void DzeroUPCTreeMessenger::Clear()
    DsvpvDisErr_2D->clear();
    Dalpha->clear();
    Ddtheta->clear();
-   DpassCut->clear();
+   DpassCut23PAS->clear();
+   DpassCut23LowPt->clear();
+   DpassCut23PASSystDsvpvSig->clear();
+   DpassCut23PASSystDtrkPt->clear();
+   DpassCut23PASSystDalpha->clear();
+   DpassCut23PASSystDchi2cl->clear();
    Dgen->clear();
    DisSignalCalc->clear();
    DisSignalCalcPrompt->clear();
@@ -3064,7 +3166,12 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    if(DsvpvDisErr_2D != nullptr && M.DsvpvDisErr_2D != nullptr)   *DsvpvDisErr_2D = *(M.DsvpvDisErr_2D);
    if(Dalpha != nullptr && M.Dalpha != nullptr)   *Dalpha = *(M.Dalpha);
    if(Ddtheta != nullptr && M.Ddtheta != nullptr)   *Ddtheta = *(M.Ddtheta);
-   if(DpassCut != nullptr && M.DpassCut != nullptr)   *DpassCut = *(M.DpassCut);
+   if(DpassCut23PAS != nullptr && M.DpassCut23PAS != nullptr)   *DpassCut23PAS = *(M.DpassCut23PAS);
+   if(DpassCut23LowPt != nullptr && M.DpassCut23LowPt != nullptr)   *DpassCut23LowPt = *(M.DpassCut23LowPt);
+   if(DpassCut23PASSystDsvpvSig != nullptr && M.DpassCut23PASSystDsvpvSig != nullptr)   *DpassCut23PASSystDsvpvSig = *(M.DpassCut23PASSystDsvpvSig);
+   if(DpassCut23PASSystDtrkPt != nullptr && M.DpassCut23PASSystDtrkPt != nullptr)   *DpassCut23PASSystDtrkPt = *(M.DpassCut23PASSystDtrkPt);
+   if(DpassCut23PASSystDalpha != nullptr && M.DpassCut23PASSystDalpha != nullptr)   *DpassCut23PASSystDalpha = *(M.DpassCut23PASSystDalpha);
+   if(DpassCut23PASSystDchi2cl != nullptr && M.DpassCut23PASSystDchi2cl != nullptr)   *DpassCut23PASSystDchi2cl = *(M.DpassCut23PASSystDchi2cl);
    if(Dgen != nullptr && M.Dgen != nullptr)   *Dgen = *(M.Dgen);
    if(DisSignalCalc != nullptr && M.DisSignalCalc != nullptr)   *DisSignalCalc = *(M.DisSignalCalc);
    if(DisSignalCalcPrompt != nullptr && M.DisSignalCalcPrompt != nullptr)   *DisSignalCalcPrompt = *(M.DisSignalCalcPrompt);
@@ -3136,6 +3243,16 @@ MuMuJetMessenger::~MuMuJetMessenger()
       delete muEta2;
       delete muPhi1;
       delete muPhi2;
+      delete muDiDxy1;
+      delete muDiDxy1Err;
+      delete muDiDxy2;
+      delete muDiDxy2Err;
+      delete muDiDz1;
+      delete muDiDz1Err;
+      delete muDiDz2;
+      delete muDiDz2Err;
+      delete muDiDxy1Dxy2;
+      delete muDiDxy1Dxy2Err;
       delete mumuMass;
       delete mumuEta;
       delete mumuY;
@@ -3146,6 +3263,9 @@ MuMuJetMessenger::~MuMuJetMessenger()
       delete muDeta;
       delete muDphi;
       delete muDR;
+      delete MJTHadronFlavor;
+      delete MJTNcHad;
+      delete MJTNbHad;
    }
 }
 
@@ -3171,6 +3291,16 @@ bool MuMuJetMessenger::Initialize()
    muEta2 = nullptr;
    muPhi1 = nullptr;
    muPhi2 = nullptr;
+   muDiDxy1 = nullptr;
+   muDiDxy1Err = nullptr;
+   muDiDxy2 = nullptr;
+   muDiDxy2Err = nullptr;
+   muDiDz1 = nullptr;
+   muDiDz1Err = nullptr;
+   muDiDz2 = nullptr;
+   muDiDz2Err = nullptr;
+   muDiDxy1Dxy2 = nullptr;
+   muDiDxy1Dxy2Err = nullptr;
    mumuMass = nullptr;
    mumuEta = nullptr;
    mumuY = nullptr;
@@ -3181,6 +3311,9 @@ bool MuMuJetMessenger::Initialize()
    muDeta = nullptr;
    muDphi = nullptr;
    muDR = nullptr;
+   MJTHadronFlavor = nullptr;
+   MJTNcHad = nullptr;
+   MJTNbHad = nullptr;
 
    Tree->SetBranchAddress("Run", &Run);
    Tree->SetBranchAddress("Event", &Event);
@@ -3205,6 +3338,16 @@ bool MuMuJetMessenger::Initialize()
    Tree->SetBranchAddress("muEta2", &muEta2);
    Tree->SetBranchAddress("muPhi1", &muPhi1);
    Tree->SetBranchAddress("muPhi2", &muPhi2);
+   Tree->SetBranchAddress("muDiDxy1", &muDiDxy1);
+   Tree->SetBranchAddress("muDiDxy1Err", &muDiDxy1Err);
+   Tree->SetBranchAddress("muDiDxy2", &muDiDxy2);
+   Tree->SetBranchAddress("muDiDxy2Err", &muDiDxy2Err);
+   Tree->SetBranchAddress("muDiDz1", &muDiDz1);
+   Tree->SetBranchAddress("muDiDz1Err", &muDiDz1Err);
+   Tree->SetBranchAddress("muDiDz2", &muDiDz2);
+   Tree->SetBranchAddress("muDiDz2Err", &muDiDz2Err);
+   Tree->SetBranchAddress("muDiDxy1Dxy2", &muDiDxy1Dxy2);
+   Tree->SetBranchAddress("muDiDxy1Dxy2Err", &muDiDxy1Dxy2Err);
    Tree->SetBranchAddress("mumuMass", &mumuMass);
    Tree->SetBranchAddress("mumuEta", &mumuEta);
    Tree->SetBranchAddress("mumuY", &mumuY);
@@ -3215,6 +3358,9 @@ bool MuMuJetMessenger::Initialize()
    Tree->SetBranchAddress("muDeta", &muDeta);
    Tree->SetBranchAddress("muDphi", &muDphi);
    Tree->SetBranchAddress("muDR", &muDR);
+   Tree->SetBranchAddress("MJTHadronFlavor", &MJTHadronFlavor);
+   Tree->SetBranchAddress("MJTNcHad", &MJTNcHad);
+   Tree->SetBranchAddress("MJTNbHad", &MJTNbHad);
    return true;
 }
 
@@ -3253,6 +3399,16 @@ bool MuMuJetMessenger::SetBranch(TTree *T)
    muEta2 = new std::vector<float>();
    muPhi1 = new std::vector<float>();
    muPhi2 = new std::vector<float>();
+   muDiDxy1 = new std::vector<float>();
+   muDiDxy1Err = new std::vector<float>();
+   muDiDxy2 = new std::vector<float>();
+   muDiDxy2Err = new std::vector<float>();
+   muDiDz1 = new std::vector<float>();
+   muDiDz1Err = new std::vector<float>();
+   muDiDz2 = new std::vector<float>();
+   muDiDz2Err = new std::vector<float>();
+   muDiDxy1Dxy2 = new std::vector<float>();
+   muDiDxy1Dxy2Err = new std::vector<float>();
    mumuMass = new std::vector<float>();
    mumuEta = new std::vector<float>();
    mumuY = new std::vector<float>();
@@ -3263,6 +3419,9 @@ bool MuMuJetMessenger::SetBranch(TTree *T)
    muDeta = new std::vector<float>();
    muDphi = new std::vector<float>();
    muDR = new std::vector<float>();
+   MJTHadronFlavor = new std::vector<int>();
+   MJTNcHad = new std::vector<int>();
+   MJTNbHad = new std::vector<int>();
 
    Tree = T;
 
@@ -3289,6 +3448,16 @@ bool MuMuJetMessenger::SetBranch(TTree *T)
    Tree->Branch("muEta2", &muEta2);
    Tree->Branch("muPhi1", &muPhi1);
    Tree->Branch("muPhi2", &muPhi2);
+   Tree->Branch("muDiDxy1", &muDiDxy1);
+   Tree->Branch("muDiDxy1Err", &muDiDxy1Err);
+   Tree->Branch("muDiDxy2", &muDiDxy2);
+   Tree->Branch("muDiDxy2Err", &muDiDxy2Err);
+   Tree->Branch("muDiDz1", &muDiDz1);
+   Tree->Branch("muDiDz1Err", &muDiDz1Err);
+   Tree->Branch("muDiDz2", &muDiDz2);
+   Tree->Branch("muDiDz2Err", &muDiDz2Err);
+   Tree->Branch("muDiDxy1Dxy2", &muDiDxy1Dxy2);
+   Tree->Branch("muDiDxy1Dxy2Err", &muDiDxy1Dxy2Err);
    Tree->Branch("mumuMass", &mumuMass);
    Tree->Branch("mumuEta", &mumuEta);
    Tree->Branch("mumuY", &mumuY);
@@ -3299,7 +3468,9 @@ bool MuMuJetMessenger::SetBranch(TTree *T)
    Tree->Branch("muDeta", &muDeta);
    Tree->Branch("muDphi", &muDphi);
    Tree->Branch("muDR", &muDR);
-
+   Tree->Branch("MJTHadronFlavor", &MJTHadronFlavor);
+   Tree->Branch("MJTNcHad", &MJTNcHad);
+   Tree->Branch("MJTNbHad", &MJTNbHad);
    return true;
 }
 
@@ -3331,6 +3502,16 @@ void MuMuJetMessenger::Clear()
    muEta2->clear();
    muPhi1->clear();
    muPhi2->clear();
+   muDiDxy1->clear();
+   muDiDxy1Err->clear();
+   muDiDxy2->clear();
+   muDiDxy2Err->clear();
+   muDiDz1->clear();
+   muDiDz1Err->clear();
+   muDiDz2->clear();
+   muDiDz2Err->clear();
+   muDiDxy1Dxy2->clear();
+   muDiDxy1Dxy2Err->clear();
    mumuMass->clear();
    mumuEta->clear();
    mumuY->clear();
@@ -3341,6 +3522,9 @@ void MuMuJetMessenger::Clear()
    muDeta->clear();
    muDphi->clear();
    muDR->clear();
+   MJTHadronFlavor->clear();
+   MJTNcHad->clear();
+   MJTNbHad->clear();
 }
 
 void MuMuJetMessenger::CopyNonTrack(MuMuJetMessenger &M)
@@ -3370,6 +3554,16 @@ void MuMuJetMessenger::CopyNonTrack(MuMuJetMessenger &M)
    if(muEta2 != nullptr && M.muEta2 != nullptr)   *muEta2 = *(M.muEta2);
    if(muPhi1 != nullptr && M.muPhi1 != nullptr)   *muPhi1 = *(M.muPhi1);
    if(muPhi2 != nullptr && M.muPhi2 != nullptr)   *muPhi2 = *(M.muPhi2);
+   if(muDiDxy1 != nullptr && M.muDiDxy1 != nullptr)   *muDiDxy1 = *(M.muDiDxy1);
+   if(muDiDxy1Err != nullptr && M.muDiDxy1Err != nullptr)   *muDiDxy1Err = *(M.muDiDxy1Err);
+   if(muDiDxy2 != nullptr && M.muDiDxy2 != nullptr)   *muDiDxy2 = *(M.muDiDxy2);
+   if(muDiDxy2Err != nullptr && M.muDiDxy2Err != nullptr)   *muDiDxy2Err = *(M.muDiDxy2Err);
+   if(muDiDz1 != nullptr && M.muDiDz1 != nullptr)   *muDiDz1 = *(M.muDiDz1);
+   if(muDiDz1Err != nullptr && M.muDiDz1Err != nullptr)   *muDiDz1Err = *(M.muDiDz1Err);
+   if(muDiDz2 != nullptr && M.muDiDz2 != nullptr)   *muDiDz2 = *(M.muDiDz2);
+   if(muDiDz2Err != nullptr && M.muDiDz2Err != nullptr)   *muDiDz2Err = *(M.muDiDz2Err);
+   if(muDiDxy1Dxy2 != nullptr && M.muDiDxy1Dxy2 != nullptr)   *muDiDxy1Dxy2 = *(M.muDiDxy1Dxy2);
+   if(muDiDxy1Dxy2Err != nullptr && M.muDiDxy1Dxy2Err != nullptr)   *muDiDxy1Dxy2Err = *(M.muDiDxy1Dxy2Err);
    if(mumuMass != nullptr && M.mumuMass != nullptr)   *mumuMass = *(M.mumuMass);
    if(mumuEta != nullptr && M.mumuEta != nullptr)   *mumuEta = *(M.mumuEta);
    if(mumuY != nullptr && M.mumuY != nullptr)   *mumuY = *(M.mumuY);
@@ -3380,6 +3574,9 @@ void MuMuJetMessenger::CopyNonTrack(MuMuJetMessenger &M)
    if(muDeta != nullptr && M.muDeta != nullptr)   *muDeta = *(M.muDeta);
    if(muDphi != nullptr && M.muDphi != nullptr)   *muDphi = *(M.muDphi);
    if(muDR != nullptr && M.muDR != nullptr)   *muDR = *(M.muDR);
+   if(MJTHadronFlavor != nullptr && M.MJTHadronFlavor != nullptr)   *MJTHadronFlavor = *(M.MJTHadronFlavor);
+   if(MJTNcHad != nullptr && M.MJTNcHad != nullptr)   *MJTNcHad = *(M.MJTNcHad);
+   if(MJTNbHad != nullptr && M.MJTNbHad != nullptr)   *MJTNbHad = *(M.MJTNbHad);
 }
 
 bool MuMuJetMessenger::FillEntry()

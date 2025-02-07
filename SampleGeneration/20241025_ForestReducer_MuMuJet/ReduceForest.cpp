@@ -169,7 +169,9 @@ int main(int argc, char *argv[]) {
                           MJet.JetPFCHF[ijet] > 0. && MJet.JetPFCHM[ijet] > 0. && MJet.JetPFCEF[ijet] < 0.80;
         if (!passPurity)
           continue;
-
+        MMuMuJet.MJTHadronFlavor->push_back(MJet.MJTHadronFlavor[ijet]);
+        MMuMuJet.MJTNcHad->push_back(MJet.MJTNcHad[ijet]);
+        MMuMuJet.MJTNbHad->push_back(MJet.MJTNbHad[ijet]);
         MMuMuJet.JetPT->push_back(MJet.JetPT[ijet]);
         MMuMuJet.JetEta->push_back(MJet.JetEta[ijet]);
         MMuMuJet.JetPhi->push_back(MJet.JetPhi[ijet]);
@@ -180,6 +182,8 @@ int main(int argc, char *argv[]) {
         float muEta2 = -999.;
         float muPhi1 = -999.;
         float muPhi2 = -999.;
+        float muDiDxy1 = -999.;
+        float muDiDxy2 = -999.;
         float mumuMass = -999.;
         float mumuEta = -999.;
         float mumuY = -999.;
@@ -211,10 +215,10 @@ int main(int argc, char *argv[]) {
             continue;
           if (deltaR(MJet.JetEta[ijet], MJet.JetPhi[ijet], MMu.DiEta2[ipair], MMu.DiPhi2[ipair]) > 0.3)
             continue;
-          if (fabs(MMu.DiDxy1[ipair]) < 0.01)
-            continue;
-          if (fabs(MMu.DiDxy2[ipair]) < 0.01)
-            continue;
+          //if (fabs(MMu.DiDxy1[ipair]) < 0.01)
+          //  continue;
+          //if (fabs(MMu.DiDxy2[ipair]) < 0.01)
+          //  continue;
           // build dimuon TLorentzVector
           TLorentzVector Mu1, Mu2;
           Mu1.SetPtEtaPhiM(MMu.DiPT1[ipair], MMu.DiEta1[ipair], MMu.DiPhi1[ipair], M_MU);
@@ -233,6 +237,8 @@ int main(int argc, char *argv[]) {
           muEta2 = MMu.DiEta2[maxMuMuIndex];
           muPhi1 = MMu.DiPhi1[maxMuMuIndex];
           muPhi2 = MMu.DiPhi2[maxMuMuIndex];
+          muDiDxy1 = MMu.DiDxy1[maxMuMuIndex];
+          muDiDxy2 = MMu.DiDxy2[maxMuMuIndex];
           mumuMass = MMu.DiMass[maxMuMuIndex];
           mumuEta = MMu.DiEta[maxMuMuIndex];
           mumuY = MMu.DiRapidity[maxMuMuIndex];
@@ -251,6 +257,8 @@ int main(int argc, char *argv[]) {
         MMuMuJet.muEta2->push_back(muEta2);
         MMuMuJet.muPhi1->push_back(muPhi1);
         MMuMuJet.muPhi2->push_back(muPhi2);
+        MMuMuJet.muDiDxy1->push_back(muDiDxy1);
+        MMuMuJet.muDiDxy2->push_back(muDiDxy2);
         MMuMuJet.mumuMass->push_back(mumuMass);
         MMuMuJet.mumuEta->push_back(mumuEta);
         MMuMuJet.mumuY->push_back(mumuY);

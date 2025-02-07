@@ -28,6 +28,7 @@ class TriggerTreeMessenger;
 class TriggerObjectTreeMessenger;
 class TrackTreeMessenger;
 class MuTreeMessenger;
+class SingleMuTreeMessenger;
 class PbPbTrackTreeMessenger;
 class PbPbUPCTrackTreeMessenger;
 class ZDCTreeMessenger;
@@ -189,6 +190,9 @@ public:
    float RefPartonPT[JETCOUNTMAX];
    int RefPartonFlavor[JETCOUNTMAX];
    int RefPartonFlavorForB[JETCOUNTMAX];
+   int MJTHadronFlavor[JETCOUNTMAX];
+   int MJTNcHad[JETCOUNTMAX];
+   int MJTNbHad[JETCOUNTMAX];
    std::vector<std::vector<float> > *RefGSubJetPT;
    std::vector<std::vector<float> > *RefGSubJetEta;
    std::vector<std::vector<float> > *RefGSubJetPhi;
@@ -524,6 +528,31 @@ public:
    bool DimuonPassTightCut(int index);
 };
 
+class SingleMuTreeMessenger
+{
+public:
+   TTree *Tree;
+   std::vector<float> *SingleMuPT;
+   std::vector<float> *SingleMuEta;
+   std::vector<float> *SingleMuPhi;
+   std::vector<float> *SingleMuDxy;
+   std::vector<float> *SingleMuDxyError;
+   std::vector<float> *SingleMuDz;
+   std::vector<float> *SingleMuDzError;
+   std::vector<int> *SingleMuCharge;
+   std::vector<bool> *SingleMuIsGood;
+   std::vector<bool> *SingleMuIsGlobal;
+   std::vector<bool> *SingleMuIsTracker;
+   std::vector<bool> *SingleMuHybridSoft;
+
+public:
+   SingleMuTreeMessenger(TFile &File, std::string TreeName = "muonAnalyzer/MuonTree");
+   SingleMuTreeMessenger(TFile *File, std::string TreeName = "muonAnalyzer/MuonTree");
+   SingleMuTreeMessenger(TTree *SingleMuTree);
+   bool Initialize(TTree *SingleMuTree);
+   bool Initialize();
+   bool GetEntry(int iEntry);
+};
 class PbPbTrackTreeMessenger
 {
 public:
@@ -757,7 +786,12 @@ public:
    std::vector<float> *DsvpvDisErr_2D;
    std::vector<float> *Dalpha;
    std::vector<float> *Ddtheta;
-   std::vector<bool>  *DpassCut;
+   std::vector<bool> *DpassCut23PAS;
+   std::vector<bool> *DpassCut23LowPt;
+   std::vector<bool> *DpassCut23PASSystDsvpvSig;
+   std::vector<bool> *DpassCut23PASSystDtrkPt;
+   std::vector<bool> *DpassCut23PASSystDalpha;
+   std::vector<bool> *DpassCut23PASSystDchi2cl;
    std::vector<int> *Dgen;
    std::vector<bool> *DisSignalCalc;
    std::vector<bool> *DisSignalCalcPrompt;
@@ -769,6 +803,15 @@ public:
    std::vector<bool> *GisSignalCalc;
    std::vector<bool> *GisSignalCalcPrompt;
    std::vector<bool> *GisSignalCalcFeeddown;
+
+   ///////////////////
+   // Defining the rapidity gap energy threshold array for the systematics study -- 1
+   // [Change accordingly] function gammaN_EThresh*()
+   ///////////////////
+   const int N_gapEThresh = 9;
+   // from tight to loose
+   const std::vector<float> gapEThresh_gammaN = {4.3, 5.5, 6.4, 7.8, 9.2, 10.6, 12.5, 15.0, 16.2};
+   const std::vector<float> gapEThresh_Ngamma = {4.5, 5.5, 6.5, 7.6, 8.6, 10.0, 12.0, 15.0, 16.0};
 
 public:   // Derived quantities
    bool GoodPhotonuclear; //FIXME: currently not implemented
@@ -790,6 +833,25 @@ public:
    void Clear();
    void CopyNonTrack(DzeroUPCTreeMessenger &M);
    bool FillEntry();
+
+   ///////////////////
+   // Utility functions to examine passing a specific rapidity gap energy threshold -- 2
+   // [Change accordingly] the declaration of gapEThresh_*
+   ///////////////////
+   bool gammaN_EThreshTight()   { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(0); }
+   bool gammaN_EThreshLoose()   { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(N_gapEThresh-1); }
+   bool gammaN_EThreshNominal() { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(N_gapEThresh/2); }
+   bool gammaN_EThreshSyst5p5() { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(1); }
+   bool gammaN_EThreshSyst15()  { if (this->gammaN->size()!=N_gapEThresh) return false; return this->gammaN->at(7); }
+   bool gammaN_EThreshCustom(float threshold)  { return ( this->ZDCgammaN && this->HFEMaxPlus <= threshold ); }
+
+   bool Ngamma_EThreshTight()   { if (this->Ngamma->size()!=N_gapEThresh) return false; return this->Ngamma->at(0); }
+   bool Ngamma_EThreshLoose()   { if (this->Ngamma->size()!=N_gapEThresh) return false; return this->Ngamma->at(N_gapEThresh-1); }
+   bool Ngamma_EThreshNominal() { if (this->Ngamma->size()!=N_gapEThresh) return false; return this->Ngamma->at(N_gapEThresh/2); }
+   bool Ngamma_EThreshSyst5p5() { if (this->Ngamma->size()!=N_gapEThresh) return false; return this->Ngamma->at(1); }
+   bool Ngamma_EThreshSyst15()  { if (this->Ngamma->size()!=N_gapEThresh) return false; return this->Ngamma->at(7); }
+   bool Ngamma_EThreshCustom(float threshold)  { return ( this->ZDCNgamma && this->HFEMaxMinus <= threshold ); }
+
 };
 
 class MuMuJetMessenger
@@ -815,6 +877,16 @@ public:
    std::vector<float> *muEta2;
    std::vector<float> *muPhi1;
    std::vector<float> *muPhi2;
+   std::vector<float> *muDiDxy1;
+   std::vector<float> *muDiDxy1Err;
+   std::vector<float> *muDiDxy2;
+   std::vector<float> *muDiDxy2Err;
+   std::vector<float> *muDiDz1;
+   std::vector<float> *muDiDz1Err;
+   std::vector<float> *muDiDz2;
+   std::vector<float> *muDiDz2Err;
+   std::vector<float> *muDiDxy1Dxy2;
+   std::vector<float> *muDiDxy1Dxy2Err;
    std::vector<float> *mumuMass;
    std::vector<float> *mumuEta;
    std::vector<float> *mumuY;
@@ -825,6 +897,9 @@ public:
    std::vector<float> *muDeta;
    std::vector<float> *muDphi;
    std::vector<float> *muDR;
+   std::vector<int> *MJTHadronFlavor;
+   std::vector<int> *MJTNcHad;
+   std::vector<int> *MJTNbHad;
 private:
    bool WriteMode;
    bool Initialized;
