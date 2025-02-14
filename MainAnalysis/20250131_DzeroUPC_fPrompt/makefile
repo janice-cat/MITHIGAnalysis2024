@@ -1,4 +1,4 @@
-default: ExecuteDzeroUPC MassFit SideBandSubtraction GenMatchedTemplate CharmFractionExtraction
+default: ExecuteDzeroUPC MassFit SidebandSubtraction GenMatchedTemplate CharmFractionExtraction
 
 ExecuteDzeroUPC: DzeroUPC.cpp
 	g++ DzeroUPC.cpp -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
@@ -10,9 +10,9 @@ MassFit: massfit.C
 		-o MassFit `root-config --cflags --glibs` -lRooFit -lRooFitCore \
 		$(ProjectBase)/CommonCode/library/Messenger.o
 
-SideBandSubtraction: sideBandSubtraction.C
-	g++ sideBandSubtraction.C -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
-		-o SideBandSubtraction `root-config --cflags --glibs` -lRooFit -lRooFitCore \
+SidebandSubtraction: sidebandSubtraction.C
+	g++ sidebandSubtraction.C -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
+		-o SidebandSubtraction `root-config --cflags --glibs` -lRooFit -lRooFitCore \
 		$(ProjectBase)/CommonCode/library/Messenger.o
 
 GenMatchedTemplate: genMatchedTemplate.C

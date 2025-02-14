@@ -24,7 +24,7 @@
 #include <RooWorkspace.h>
 
 #include "CommandLine.h" // Yi's Commandline bundle
-
+#include "utilities.h"
 
 using namespace std;
 using namespace RooFit;
@@ -38,16 +38,6 @@ using namespace RooFit;
 #include <map>
 #include <fstream>
 #include <iomanip> // For setting precision
-
-void formatLegend(TLegend* leg, double textsize=24)
-{
-  leg->SetBorderSize(0);
-  leg->SetTextFont(43);
-  leg->SetTextSize(textsize);
-  leg->SetFillStyle(0);
-  leg->SetFillColor(0);
-  leg->SetLineColor(0);
-}
 
 int charmFractionExtraction(string dataInput, string promptTemplInput, string nonPromptTemplInput,
 				string fitting,

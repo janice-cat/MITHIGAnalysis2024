@@ -22,6 +22,7 @@
 #include <RooWorkspace.h>
 
 #include "CommandLine.h" // Yi's Commandline bundle
+#include "utilities.h"
 
 
 using namespace std;
@@ -37,26 +38,6 @@ using namespace RooFit;
 
 #define DMASSMIN 1.68
 #define DMASSMAX 2.05
-
-void normalizeHistoBinWidth(TH1D* histo)
-{
-  for (int i = 1; i <= histo->GetNbinsX(); ++i) 
-  {
-    double binWidth = histo->GetXaxis()->GetBinWidth(i);
-    histo->SetBinContent(i, histo->GetBinContent(i) / binWidth);
-    histo->SetBinError(i, histo->GetBinError(i) / binWidth);
-  }
-}
-
-void formatLegend(TLegend* leg, double textsize=24)
-{
-  leg->SetBorderSize(0);
-  leg->SetTextFont(43);
-  leg->SetTextSize(textsize);
-  leg->SetFillStyle(0);
-  leg->SetFillColor(0);
-  leg->SetLineColor(0);
-}
 
 int genMatchedTemplate(string sampleInput, 
 				string massFitResult, 
@@ -136,6 +117,7 @@ int genMatchedTemplate(string sampleInput,
   TFile* outFile = new TFile(output.c_str(), "recreate");
 
   TH1D* hDCA_SR_norm    = (TH1D*) hDCA_SR->Clone(Form("%s_norm",hDCA_SR->GetName()));
+  hDCA_SR_norm->Sumw2();
   hDCA_SR_norm->Scale(1/hDCA_SR_norm->Integral());
   hDCA_SR_norm->GetYaxis()->SetTitle("Normalized");
 
