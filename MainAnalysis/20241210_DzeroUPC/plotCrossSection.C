@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 
   TH1F* hFrame = new TH1F("hFrame", " ", 100, -2.2, 2.2);
   hFrame->GetYaxis()->SetTitle("d^{2}#sigma/dydp_{T} (mb/GeV)");
-  hFrame->GetXaxis()->SetTitle("D^{0} y");
+  hFrame->GetXaxis()->SetTitle("y_{D^{0}}");
   hFrame->SetStats(0);
   hFrame->GetYaxis()->SetTitleOffset(1.5);
   hFrame->GetYaxis()->SetRangeUser(0, 3.5);
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
   TH1F* hFrame2 = new TH1F("hFrame2", " ", 100, (IsGammaN)? -0.2: -2.2, 
                                                 (IsGammaN)?  2.2:  0.2);
   hFrame2->GetYaxis()->SetTitle("RFB");
-  hFrame2->GetXaxis()->SetTitle(Form("%sD^{0} y", (IsGammaN)? "+": "-"));
+  hFrame2->GetXaxis()->SetTitle(Form("%sy_{D^{0}}", (IsGammaN)? "+": "-"));
   hFrame2->SetStats(0);
   hFrame2->GetYaxis()->SetTitleOffset(1.5);
   hFrame2->GetYaxis()->SetRangeUser(0, 0.8);
@@ -356,8 +356,8 @@ int main(int argc, char *argv[])
   {
     // Create canvas
     TCanvas* canvas = new TCanvas("canvas", "canvas", 800, 800);
-    canvas->SetLeftMargin(0.13);
-    canvas->SetRightMargin(0.04);
+    canvas->SetLeftMargin(0.14);
+    canvas->SetRightMargin(0.03);
     canvas->SetBottomMargin(0.12);
     canvas->SetTopMargin(0.08);
 
@@ -365,8 +365,10 @@ int main(int argc, char *argv[])
     TH1F* hFrame = new TH1F("hFrame", "", nBinsX, xMin, xMax);
     hFrame->GetYaxis()->SetTitle(yAxisTitle);
     hFrame->GetXaxis()->SetTitle(xAxisTitle);
+    hFrame->GetYaxis()->SetTitleSize(0.043);
+    hFrame->GetXaxis()->SetTitleSize(0.043);
     hFrame->SetStats(0);
-    hFrame->GetYaxis()->SetTitleOffset(1.5);
+    hFrame->GetYaxis()->SetTitleOffset(1.4);
     hFrame->GetYaxis()->SetRangeUser(yMin, yMax);
     hFrame->Draw();
 
@@ -394,7 +396,7 @@ int main(int argc, char *argv[])
 
   const char* latexText = Form("%d < D_{p_{T}} < %d (GeV/#it{c})", (int) MinDzeroPT, (int) MaxDzeroPT);
 
-  plotGraph("#varepsilon_{event}", "D^{0} y",
+  plotGraph("#varepsilon_{event}", "y_{D^{0}}",
             0.95, 1.07,
             yValues, effEvtValues, yErrors, effEvtErrors,
             latexText,
@@ -403,7 +405,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("Numerator N_{event}", "D^{0} y",
+  plotGraph("Numerator N_{event}", "y_{D^{0}}",
             0, (*std::max_element(numEvtValues.begin(), numEvtValues.end()))*1.3,
             yValues, numEvtValues, yErrors, numEvtErrors,
             latexText,
@@ -412,7 +414,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("Denominator N_{event}", "D^{0} y",
+  plotGraph("Denominator N_{event}", "y_{D^{0}}",
             0, (*std::max_element(denEvtValues.begin(), denEvtValues.end()))*1.3,
             yValues, denEvtValues, yErrors, denEvtErrors,
             latexText,
@@ -421,7 +423,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("#varepsilon_{D}", "D^{0} y",
+  plotGraph("(#alpha #varepsilon)_{D^{0}}", "y_{D^{0}}",
             0, 1.05,
             yValues, effDValues, yErrors, effDErrors,
             latexText,
@@ -430,7 +432,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("#varepsilon_{D}", "D^{0} y",
+  plotGraph("(#alpha #varepsilon)_{D^{0}}", "y_{D^{0}}",
             0, 0.2, //(*std::max_element(effDValues.begin(), effDValues.end()))*1.3,
             yValues, effDValues, yErrors, effDErrors,
             latexText,
@@ -439,7 +441,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("Numerator N_{D}", "D^{0} y",
+  plotGraph("Numerator N_{D}", "y_{D^{0}}",
             0, (*std::max_element(numDValues.begin(), numDValues.end()))*1.3,
             yValues, numDValues, yErrors, numDErrors,
             latexText,
@@ -448,7 +450,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("Denominator N_{D}", "D^{0} y",
+  plotGraph("Denominator N_{D}", "y_{D^{0}}",
             0, (*std::max_element(denDValues.begin(), denDValues.end()))*1.3,
             yValues, denDValues, yErrors, denDErrors,
             latexText,
@@ -457,7 +459,7 @@ int main(int argc, char *argv[])
                   (int) MinDzeroPT, (int) MaxDzeroPT,
                   IsGammaN));
 
-  plotGraph("Raw yield", "D^{0} y",
+  plotGraph("Raw yield", "y_{D^{0}}",
             0, (*std::max_element(rawYieldValues.begin(), rawYieldValues.end()))*1.3,
             yValues, rawYieldValues, yErrors, rawYieldErrors,
             latexText,
