@@ -246,6 +246,7 @@ int main(int argc, char *argv[])
   TH1F* hFrame = new TH1F("hFrame", " ", 100, -2.2, 2.2);
   hFrame->GetYaxis()->SetTitle("d^{2}#sigma/dydp_{T} (mb/GeV)");
   hFrame->GetXaxis()->SetTitle("y_{D^{0}}");
+  hFrame->SetTitle((IsGammaN)? "#gammaN": "N#gamma");
   hFrame->SetStats(0);
   hFrame->GetYaxis()->SetTitleOffset(1.5);
   hFrame->GetYaxis()->SetRangeUser(0, 3.5);
@@ -320,6 +321,7 @@ int main(int argc, char *argv[])
                                                 (IsGammaN)?  2.2:  0.2);
   hFrame2->GetYaxis()->SetTitle("RFB");
   hFrame2->GetXaxis()->SetTitle(Form("%sy_{D^{0}}", (IsGammaN)? "+": "-"));
+  hFrame2->SetTitle((IsGammaN)? "#gammaN": "N#gamma");
   hFrame2->SetStats(0);
   hFrame2->GetYaxis()->SetTitleOffset(1.5);
   hFrame2->GetYaxis()->SetRangeUser(0, 0.8);
@@ -352,7 +354,8 @@ int main(int argc, char *argv[])
                  const std::vector<double>& xValues, const std::vector<double>& yValues,
                  const std::vector<double>& xErrors, const std::vector<double>& yErrors,
                  const char* latexText, const char* plotname,
-                 int nBinsX=100, double xMin=-2.2, double xMax=2.2)
+                 int nBinsX=100, double xMin=-2.2, double xMax=2.2,
+                 string frameTitle="")
   {
     // Create canvas
     TCanvas* canvas = new TCanvas("canvas", "canvas", 800, 800);
@@ -365,6 +368,7 @@ int main(int argc, char *argv[])
     TH1F* hFrame = new TH1F("hFrame", "", nBinsX, xMin, xMax);
     hFrame->GetYaxis()->SetTitle(yAxisTitle);
     hFrame->GetXaxis()->SetTitle(xAxisTitle);
+    hFrame->SetTitle(frameTitle.c_str());
     hFrame->GetYaxis()->SetTitleSize(0.043);
     hFrame->GetXaxis()->SetTitleSize(0.043);
     hFrame->SetStats(0);
@@ -403,7 +407,9 @@ int main(int argc, char *argv[])
             Form("%s/evtEff_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("Numerator N_{event}", "y_{D^{0}}",
             0, (*std::max_element(numEvtValues.begin(), numEvtValues.end()))*1.3,
@@ -412,7 +418,9 @@ int main(int argc, char *argv[])
             Form("%s/evtNum_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("Denominator N_{event}", "y_{D^{0}}",
             0, (*std::max_element(denEvtValues.begin(), denEvtValues.end()))*1.3,
@@ -421,7 +429,9 @@ int main(int argc, char *argv[])
             Form("%s/evtDen_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("(#alpha #varepsilon)_{D^{0}}", "y_{D^{0}}",
             0, 1.05,
@@ -430,7 +440,9 @@ int main(int argc, char *argv[])
             Form("%s/DEff_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("(#alpha #varepsilon)_{D^{0}}", "y_{D^{0}}",
             0, 0.2, //(*std::max_element(effDValues.begin(), effDValues.end()))*1.3,
@@ -439,7 +451,9 @@ int main(int argc, char *argv[])
             Form("%s/DEff_zoom_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("Numerator N_{D}", "y_{D^{0}}",
             0, (*std::max_element(numDValues.begin(), numDValues.end()))*1.3,
@@ -448,7 +462,9 @@ int main(int argc, char *argv[])
             Form("%s/DNum_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("Denominator N_{D}", "y_{D^{0}}",
             0, (*std::max_element(denDValues.begin(), denDValues.end()))*1.3,
@@ -457,7 +473,9 @@ int main(int argc, char *argv[])
             Form("%s/DDen_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
   plotGraph("Raw yield", "y_{D^{0}}",
             0, (*std::max_element(rawYieldValues.begin(), rawYieldValues.end()))*1.3,
@@ -466,7 +484,9 @@ int main(int argc, char *argv[])
             Form("%s/RawYield_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            100, -2.2, 2.2,
+            ((IsGammaN)? "#gammaN": "N#gamma"));
 
 
   return 0;
