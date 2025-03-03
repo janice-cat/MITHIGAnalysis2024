@@ -20,6 +20,11 @@ PlotCrossSection: plotCrossSection.C
 		-o PlotCrossSection `root-config --cflags --glibs` -lRooFit -lRooFitCore \
 		$(ProjectBase)/CommonCode/library/Messenger.o
 
+PlotCrossSectionRatio: plotCrossSectionRatio.C
+	g++ plotCrossSectionRatio.C -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
+		-o PlotCrossSectionRatio `root-config --cflags --glibs` -lRooFit -lRooFitCore \
+		$(ProjectBase)/CommonCode/library/Messenger.o
+
 PlotRapGapScan: rapGapScanPlotter/plotRapGapScan.C
 	g++ rapGapScanPlotter/plotRapGapScan.C -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
 		-o PlotRapGapScan `root-config --cflags --glibs` -lRooFit -lRooFitCore \
