@@ -5,7 +5,7 @@
 #include "TH2D.h"
 
 
-#include "WeightHandler.h"
+#include "WeightHandler2D.h"
 #include "CommandLine.h" // Yi's Commandline bundle
 
 using namespace std;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
   }
 
   /////////// Output
-  WeightHandler w(h_num, h_den);
+  WeightHandler2D w(h_num, h_den);
   w.WriteToFile(weightFileName.c_str());
 
 	return 0;
