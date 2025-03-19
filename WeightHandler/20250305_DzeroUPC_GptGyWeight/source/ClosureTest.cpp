@@ -13,6 +13,7 @@
 
 
 #include "WeightHandler2D.h"
+#include "Messenger.h"   // Yi's Messengers for reading data files
 #include "CommandLine.h" // Yi's Commandline bundle
 #include "HistoHelper.h"
 
@@ -26,9 +27,8 @@ int main(int argc, char *argv[])
 {
   CommandLine CL(argc, argv);
   string weightFileName     = CL.Get      ("weightFileName", "Weights/testWeight.root");
-  string unweightedFileName = CL.Get      ("unweightedFileName", "MC.root");
-  string targetFileName     = CL.Get      ("targetFileName", "Data.root");
-  string treeName           = CL.Get      ("treeName", "ntReweighting");
+  string unweightedFileName = CL.Get      ("unweightedFileName", "/data00/UPCD0LowPtAnalysis_2023ZDCORData_2023reco/SkimsMC/20250213_v4_Pthat0_ForcedD0DecayD0Filtered_BeamA/mergedfile.root");
+  string treeName           = CL.Get      ("treeName", "Tree");
 
 
   TFile *fUnweighted = TFile::Open(unweightedFileName.c_str(), "READ");
@@ -37,109 +37,90 @@ int main(int argc, char *argv[])
     std::cerr << "Error: Could not open unweighted file!" << std::endl;
     return 1;
   }
-  
-  TTree *tUnweighted = (TTree*) fUnweighted->Get(treeName.c_str());
-  if (!tUnweighted)
-  {
-    std::cerr << "Error: Could not retrieve tree!" << std::endl;
-    return 1;
-  }
 
-  std::vector<float> *Dpt = nullptr;
-  std::vector<float> *Dy = nullptr;
-  std::vector<float> *DCA = nullptr;
-  float leadingGpt, leadingGy;
-  tUnweighted->SetBranchAddress("Dpt", &Dpt);
-  tUnweighted->SetBranchAddress("Dy", &Dy);
-  tUnweighted->SetBranchAddress("DCA", &DCA);
-  tUnweighted->SetBranchAddress("leadingGpt", &leadingGpt);
-  tUnweighted->SetBranchAddress("leadingGy", &leadingGy);
-
-  TFile *fTarget = TFile::Open(targetFileName.c_str(), "READ");
-  if (!fTarget || fTarget->IsZombie())
-  {
-    std::cerr << "Error: Could not open Target file!" << std::endl;
-    return 1;
-  }
-
-  TTree *tTarget = (TTree*) fTarget->Get(treeName.c_str());
-  if (!tTarget)
-  {
-    std::cerr << "Error: Could not retrieve tree!" << std::endl;
-    return 1;
-  }
-
-  tTarget->SetBranchAddress("Dpt", &Dpt);
-  tTarget->SetBranchAddress("Dy", &Dy);
-  tTarget->SetBranchAddress("DCA", &DCA);
+  DzeroUPCTreeMessenger *MDzeroUPC = new DzeroUPCTreeMessenger(*fUnweighted, treeName);
 
   WeightHandler2D GptGyWH;
   GptGyWH.LoadFromFile(weightFileName);
 
   // Create histogram by using the same histogram binnings
-  TH1D *h_unweighted_Dpt  = new TH1D("h_unweighted_Dpt", ";D^{0} p_{T};", 40, 0, 8.0);
-  TH1D *h_weighted_Dpt    = new TH1D("h_weighted_Dpt", ";D^{0} p_{T};", 40, 0, 8.0);
-  TH1D *h_target_Dpt      = new TH1D("h_target_Dpt", ";D^{0} p_{T};", 40, 0, 8.0);
+  TH1D *h_unweighted_leadingGpt  = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionX("h_unweighted_leadingGpt");  h_unweighted_leadingGpt->Reset();
+  TH1D *h_weighted_leadingGpt    = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionX("h_weighted_leadingGpt");    h_weighted_leadingGpt->Reset();
+  TH1D *h_target_leadingGpt      = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionX("h_target_leadingGpt");
+  h_unweighted_leadingGpt->GetXaxis()->SetTitle("D^{0} p_{T}^{gen}");
+  h_weighted_leadingGpt->GetXaxis()->SetTitle("D^{0} p_{T}^{gen}");
+  h_target_leadingGpt->GetXaxis()->SetTitle("D^{0} p_{T}^{gen}");
 
-  TH1D *h_unweighted_Dy  = new TH1D("h_unweighted_Dy", ";D^{0} y;", 30, -3.0, 3.0);
-  TH1D *h_weighted_Dy    = new TH1D("h_weighted_Dy", ";D^{0} y;", 30, -3.0, 3.0);
-  TH1D *h_target_Dy      = new TH1D("h_target_Dy", ";D^{0} y;", 30, -3.0, 3.0);
+  TH1D *h_unweighted_leadingGy  = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionY("h_unweighted_leadingGy");   h_unweighted_leadingGy->Reset();
+  TH1D *h_weighted_leadingGy    = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionY("h_weighted_leadingGy");     h_weighted_leadingGy->Reset();
+  TH1D *h_target_leadingGy      = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionY("h_target_leadingGy");
+  h_unweighted_leadingGy->GetXaxis()->SetTitle("D^{0} y^{gen}");
+  h_weighted_leadingGy->GetXaxis()->SetTitle("D^{0} y^{gen}");
+  h_target_leadingGy->GetXaxis()->SetTitle("D^{0} y^{gen}");
 
-  double _xBins[] = { 0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02, // 0.028,
-                      0.036, // 0.045,
-                      0.06 , // 0.08,
-                      0.10};
-  const int _nXBins = sizeof(_xBins)/sizeof(double) - 1;
+  TH1D *h_unweighted_leadingGyIn2to5  = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionY("h_unweighted_leadingGyIn2to5",
+                                                         GptGyWH.h_num->GetXaxis()->FindBin(2.0+0.001),
+                                                         GptGyWH.h_num->GetXaxis()->FindBin(5.0-0.001));   h_unweighted_leadingGyIn2to5->Reset();
+  TH1D *h_weighted_leadingGyIn2to5    = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionY("h_weighted_leadingGyIn2to5",
+                                                         GptGyWH.h_num->GetXaxis()->FindBin(2.0+0.001),
+                                                         GptGyWH.h_num->GetXaxis()->FindBin(5.0-0.001));   h_weighted_leadingGyIn2to5->Reset();
+  TH1D *h_target_leadingGyIn2to5      = (TH1D*) ((TH2D*) GptGyWH.h_num->Clone())->ProjectionY("h_target_leadingGyIn2to5",
+                                                         GptGyWH.h_num->GetXaxis()->FindBin(2.0+0.001),
+                                                         GptGyWH.h_num->GetXaxis()->FindBin(5.0-0.001));
+  h_unweighted_leadingGyIn2to5->GetXaxis()->SetTitle("D^{0} y^{gen}");
+  h_weighted_leadingGyIn2to5->GetXaxis()->SetTitle("D^{0} y^{gen}");
+  h_target_leadingGyIn2to5->GetXaxis()->SetTitle("D^{0} y^{gen}");
 
-  TH1D *h_unweighted_DCA  = new TH1D("h_unweighted_DCA", ";DCA;", _nXBins, _xBins);
-  TH1D *h_weighted_DCA    = new TH1D("h_weighted_DCA", ";DCA;", _nXBins, _xBins);
-  TH1D *h_target_DCA      = new TH1D("h_target_DCA", ";DCA;", _nXBins, _xBins);
-
-  Long64_t nEntries = tUnweighted->GetEntries();
-  for (Long64_t i = 0; i < nEntries; i++)
+  unsigned long nEntries = MDzeroUPC->GetEntries();
+  for (unsigned long i = 0; i < nEntries; i++)
   {
-    tUnweighted->GetEntry(i);
+    MDzeroUPC->GetEntry(i);
+    if(i % 1000 == 0) std::cout << "\r event processed : "<< i << "/" << nEntries << std::flush;
 
-    double GptGyWeight = GptGyWH.GetWeight(leadingGpt, leadingGy);
-    for (int iD = 0; iD < Dpt->size(); ++iD)
+    double leadingGpt = -999.;
+    double leadingGy  = -999.;
+    for (unsigned long j = 0; j < MDzeroUPC->Gpt->size(); j++)
     {
-      h_unweighted_Dpt  ->Fill(Dpt->at(iD));
-      h_weighted_Dpt    ->Fill(Dpt->at(iD), GptGyWeight);
-      h_unweighted_Dy   ->Fill(Dy->at(iD));
-      h_weighted_Dy     ->Fill(Dy->at(iD),  GptGyWeight);
-      h_unweighted_DCA  ->Fill(DCA->at(iD));
-      h_weighted_DCA    ->Fill(DCA->at(iD), GptGyWeight);
+      if (MDzeroUPC->GisSignalCalc->at(j) == false)
+        continue;
+      if (MDzeroUPC->Gpt->at(j) > leadingGpt)
+      {
+        leadingGpt = MDzeroUPC->Gpt->at(j);
+        leadingGy  = MDzeroUPC->Gy ->at(j);
+      }
+    }
+
+
+    if (leadingGpt >= GptGyWH.h_num_norm->GetXaxis()->GetXmin() &&
+        leadingGpt <= GptGyWH.h_num_norm->GetXaxis()->GetXmax() &&
+        leadingGy  >= GptGyWH.h_num_norm->GetYaxis()->GetXmin() &&
+        leadingGy  <= GptGyWH.h_num_norm->GetYaxis()->GetXmax() )
+    {
+      double GptGyWeight = GptGyWH.GetWeight(leadingGpt, leadingGy);
+      h_unweighted_leadingGpt  ->Fill(leadingGpt);
+      h_weighted_leadingGpt    ->Fill(leadingGpt, GptGyWeight);
+      h_unweighted_leadingGy   ->Fill(leadingGy);
+      h_weighted_leadingGy     ->Fill(leadingGy,  GptGyWeight);
+
+      if (leadingGpt >= 2 && leadingGpt <= 5)
+      {
+        h_unweighted_leadingGyIn2to5   ->Fill(leadingGy);
+        h_weighted_leadingGyIn2to5     ->Fill(leadingGy,  GptGyWeight);
+      }
     }
   }
 
-  nEntries = tTarget->GetEntries();
-  for (Long64_t i = 0; i < nEntries; i++)
-  {
-    tTarget->GetEntry(i);
+  h_unweighted_leadingGpt->Scale(1/h_unweighted_leadingGpt->Integral());
+  h_weighted_leadingGpt->Scale(1/h_weighted_leadingGpt->Integral());
+  h_target_leadingGpt->Scale(1/h_target_leadingGpt->Integral());
 
-    for (int iD = 0; iD < Dpt->size(); ++iD)
-    {
-      h_target_Dpt    ->Fill(Dpt->at(iD));
-      h_target_Dy     ->Fill(Dy->at(iD));
-      h_target_DCA    ->Fill(DCA->at(iD));
-    }
-  }
+  h_unweighted_leadingGy->Scale(1/h_unweighted_leadingGy->Integral());
+  h_weighted_leadingGy->Scale(1/h_weighted_leadingGy->Integral());
+  h_target_leadingGy->Scale(1/h_target_leadingGy->Integral());
 
-  h_unweighted_Dpt->Scale(1/h_unweighted_Dpt->Integral());
-  h_weighted_Dpt->Scale(1/h_weighted_Dpt->Integral());
-  h_target_Dpt->Scale(1/h_target_Dpt->Integral());
-
-  h_unweighted_Dy->Scale(1/h_unweighted_Dy->Integral());
-  h_weighted_Dy->Scale(1/h_weighted_Dy->Integral());
-  h_target_Dy->Scale(1/h_target_Dy->Integral());
-
-  h_unweighted_DCA->Scale(1/h_unweighted_DCA->Integral());
-  h_weighted_DCA->Scale(1/h_weighted_DCA->Integral());
-  h_target_DCA->Scale(1/h_target_DCA->Integral());
-
-  normalizeHistoBinWidth(h_unweighted_DCA);
-  normalizeHistoBinWidth(h_weighted_DCA);
-  normalizeHistoBinWidth(h_target_DCA);
+  h_unweighted_leadingGyIn2to5->Scale(1/h_unweighted_leadingGyIn2to5->Integral());
+  h_weighted_leadingGyIn2to5->Scale(1/h_weighted_leadingGyIn2to5->Integral());
+  h_target_leadingGyIn2to5->Scale(1/h_target_leadingGyIn2to5->Integral());
 
   // Closure test
   auto plotClosure = [](TH1D * h_unweighted,
@@ -244,14 +225,19 @@ int main(int argc, char *argv[])
     delete c;
   };
 
-  plotClosure(h_unweighted_Dpt, h_weighted_Dpt,
-              h_target_Dpt, false, "img/ClosureTest_Dpt.pdf");
+  plotClosure(h_unweighted_leadingGpt, h_weighted_leadingGpt,
+              h_target_leadingGpt, false, "img/ClosureTest_leadingGpt.pdf");
 
-  plotClosure(h_unweighted_Dy, h_weighted_Dy,
-              h_target_Dy, false, "img/ClosureTest_Dy.pdf");
+  plotClosure(h_unweighted_leadingGpt, h_weighted_leadingGpt,
+              h_target_leadingGpt, true, "img/ClosureTest_leadingGpt_logy.pdf");
 
-  plotClosure(h_unweighted_DCA, h_weighted_DCA,
-              h_target_DCA, true, "img/ClosureTest_DCA.pdf");
+  plotClosure(h_unweighted_leadingGy, h_weighted_leadingGy,
+              h_target_leadingGy, false, "img/ClosureTest_leadingGy.pdf");
+
+  plotClosure(h_unweighted_leadingGyIn2to5, h_weighted_leadingGyIn2to5,
+              h_target_leadingGyIn2to5, false, "img/ClosureTest_leadingGyIn2to5.pdf");
+
+  delete MDzeroUPC;
 
 	return 0;
 }
