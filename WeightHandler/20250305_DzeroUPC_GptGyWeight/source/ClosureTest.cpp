@@ -14,6 +14,7 @@
 
 #include "WeightHandler2D.h"
 #include "CommandLine.h" // Yi's Commandline bundle
+#include "HistoHelper.h"
 
 using namespace std;
 
@@ -21,23 +22,13 @@ using namespace std;
  *    Macro to create the 1D (mult) weight file
  */
 
-void formatLegend(TLegend* leg, double textsize=27)
-{
-  leg->SetBorderSize(0);
-  leg->SetTextFont(43);
-  leg->SetTextSize(textsize);
-  leg->SetFillStyle(0);
-  leg->SetFillColor(0);
-  leg->SetLineColor(0);
-}
-
 int main(int argc, char *argv[])
 {
   CommandLine CL(argc, argv);
   string weightFileName     = CL.Get      ("weightFileName", "Weights/testWeight.root");
   string unweightedFileName = CL.Get      ("unweightedFileName", "MC.root");
   string targetFileName     = CL.Get      ("targetFileName", "Data.root");
-  string treeName           = CL.Get      ("treeName", "nt");
+  string treeName           = CL.Get      ("treeName", "ntReweighting");
 
 
   TFile *fUnweighted = TFile::Open(unweightedFileName.c_str(), "READ");
@@ -54,11 +45,15 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  float Dpt, Dy, DCA;
+  std::vector<float> *Dpt = nullptr;
+  std::vector<float> *Dy = nullptr;
+  std::vector<float> *DCA = nullptr;
+  float leadingGpt, leadingGy;
   tUnweighted->SetBranchAddress("Dpt", &Dpt);
   tUnweighted->SetBranchAddress("Dy", &Dy);
   tUnweighted->SetBranchAddress("DCA", &DCA);
-
+  tUnweighted->SetBranchAddress("leadingGpt", &leadingGpt);
+  tUnweighted->SetBranchAddress("leadingGy", &leadingGy);
 
   TFile *fTarget = TFile::Open(targetFileName.c_str(), "READ");
   if (!fTarget || fTarget->IsZombie())
@@ -78,8 +73,8 @@ int main(int argc, char *argv[])
   tTarget->SetBranchAddress("Dy", &Dy);
   tTarget->SetBranchAddress("DCA", &DCA);
 
-  WeightHandler2D w;
-  w.LoadFromFile(weightFileName);
+  WeightHandler2D GptGyWH;
+  GptGyWH.LoadFromFile(weightFileName);
 
   // Create histogram by using the same histogram binnings
   TH1D *h_unweighted_Dpt  = new TH1D("h_unweighted_Dpt", ";D^{0} p_{T};", 40, 0, 8.0);
@@ -104,22 +99,30 @@ int main(int argc, char *argv[])
   for (Long64_t i = 0; i < nEntries; i++)
   {
     tUnweighted->GetEntry(i);
-    double weight = w.GetWeight(Dpt, Dy);
-    h_unweighted_Dpt->Fill(Dpt);
-    h_weighted_Dpt->Fill(Dpt, weight);
-    h_unweighted_Dy->Fill(Dy);
-    h_weighted_Dy->Fill(Dy, weight);
-    h_unweighted_DCA->Fill(DCA);
-    h_weighted_DCA->Fill(DCA, weight);
+
+    double GptGyWeight = GptGyWH.GetWeight(leadingGpt, leadingGy);
+    for (int iD = 0; iD < Dpt->size(); ++iD)
+    {
+      h_unweighted_Dpt  ->Fill(Dpt->at(iD));
+      h_weighted_Dpt    ->Fill(Dpt->at(iD), GptGyWeight);
+      h_unweighted_Dy   ->Fill(Dy->at(iD));
+      h_weighted_Dy     ->Fill(Dy->at(iD),  GptGyWeight);
+      h_unweighted_DCA  ->Fill(DCA->at(iD));
+      h_weighted_DCA    ->Fill(DCA->at(iD), GptGyWeight);
+    }
   }
 
   nEntries = tTarget->GetEntries();
   for (Long64_t i = 0; i < nEntries; i++)
   {
     tTarget->GetEntry(i);
-    h_target_Dpt->Fill(Dpt);
-    h_target_Dy->Fill(Dy);
-    h_target_DCA->Fill(DCA);
+
+    for (int iD = 0; iD < Dpt->size(); ++iD)
+    {
+      h_target_Dpt    ->Fill(Dpt->at(iD));
+      h_target_Dy     ->Fill(Dy->at(iD));
+      h_target_DCA    ->Fill(DCA->at(iD));
+    }
   }
 
   h_unweighted_Dpt->Scale(1/h_unweighted_Dpt->Integral());
@@ -133,6 +136,10 @@ int main(int argc, char *argv[])
   h_unweighted_DCA->Scale(1/h_unweighted_DCA->Integral());
   h_weighted_DCA->Scale(1/h_weighted_DCA->Integral());
   h_target_DCA->Scale(1/h_target_DCA->Integral());
+
+  normalizeHistoBinWidth(h_unweighted_DCA);
+  normalizeHistoBinWidth(h_weighted_DCA);
+  normalizeHistoBinWidth(h_target_DCA);
 
   // Closure test
   auto plotClosure = [](TH1D * h_unweighted,

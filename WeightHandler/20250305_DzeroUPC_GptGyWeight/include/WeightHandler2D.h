@@ -64,7 +64,7 @@ public:
                     string num_name="h_num",
                     string den_name="h_den");
 
-  double GetWeight(double _Dpt, double _Dy);
+  double GetWeight(double _Gpt, double _Gy);
 
   TFile *file=NULL;
   TH2D* h_num;
@@ -129,7 +129,7 @@ bool WeightHandler2D::WriteToFile(string filename,
 }
 
 
-double WeightHandler2D::GetWeight(double _Dpt, double _Dy)
+double WeightHandler2D::GetWeight(double _Gpt, double _Gy)
 {
   static int print_count = 0;
 
@@ -140,8 +140,8 @@ double WeightHandler2D::GetWeight(double _Dpt, double _Dy)
     return 0.0;
   }
 
-  int binX = h_ratio->GetXaxis()->FindBin(_Dpt);
-  int binY = h_ratio->GetYaxis()->FindBin(_Dy);
+  int binX = h_ratio->GetXaxis()->FindBin(_Gpt);
+  int binY = h_ratio->GetYaxis()->FindBin(_Gy);
 
   return h_ratio->GetBinContent(binX, binY);
 }

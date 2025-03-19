@@ -11,7 +11,7 @@
 using namespace std;
 
 /* + Description:
- *    Macro to create the 2D (Dpt, Dy) weight file
+ *    Macro to create the 2D (Gpt, Gy) weight file
  */
 
 int main(int argc, char *argv[])
