@@ -24,16 +24,6 @@ using namespace std;
  *    Macro to create the 1D (mult) weight file
  */
 
-void formatLegend(TLegend* leg, double textsize=27)
-{
-  leg->SetBorderSize(0);
-  leg->SetTextFont(43);
-  leg->SetTextSize(textsize);
-  leg->SetFillStyle(0);
-  leg->SetFillColor(0);
-  leg->SetLineColor(0);
-}
-
 int main(int argc, char *argv[])
 {
   CommandLine CL(argc, argv);
