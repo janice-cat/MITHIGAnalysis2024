@@ -1,7 +1,10 @@
 default: ExecuteDzeroUPC MassFit CorrectedYields PlotCrossSection PlotRapGapScan PlotHFDist
 
 ExecuteDzeroUPC: DzeroUPC.cpp
-	g++ DzeroUPC.cpp -O3 -I. -I$(ProjectBase)/CommonCode/include -I./include \
+	g++ DzeroUPC.cpp -O3 -I. -I$(ProjectBase)/CommonCode/include \
+	  -I$(ProjectBase)/WeightHandler/20250305_DzeroUPC_GptGyWeight/include \
+	  -I$(ProjectBase)/WeightHandler/20250312_DzeroUPC_multiplicityWeight/include \
+	  -I./include \
 		-o ExecuteDzeroUPC `root-config --cflags --glibs` \
 		$(ProjectBase)/CommonCode/library/Messenger.o
 

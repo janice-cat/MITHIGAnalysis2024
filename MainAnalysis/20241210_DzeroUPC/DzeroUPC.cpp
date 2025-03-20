@@ -18,6 +18,9 @@ using namespace std;
 #include "parameter.h"   // The parameters used in the analysis
 #include "utilities.h"   // Yen-Jie's random utility functions
 
+#include "WeightHandler2D.h"
+#include "WeightHandler1D.h"
+
 //============================================================//
 // Function to check for configuration errors
 //============================================================//
@@ -137,6 +140,18 @@ public:
     hDenDEff->Sumw2();
     hNumDEff->Sumw2();
 
+    WeightHandler2D GptGyWH;
+    if (par.DoGptGyReweighting)
+    {
+      GptGyWH.LoadFromFile(par.GptGyWeightFileName);
+    }
+
+    WeightHandler1D MultWH;
+    if (par.DoMultReweighting)
+    {
+      MultWH.LoadFromFile(par.MultWeightFileName);
+    }
+
     par.printParameters();
     unsigned long nEntry = MDzeroUPC->GetEntries() * par.scaleFactor;
     ProgressBar Bar(cout, nEntry);
@@ -151,8 +166,18 @@ public:
 
       // Check if the event is a signal MC event, a.k.a., having at least one gen-level D candidate that falls into the (pt,y) bin of interest
       bool isSigMCEvt = false;
+      double leadingGpt = -999.;
+      double leadingGy  = -999.;
       if (!par.IsData){
         for (unsigned long j = 0; j < MDzeroUPC->Gpt->size(); j++) {
+          if (MDzeroUPC->GisSignalCalc->at(j) == false)
+            continue;
+          if (MDzeroUPC->Gpt->at(j) > leadingGpt)
+          {
+            leadingGpt = MDzeroUPC->Gpt->at(j);
+            leadingGy  = MDzeroUPC->Gy ->at(j);
+          }
+
           if (MDzeroUPC->Gpt->at(j) < par.MinDzeroPT)
             continue;
           if (MDzeroUPC->Gpt->at(j) > par.MaxDzeroPT)
@@ -161,17 +186,23 @@ public:
             continue;
           if (MDzeroUPC->Gy->at(j) > par.MaxDzeroY)
             continue;
-          if (MDzeroUPC->GisSignalCalc->at(j) == false)
-            continue;
           isSigMCEvt = true;
         }
       }
 
-      if (!par.IsData && isSigMCEvt) hDenEvtEff->Fill(1);
+      double GptGyWeight = 1.0;
+      double MultWeight  = 1.0;
+      if (!par.IsData)
+      {
+        if (par.DoGptGyReweighting) GptGyWeight = GptGyWH.GetWeight(leadingGpt, leadingGy);
+        if (par.DoMultReweighting ) MultWeight  = MultWH.GetWeight(MDzeroUPC->nTrackInAcceptanceHP);
+      }
+
+      if (!par.IsData && isSigMCEvt) hDenEvtEff->Fill(1, GptGyWeight*MultWeight);
 
       // Check if the event passes the selection criteria
       if (eventSelection(MDzeroUPC, par)) {
-        if (!par.IsData && isSigMCEvt) hNumEvtEff->Fill(1);
+        if (!par.IsData && isSigMCEvt) hNumEvtEff->Fill(1, GptGyWeight*MultWeight);
 
         for (unsigned long j = 0; j < MDzeroUPC->Dalpha->size(); j++) {
           if (MDzeroUPC->Dpt->at(j) < par.MinDzeroPT)
@@ -194,7 +225,7 @@ public:
           if (!par.IsData) {
             nt->Fill((*MDzeroUPC->Dmass)[j], (*MDzeroUPC->Dgen)[j]);
             if (MDzeroUPC->Dgen->at(j) == 23333) {
-              hNumDEff->Fill(1);
+              hNumDEff->Fill(1, GptGyWeight*MultWeight);
             }
           } else
             nt->Fill((*MDzeroUPC->Dmass)[j], 0);
@@ -218,7 +249,7 @@ public:
               continue;
             if (MDzeroUPC->GisSignalCalc->at(j) == false)
               continue;
-            hDenDEff->Fill(1);
+            hDenDEff->Fill(1, GptGyWeight*MultWeight);
             // Fill HF E_max distributions for MC
             if(doHFEmaxDistributions) {
               hHFEmaxMinus_vs_EvtMult->Fill(MDzeroUPC->HFEMaxMinus, MDzeroUPC->nTrackInAcceptanceHP);
@@ -284,10 +315,16 @@ int main(int argc, char *argv[]) {
   int DoSystD = CL.GetInt("DoSystD", 0);             // Systematic study: apply the alternative D selections
                                                      // 0 = nominal, 1 = Dsvpv variation, 2: DtrkPt variation
                                                      // 3 = Dalpha variation, 4: Dchi2cl variation
+  bool DoGptGyReweighting   = CL.GetBool  ("DoGptGyReweighting", false);
+  string GptGyWeightFileName= CL.Get      ("GptGyWeightFileName", "../../WeightHandler/20250305_DzeroUPC_GptGyWeight/Weights/testWeight.root");
+  bool DoMultReweighting   = CL.GetBool  ("DoMultReweighting", false);
+  string MultWeightFileName= CL.Get      ("MultWeightFileName", "../../WeightHandler/20250312_DzeroUPC_multiplicityWeight/Weights/testWeight.root");
 
   bool IsData = CL.GetBool("IsData", 0);              // Data or MC
   Parameters par(MinDzeroPT, MaxDzeroPT, MinDzeroY, MaxDzeroY, IsGammaN, TriggerChoice, IsData, scaleFactor,
-                 DoSystRapGap, DoSystD);
+                 DoSystRapGap, DoSystD,
+                 DoGptGyReweighting, GptGyWeightFileName,
+                 DoMultReweighting, MultWeightFileName);
   par.input = CL.Get("Input", "mergedSample.root"); // Input file
   par.output = CL.Get("Output", "output.root");     // Output file
   par.nThread = CL.GetInt("nThread", 1);            // The number of threads to be used for parallel processing.
