@@ -21,7 +21,7 @@
 using namespace std;
 
 /* + Description:
- *    Macro to create the 1D (mult) weight file
+ *    Macro to do the multiplicity reweight (1D) closure test (btw MC & Data)
  */
 
 int main(int argc, char *argv[])
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
   {
     tUnweighted->GetEntry(i);
 
-    double GptGyWeight = 1.0;    
+    double GptGyWeight = 1.0;
     if (doGptGyReweighting) GptGyWeight = GptGyWH.GetWeight(leadingGpt, leadingGy);
     double MultWeight  = MultWH.GetWeight(nTrackInAcceptanceHP);
 

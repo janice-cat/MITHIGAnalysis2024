@@ -2,6 +2,7 @@
 #define _HISTOHELPER_H_
 
 #include "TH1D.h"
+#include "TLegend.h"
 
 void normalizeHistoBinWidth(TH1D* histo)
 {
