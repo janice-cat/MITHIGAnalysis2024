@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
   float MinDzeroPT = CL.GetDouble("MinDzeroPT", 2);  // Minimum Dzero transverse momentum threshold for Dzero selection.
   float MaxDzeroPT = CL.GetDouble("MaxDzeroPT", 5);  // Maximum Dzero transverse momentum threshold for Dzero selection.
   bool IsGammaN = CL.GetBool("IsGammaN", true);      // GammaN analysis (or NGamma)
+  bool UseMaxFitUncert = CL.GetBool("UseMaxFitUncert", false);
 
   vector<string> inputPoints      = CL.GetStringVector("InputPoints",    ""); // Input corrected yields md files
 
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
   string         wSystFitSigAlpha = CL.Get    ("wSystFitSigAlpha", "MassFit_systFitSigAlpha"); // Include fit systematics of different signal modeling. The input is the fit directory name
   string         wSystFitComb     = CL.Get    ("wSystFitComb", "MassFit_systComb");// Include fit systematics of different combinatorics modeling. The input is the fit directory name
   string         wSystFitPkBg     = CL.Get    ("wSystFitPkBg", "MassFit_systPkBg");// Include fit systematics of different background KK and pipi peak modeling. The input is the fit directory name
+  string         wSystMassWindow  = CL.Get    ("wSystMassWindow", "MassFit_systMassWindow");
   string         nominalSampleRST = CL.Get    ("nominalSampleRST", "fullAnalysis");// Nominal sample directory name
   string         nominalFitRST    = CL.Get    ("nominalFitRST", "MassFit");        // Nominal fit directory name
 
@@ -170,6 +172,10 @@ int main(int argc, char *argv[])
   vector<double> systFitPkBgCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitPkBg,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  // MassWindow
+  vector<double> systMassWindowCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+                    nominalFitRST, wSystMassWindow,
+                    MinDzeroPT, MaxDzeroPT, IsGammaN);
 
   vector<double> systEvtSelUncert(nPoints);
   vector<double> systRapGapUncert(nPoints);
@@ -177,10 +183,12 @@ int main(int argc, char *argv[])
   vector<double> systDtrkPtUncert(nPoints);
   vector<double> systDalphaUncert(nPoints);
   vector<double> systDchi2clUncert(nPoints);
+  vector<double> systFitUncert(nPoints);
   vector<double> systFitSigMeanUncert(nPoints);
   vector<double> systFitSigAlphaUncert(nPoints);
   vector<double> systFitCombUncert(nPoints);
   vector<double> systFitPkBgUncert(nPoints);
+  vector<double> systMassWindowUncert(nPoints);
   for (int i = 0; i < nPoints; ++i)
   {
     systEvtSelUncert[i]   = (wSystEvtSel)? effEvtErrors[i]/effEvtValues[i]*correctedYieldValues[i]: 0;
@@ -199,22 +207,38 @@ int main(int argc, char *argv[])
     systFitSigAlphaUncert[i] = TMath::Abs(systFitSigAlphaCorrectedYieldValues[i] - correctedYieldValues[i]);
     systFitCombUncert[i]  = TMath::Abs(systFitCombCorrectedYieldValues[i] - correctedYieldValues[i]);
     systFitPkBgUncert[i]  = TMath::Abs(systFitPkBgCorrectedYieldValues[i] - correctedYieldValues[i]);
+    systMassWindowUncert[i]  = TMath::Abs(systMassWindowCorrectedYieldValues[i] - correctedYieldValues[i]);
+    systFitUncert[i]      = TMath::Sqrt(
+      systFitSigMeanUncert[i] * systFitSigMeanUncert[i] +
+      systFitSigAlphaUncert[i] * systFitSigAlphaUncert[i] + 
+      systFitCombUncert[i] * systFitCombUncert[i] + 
+      systFitPkBgUncert[i] * systFitPkBgUncert[i] +
+      systMassWindowUncert[i] * systMassWindowUncert[i]
+    );
+    if (UseMaxFitUncert) systFitUncert[i] = max({
+      systFitSigMeanUncert[i], systFitSigAlphaUncert[i],
+      systFitCombUncert[i], systFitPkBgUncert[i], systMassWindowUncert[i]});
   }
 
   printArr(correctedYieldValues, ", ", "correctedYieldValues: ");
   printArr(systRapGapCorrectedYieldValues[0], ", ", "systRapGapLoose: ");
   printArr(systRapGapCorrectedYieldValues[1], ", ", "systRapGapTight: ");
-  printRatioArr(systEvtSelUncert, correctedYieldValues,       " | ", "| EvtSel      | ", " |");
-  printRatioArr(systRapGapUncert, correctedYieldValues,       " | ", "| RapGap      | ", " |");
-  printRatioArr(systDsvpvUncert, correctedYieldValues,        " | ", "| Dsvpv       | ", " |");
-  printRatioArr(systDtrkPtUncert, correctedYieldValues,       " | ", "| DtrkPt      | ", " |");
-  printRatioArr(systDalphaUncert, correctedYieldValues,       " | ", "| Dalpha      | ", " |");
-  printRatioArr(systDchi2clUncert, correctedYieldValues,      " | ", "| Dchi2cl     | ", " |");
-  printRatioArr(systFitSigMeanUncert, correctedYieldValues,   " | ", "| FitSigMean  | ", " |");
-  printRatioArr(systFitSigAlphaUncert, correctedYieldValues,  " | ", "| FitSigAlpha | ", " |");
-  printRatioArr(systFitCombUncert, correctedYieldValues,      " | ", "| FitComb     | ", " |");
-  printRatioArr(systFitPkBgUncert, correctedYieldValues,      " | ", "| FitPkBg     | ", " |");
-
+  printRatioArr(systEvtSelUncert, correctedYieldValues,   "  ", " EvtSel       ", "  ");
+  printRatioArr(systRapGapUncert, correctedYieldValues,   "  ", " RapGap       ", "  ");
+  printRatioArr(systDsvpvUncert, correctedYieldValues,    "  ", " Dsvpv        ", "  ");
+  printRatioArr(systDtrkPtUncert, correctedYieldValues,   "  ", " DtrkPt       ", "  ");
+  printRatioArr(systDalphaUncert, correctedYieldValues,   "  ", " Dalpha       ", "  ");
+  printRatioArr(systDchi2clUncert, correctedYieldValues,  "  ", " Dchi2cl      ", "  ");
+  printRatioArr(systFitUncert, correctedYieldValues,      "  ", " Fit(Total)   ", "  ");
+  vector<vector<double>> systList = {
+    systEvtSelUncert,
+    systRapGapUncert,
+    systDsvpvUncert,
+    systDtrkPtUncert,
+    systDalphaUncert,
+    systDchi2clUncert,
+    systFitUncert
+  };
   vector<double> systTotUncert(nPoints);
   for (int i = 0; i < nPoints; ++i)
   {
@@ -222,25 +246,23 @@ int main(int argc, char *argv[])
     double systTrkUncert  = wSystTrk * correctedYieldValues[i];
     double systBRUncert   = wSystBR * correctedYieldValues[i];
     double systPromptFrac = 0.05 * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
-
-    systTotUncert[i] = TMath::Sqrt(
-                          systLumiUncert * systLumiUncert +
-                          systTrkUncert * systTrkUncert +
-                          systBRUncert * systBRUncert +
-                          systPromptFrac * systPromptFrac +
-                          systEvtSelUncert[i] * systEvtSelUncert[i] +
-                          systRapGapUncert[i] * systRapGapUncert[i] +
-                          systDsvpvUncert[i] * systDsvpvUncert[i] +
-                          systDtrkPtUncert[i] * systDtrkPtUncert[i] +
-                          systDalphaUncert[i] * systDalphaUncert[i] +
-                          systDchi2clUncert[i] * systDchi2clUncert[i] +
-                          systFitSigMeanUncert[i] * systFitSigMeanUncert[i] +
-                          systFitSigAlphaUncert[i] * systFitSigAlphaUncert[i] +
-                          systFitCombUncert[i] * systFitCombUncert[i] +
-                          systFitPkBgUncert[i] * systFitPkBgUncert[i]
-                       );
+    systTotUncert[i] = (
+      systLumiUncert * systLumiUncert +
+      systTrkUncert * systTrkUncert +
+      systBRUncert * systBRUncert +
+      systPromptFrac * systPromptFrac
+    );
+    for (int j = 0; j < systList.size(); ++j) {
+      systTotUncert[i] += systList[j][i] * systList[j][i];
+    }
+    systTotUncert[i] = TMath::Sqrt(systTotUncert[i]);
   }
-  printRatioArr(systTotUncert, correctedYieldValues, " | ", "| Total       | ", " |");
+  printRatioArr(systTotUncert, correctedYieldValues,          "  ", " Total        ", "  ");
+  printRatioArr(systFitSigMeanUncert, correctedYieldValues,   "  ", " Fit:SigMean  ", "  ");
+  printRatioArr(systFitSigAlphaUncert, correctedYieldValues,  "  ", " Fit:SigAlpha ", "  ");
+  printRatioArr(systFitCombUncert, correctedYieldValues,      "  ", " Fit:Comb     ", "  ");
+  printRatioArr(systFitPkBgUncert, correctedYieldValues,      "  ", " Fit:PkBg     ", "  ");
+  printRatioArr(systMassWindowUncert, correctedYieldValues,   "  ", " Fit:MassWin  ", "  ");
   printArr(systTotUncert, ", ", "systTotUncert: ");
 
   /////////////////////////////////
@@ -276,10 +298,8 @@ int main(int argc, char *argv[])
       gr_uncert->SetPoint(i, yValues[i], correctedYieldValues[i]); // Set the upper bound of the uncertainty
       gr_uncert->SetPointError(i, yErrors[i], systTotUncert[i]); // Error is the systematic uncertainty
   }
-
   gr_uncert->SetFillColorAlpha(kRed,0.3); // Set color for uncertainty band (you can adjust it)
   gr_uncert->Draw("2 SAME"); // Draw the uncertainty band
-
 
   /////////////////////////////////
   // [TODO] Need to add a flag to decide whether to overlay the HIN-24-003 result
@@ -299,10 +319,10 @@ int main(int argc, char *argv[])
   gr_uncert_ref->Draw("2 SAME"); // Draw the uncertainty band
 
 
-  TLegend* leg = new TLegend(0.1, 0.15, 0.48, 0.28);
+  TLegend* leg = new TLegend(0.2, 0.78, 0.55, 0.90);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
-  leg->AddEntry(gr, "New framework", "P");
+  leg->AddEntry(gr, "HIN-25-002", "P");
   leg->AddEntry(gr_ref, "HIN-24-003", "P");
   leg->Draw();
 

@@ -22,7 +22,6 @@
 
 #include "CommandLine.h" // Yi's Commandline bundle
 
-
 using namespace std;
 using namespace RooFit;
 #include <RooArgSet.h>
@@ -41,9 +40,9 @@ using namespace RooFit;
 using namespace std;
 
 #define DMASS 1.86484
-#define DMASSMIN 1.67
-#define DMASSMAX 2.07
-#define DMASSNBINS 32
+#define DMASSMIN 1.66
+#define DMASSMAX 2.26
+#define DMASSNBINS 48
 
 struct ParamsBase {
   std::map<std::string, RooRealVar*> params; // Store RooRealVar objects
@@ -215,9 +214,9 @@ struct CombinatoricsBkgParams : public ParamsBase {
 
   CombinatoricsBkgParams(bool _doSyst=false) :
     doSyst(_doSyst),
-    lambda("lambda", "lambda", -4.0, -10.0, 10.0),
-    a0("a0", "constant", 0.5, -1.0, 1.0),
-    a1("a1", "slope", -0.2, -1.0, 1.0)
+    lambda("lambda", "lambda", -4.0, -10.0, 0.0),
+    a0("a1", "slope", -1.0, -2.0, 0.0),
+    a1("a2", "curve", 0.3, 0.0, 1.0)
   {
     // switch to allow the using the functionalities in the base class:
     // print, write and read
@@ -240,8 +239,8 @@ struct SwapParams : public ParamsBase {
   RooRealVar sigma;
 
   SwapParams() :
-    mean("swap_mean", "[swap] mean", 1.86484, 1.85, 1.88),
-    sigma("swap_sigma", "[swap] width of first Gaussian", 0.1, 0.03, 3.1)
+    mean("swap_mean", "[swap] mean", DMASS, DMASS - 0.015, DMASS + 0.015),
+    sigma("swap_sigma", "[swap] width of  Gaussian", 0.1, 0.03, 3.1)
   {
     params[mean.GetName()] = &mean;
     params[sigma.GetName()] = &sigma;
@@ -389,8 +388,8 @@ struct EventParams {
   // Constructor
   EventParams(double _nsig = 500, double _nbkg = 500,
               double _fswp = 0.5, double _fpkkk = 0.5, double _fpkpp = 0.5)
-      : nsig("nsig", "number of signal events", _nsig, 0, _nsig * 3),
-        nbkg("nbkg", "number of background events", _nbkg, 0, _nbkg * 3),
+      : nsig("nsig", "number of signal events", _nsig, 0, _nsig * 5),
+        nbkg("nbkg", "number of background events", _nbkg, 0, _nbkg * 5),
         fswp("fswp", "fswp", _fswp),
         fpkkk("fpkkk", "fpkkk", _fpkkk),
         fpkpp("fpkpp", "fpkpp", _fpkpp),
@@ -421,9 +420,13 @@ struct EventParams {
   }
 };
 
-void styleframe_massfit(RooPlot* frame)
-{
-  float binWidth = (DMASSMAX - DMASSMIN) / DMASSNBINS;
+void styleframe_massfit(
+  RooPlot* frame,
+  double DmassMin,
+  double DmassMax,
+  int DmassNBins
+) {
+  float binWidth = (DmassMax - DmassMin) / DmassNBins;
   frame->SetYTitle(Form("Events / (%.4f GeV)", binWidth));
   frame->SetTitleSize(0.045, "XY");
   frame->SetTitleOffset(0.85, "XY");
@@ -431,7 +434,9 @@ void styleframe_massfit(RooPlot* frame)
 
 void sigswpmc_fit(TTree *mctree, string rstDir,
                 string& siglmcdat, string& swapdat,
-                string plotTitle)
+                string plotTitle,
+                double DmassMin, double DmassMax,
+                int DmassNBins)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing signal prefit ......" << std::endl;
@@ -439,13 +444,15 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
+  RooRealVar m("Dmass", "Mass [GeV]", DmassMin, DmassMax);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
   // Import data
   RooDataSet _data("_data", "dataset", RooArgSet(m, Dgen), Import(*mctree));
-  RooDataSet& data = *( (RooDataSet*) _data.reduce( "(Dgen == 23333 || Dgen == 41022 || Dgen == 41044) || "
-                                                    "(Dgen == 23344 || Dgen == 41122 || Dgen == 41144)") );
+  RooDataSet& data = *( (RooDataSet*) _data.reduce(Form(
+    "((Dgen == 23333 || Dgen == 41022 || Dgen == 41044) || "
+    " (Dgen == 23344 || Dgen == 41122 || Dgen == 41144)) &&"
+    "  Dmass > %f && Dmass < %f ", DmassMin, DmassMax)));
 
   std::cout << "[Info] Number of entries: " << data.sumEntries() << std::endl;
 
@@ -469,7 +476,7 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
   RooFitResult* result = model.fitTo(data, Save());
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame(DMASSNBINS);
+  RooPlot* frame = m.frame(DmassNBins);
   frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
@@ -477,7 +484,7 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
   model.plotOn(frame, Components(gauss1), LineStyle(2), LineWidth(2), LineColor(kRed));
   model.plotOn(frame, Components(gauss2), LineStyle(3), LineWidth(2), LineColor(kRed));
   model.plotOn(frame, Components(swapPDF), LineStyle(kSolid), LineColor(kOrange+1));
-  styleframe_massfit(frame);
+  styleframe_massfit(frame, DmassMin, DmassMax, DmassNBins);
   frame->Draw();
 
   // Add fitted values and errors using TLatex
@@ -514,7 +521,9 @@ void sigswpmc_fit(TTree *mctree, string rstDir,
 
 void kkmc_fit(TTree *mctree, string rstDir,
               string& pkkkdat,
-              string plotTitle)
+              string plotTitle,
+              double DmassMin, double DmassMax,
+              int DmassNBins)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing kk prefit ......" << std::endl;
@@ -522,7 +531,7 @@ void kkmc_fit(TTree *mctree, string rstDir,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
+  RooRealVar m("Dmass", "Mass [GeV]", DmassMin, DmassMax);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
   // Import data
@@ -543,11 +552,11 @@ void kkmc_fit(TTree *mctree, string rstDir,
   RooFitResult* result = model.fitTo(data, Save());
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame(DMASSNBINS);
+  RooPlot* frame = m.frame(DmassNBins);
   frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
-  styleframe_massfit(frame);
+  styleframe_massfit(frame, DmassMin, DmassMax, DmassNBins);
   frame->Draw();
 
   // Add fitted parameter values and errors using TLatex
@@ -575,7 +584,9 @@ void kkmc_fit(TTree *mctree, string rstDir,
 
 void pipimc_fit(TTree *mctree, string rstDir,
                 string& pkppdat,
-                string plotTitle)
+                string plotTitle,
+                double DmassMin, double DmassMax,
+                int DmassNBins)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing pipi prefit ......" << std::endl;
@@ -583,7 +594,7 @@ void pipimc_fit(TTree *mctree, string rstDir,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
+  RooRealVar m("Dmass", "Mass [GeV]", DmassMin, DmassMax);
   RooRealVar Dgen("Dgen", "Dgen", 0, 30000);
 
   // Import data
@@ -604,11 +615,11 @@ void pipimc_fit(TTree *mctree, string rstDir,
   RooFitResult* result = model.fitTo(data, Save());
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame(DMASSNBINS);
+  RooPlot* frame = m.frame(DmassNBins);
   frame->SetTitle(plotTitle.c_str());
   data.plotOn(frame);
   model.plotOn(frame);
-  styleframe_massfit(frame);
+  styleframe_massfit(frame, DmassMin, DmassMax, DmassNBins);
   frame->Draw();
 
   // Add fitted parameter values and errors using TLatex
@@ -641,7 +652,9 @@ void main_fit(TTree *datatree, string rstDir, string output,
               bool doSyst_comb,
               bool doPkkk, bool doPkpp,
               double sigMeanRange, double sigAlphaRange,
-              string plotTitle)
+              string plotTitle,
+              double DmassMin, double DmassMax,
+              int DmassNBins)
 {
   std::cout << "=======================================================" << std::endl;
   std::cout << "=    Doing main fit ......" << std::endl;
@@ -649,10 +662,11 @@ void main_fit(TTree *datatree, string rstDir, string output,
 
   TCanvas* canvas = new TCanvas("canvas", "Fit Plot", 800, 600);
   // Define the mass range and variables
-  RooRealVar m("Dmass", "Mass [GeV]", DMASSMIN, DMASSMAX);
+  RooRealVar m("Dmass", "Mass [GeV]", DmassMin, DmassMax);
 
   // Import data
-  RooDataSet data("data", "dataset", RooArgSet(m), Import(*datatree));
+  RooDataSet _data("data", "dataset", RooArgSet(m), Import(*datatree));
+  RooDataSet& data = *( (RooDataSet*) _data.reduce(Form("Dmass > %f && Dmass < %f ", DmassMin, DmassMax)));
 
   std::cout << "[Info] Number of entries: " << data.sumEntries() << std::endl;
   
@@ -750,6 +764,10 @@ void main_fit(TTree *datatree, string rstDir, string output,
   // Save data-fitted params to .dat file
   sigldatadat=Form("%s/sigldata.dat", rstDir.c_str());
   sigl.writeToDat(sigldatadat.c_str());
+  string swapdatadat=Form("%s/swapdata.dat", rstDir.c_str());
+  swap.writeToDat(swapdatadat.c_str());
+  string combdatadat=Form("%s/combdata.dat", rstDir.c_str());
+  comb.writeToDat(combdatadat.c_str());
   
   // Save the workspace into a ROOT file
   ws.Write();
@@ -758,7 +776,7 @@ void main_fit(TTree *datatree, string rstDir, string output,
   std::cout << "Model, parameters, and data saved in fit_results.root." << std::endl;
 
   // Plot the data and the fit result
-  RooPlot* frame = m.frame(DMASSNBINS);
+  RooPlot* frame = m.frame(DmassNBins);
   frame->SetTitle(plotTitle.c_str());
   printf("Plot title: %s\n", plotTitle.c_str());
   data.plotOn(frame);
@@ -768,7 +786,7 @@ void main_fit(TTree *datatree, string rstDir, string output,
   if (doPkkk) model.plotOn(frame, Name("pkkkPDF"), Components(pkkkPDF), LineStyle(kSolid), LineColor(kViolet-3));
   if (doPkpp) model.plotOn(frame, Name("pkppPDF"), Components(pkppPDF), LineStyle(kSolid), LineColor(kTeal-7));
   model.plotOn(frame, Name("combPDF"), Components(combPDF), LineStyle(kDashed), LineColor(kGray));
-  styleframe_massfit(frame);
+  styleframe_massfit(frame, DmassMin, DmassMax, DmassNBins);
   frame->Draw();
   
   canvas->SaveAs(Form("%s/fit_result_full_clean.pdf", rstDir.c_str()));
@@ -779,7 +797,7 @@ void main_fit(TTree *datatree, string rstDir, string output,
   int nLegEntries = 3;
   if (doPkkk) nLegEntries++;
   if (doPkpp) nLegEntries++;
-  TLegend* legend = new TLegend(0.20, ypos + 0.035 - ypos_step*(nLegEntries), 0.40, ypos + 0.035);
+  TLegend* legend = new TLegend(0.13, ypos + 0.035 - ypos_step*(nLegEntries), 0.32, ypos + 0.035);
   legend->SetFillStyle(0);
   legend->SetLineWidth(0);
   legend->SetLineColor(0);
@@ -847,9 +865,9 @@ void main_fit(TTree *datatree, string rstDir, string output,
   std::cout << "nll_b: " << nll_b << ", nll_sb: " << nll_sb << ", deltaNLL: " << deltaNLL << std::endl;
   std::cout << "p-value: " << p_value << std::endl;
   std::cout << "Significance: " << significance << " sigma" << std::endl;
-  latex.DrawLatex(0.20, ypos - 0 * ypos_step, Form("S/#sqrt{S+B} = %.1f", SoverB));
-  latex.DrawLatex(0.20, ypos - 1 * ypos_step, Form("p-value = %.3e", p_value));
-  latex.DrawLatex(0.20, ypos - 2 * ypos_step, Form("Significance = %.1f#sigma", significance));
+  latex.DrawLatex(0.13, ypos - 0 * ypos_step, Form("S/#sqrt{S+B} = %.1f", SoverB));
+  latex.DrawLatex(0.13, ypos - 1 * ypos_step, Form("p-value = %.3e", p_value));
+  latex.DrawLatex(0.13, ypos - 2 * ypos_step, Form("Significance = %.1f#sigma", significance));
 
   canvas->SaveAs(Form("%s/fit_result_full_param_stats.pdf", rstDir.c_str()));
 
@@ -878,12 +896,29 @@ int main(int argc, char *argv[]) {
   bool doSyst_comb     = CL.GetBool  ("doSyst_comb", false); // do systematics study for the combinatorics background
   bool doPkkk          = CL.GetBool  ("doPkkk", true); // include KK peak in background model
   bool doPkpp          = CL.GetBool  ("doPkpp", true); // include pipi peak in background model
-
+  vector<double> systMassWin    = CL.GetDoubleVector("systMassWin", "");
+  cout << "----- SystMassWindow -----" << endl;
+  cout << "size: " << systMassWin.size() << endl;
+  for (int i=0; i<systMassWin.size(); i++) {
+     cout << i << ": " << systMassWin[i] << endl;
+  }
+  cout << "--------------------------" << endl;
+//  bool doSyst_MassWin  = CL.GetBool  ("doSyst_MassWin", false); // vary the mass window
   
   // Handle legacy setting of doSyst_sig
   if (doSyst_sig) {
     sigMeanRange = 0.;
     sigAlphaRange = 0.;
+  }
+  
+  // Varied mass window systematic
+  double DmassMin = DMASSMIN;
+  double DmassMax = DMASSMAX;
+  int DmassNBins = DMASSNBINS;
+  if (systMassWin.size() == 3) {
+    DmassMin = systMassWin[0];
+    DmassMax = systMassWin[1];
+    DmassNBins = int(systMassWin[2]);
   }
   
   string output        = CL.Get      ("Output",  "fit.root");    // Output file
@@ -935,10 +970,12 @@ int main(int argc, char *argv[]) {
   string nevtdat;
   if (neventsInput=="")
   {
-    double nsig = mctree->GetEntries(Form("(Dgen == 23333 || Dgen == 41022 || Dgen == 41044) && Dmass>%f && Dmass<%f", DMASSMIN, DMASSMAX));
-    double nswp = mctree->GetEntries(Form("(Dgen == 23344 || Dgen == 41122 || Dgen == 41144) && Dmass>%f && Dmass<%f", DMASSMIN, DMASSMAX));
-    double npkkk = mctree->GetEntries(Form("Dgen == 333 && Dmass < 1.8648 && Dmass>%f && Dmass<%f", DMASSMIN, DMASSMAX));
-    double npkpp = mctree->GetEntries(Form("Dgen == 333 && Dmass > 1.8648 && Dmass>%f && Dmass<%f", DMASSMIN, DMASSMAX));
+    double nsig = mctree->GetEntries(Form("(Dgen == 23333 || Dgen == 41022 || Dgen == 41044) && Dmass>%f && Dmass<%f", DmassMin, DmassMax));
+    double nswp = mctree->GetEntries(Form("(Dgen == 23344 || Dgen == 41122 || Dgen == 41144) && Dmass>%f && Dmass<%f", DmassMin, DmassMax));
+    double npkkk = 0;
+    double npkpp = 0;
+    if (doPkkk) npkkk = mctree->GetEntries(Form("Dgen == 333 && Dmass < 1.8648 && Dmass>%f && Dmass<%f", DmassMin, DmassMax));
+    if (doPkpp) npkpp = mctree->GetEntries(Form("Dgen == 333 && Dmass > 1.8648 && Dmass>%f && Dmass<%f", DmassMin, DmassMax));
     nevtdat = Form("%s/events.dat", rstDir.c_str());
     EventParams::writeFracToDat(nevtdat, nswp / nsig,
                                          npkkk / nsig,
@@ -950,17 +987,17 @@ int main(int argc, char *argv[]) {
   if (!(sigswpInputs.size()==1 && sigswpInputs[0].find(".dat")!=string::npos)) {
     TChain *sigswptree = new TChain("nt");
     for (auto file : sigswpInputs) sigswptree->Add(file.c_str());
-    sigswpmc_fit(sigswptree, rstDir, siglmcdat, swapdat, plotTitle.str());
+    sigswpmc_fit(sigswptree, rstDir, siglmcdat, swapdat, plotTitle.str(), DmassMin, DmassMax, DmassNBins);
   }
   if (doPkkk && !(KKmcInputs.size()==1 && KKmcInputs[0].find(".dat")!=string::npos)) {
     TChain *KKmctree = new TChain("nt");
     for (auto file : KKmcInputs) KKmctree->Add(file.c_str());
-    kkmc_fit(KKmctree, rstDir, pkkkdat, plotTitle.str());
+    kkmc_fit(KKmctree, rstDir, pkkkdat, plotTitle.str(), DmassMin, DmassMax, DmassNBins);
   }
   if (doPkpp && !(pipimcInputs.size()==1 && pipimcInputs[0].find(".dat")!=string::npos)) {
     TChain *pipimctree = new TChain("nt");
     for (auto file : pipimcInputs) pipimctree->Add(file.c_str());
-    pipimc_fit(mctree, rstDir, pkppdat, plotTitle.str());
+    pipimc_fit(mctree, rstDir, pkppdat, plotTitle.str(), DmassMin, DmassMax, DmassNBins);
   }
   
   main_fit(datatree, rstDir, output,
@@ -969,7 +1006,8 @@ int main(int argc, char *argv[]) {
            doSyst_comb,
            doPkkk, doPkpp,
            sigMeanRange, sigAlphaRange,
-           plotTitle.str());
+           plotTitle.str(),
+           DmassMin, DmassMax, DmassNBins);
 
   return 0;
 }
