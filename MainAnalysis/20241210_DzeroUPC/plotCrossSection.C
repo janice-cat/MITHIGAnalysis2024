@@ -1,5 +1,6 @@
 #include "TCanvas.h"
 #include "TGraphErrors.h"
+#include "TFile.h"
 #include "TH1F.h"
 #include "TAxis.h"
 #include "TLegend.h"
@@ -318,6 +319,12 @@ int main(int argc, char *argv[])
   gr_uncert_ref->SetFillColorAlpha(kBlack,0.3); // Set color for uncertainty band (you can adjust it)
   gr_uncert_ref->Draw("2 SAME"); // Draw the uncertainty band
 
+  TFile *outFile = new TFile(Form("%s/histograms_pt%d-%d_IsGammaN%o.root", PlotDir.c_str(), (int) MinDzeroPT, (int) MaxDzeroPT,
+                   IsGammaN), "RECREATE");
+  gr->SetName("correctedYield"); gr->Write();
+  gr_uncert->SetName("correctedYieldSyst"); gr_uncert->Write();
+  gr_ref->SetName("RefCorrectedYield"); gr_ref->Write();
+  gr_uncert_ref->SetName("RefCorrectedYieldSyst"); gr_uncert_ref->Write();
 
   TLegend* leg = new TLegend(0.2, 0.78, 0.55, 0.90);
   leg->SetFillStyle(0);
@@ -364,6 +371,9 @@ int main(int argc, char *argv[])
   gr2->SetLineWidth(2);
   gr2->Draw("P E1 SAME");
 
+  outFile->cd();
+  gr2->SetName("RFB"); gr2->Write();
+
   latex.DrawLatex(0.6, 0.82, Form("%d < D_{p_{T}} < %d (GeV)", (int) MinDzeroPT, (int) MaxDzeroPT));
 
   c1->Update();
@@ -382,6 +392,7 @@ int main(int argc, char *argv[])
                  const std::vector<double>& xValues, const std::vector<double>& yValues,
                  const std::vector<double>& xErrors, const std::vector<double>& yErrors,
                  const char* latexText, const char* plotname,
+                 TFile* outFile, string graphName,
                  int nBinsX=100, double xMin=-2.2, double xMax=2.2)
   {
     // Create canvas
@@ -403,6 +414,7 @@ int main(int argc, char *argv[])
     // Create TGraphErrors for data points
     TGraphErrors* graph = new TGraphErrors(xValues.size(), xValues.data(), yValues.data(),
                                            xErrors.data(), yErrors.data());
+    graph->SetName(graphName.c_str());
     graph->Draw("P E1 SAME");
 
     // Add TLatex for additional text
@@ -415,6 +427,9 @@ int main(int argc, char *argv[])
     // Update and save the canvas
     canvas->Update();
     canvas->SaveAs(plotname);
+
+    outFile->cd();
+    graph->Write();
 
     // Clean up
     delete graph;
@@ -431,7 +446,8 @@ int main(int argc, char *argv[])
             Form("%s/evtEff_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "evtEff");
 
   plotGraph("Numerator N_{event}", "D^{0} y",
             0, (*std::max_element(numEvtValues.begin(), numEvtValues.end()))*1.3,
@@ -440,7 +456,8 @@ int main(int argc, char *argv[])
             Form("%s/evtNum_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "evtNum");
 
   plotGraph("Denominator N_{event}", "D^{0} y",
             0, (*std::max_element(denEvtValues.begin(), denEvtValues.end()))*1.3,
@@ -449,7 +466,8 @@ int main(int argc, char *argv[])
             Form("%s/evtDen_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "evtDen");
 
   plotGraph("#varepsilon_{D}", "D^{0} y",
             0, 1.05,
@@ -458,7 +476,8 @@ int main(int argc, char *argv[])
             Form("%s/DEff_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "DEff");
 
   plotGraph("#varepsilon_{D}", "D^{0} y",
             0, 0.2, //(*std::max_element(effDValues.begin(), effDValues.end()))*1.3,
@@ -467,7 +486,8 @@ int main(int argc, char *argv[])
             Form("%s/DEff_zoom_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "DEff_zoom");
 
   plotGraph("Numerator N_{D}", "D^{0} y",
             0, (*std::max_element(numDValues.begin(), numDValues.end()))*1.3,
@@ -476,7 +496,8 @@ int main(int argc, char *argv[])
             Form("%s/DNum_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "DNum");
 
   plotGraph("Denominator N_{D}", "D^{0} y",
             0, (*std::max_element(denDValues.begin(), denDValues.end()))*1.3,
@@ -485,7 +506,8 @@ int main(int argc, char *argv[])
             Form("%s/DDen_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "DDen");
 
   plotGraph("Raw yield", "D^{0} y",
             0, (*std::max_element(rawYieldValues.begin(), rawYieldValues.end()))*1.3,
@@ -494,8 +516,9 @@ int main(int argc, char *argv[])
             Form("%s/RawYield_pt%d-%d_IsGammaN%o.pdf",
                   PlotDir.c_str(),
                   (int) MinDzeroPT, (int) MaxDzeroPT,
-                  IsGammaN));
+                  IsGammaN),
+            outFile, "RawYield");
 
-
+  outFile->Close();
   return 0;
 }

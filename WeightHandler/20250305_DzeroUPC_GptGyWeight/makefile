@@ -1,6 +1,6 @@
 default: all
 
-all: Setup bin/MakeWeights bin/ClosureTest bin/DataMC_ClosureTest
+all: Setup bin/MakeWeights bin/ClosureTest bin/ReweightResults bin/DataMC_ClosureTest
 
 Setup:
 	mkdir -p bin
@@ -15,10 +15,14 @@ bin/ClosureTest: source/ClosureTest.cpp
 	g++ source/ClosureTest.cpp -O3 -Iinclude -I$(ProjectBase)/CommonCode/include -o bin/ClosureTest `root-config --cflags --glibs` \
 	$(ProjectBase)/CommonCode/library/Messenger.o
 
+bin/ReweightResults: source/ReweightResults.cpp
+	g++ source/ReweightResults.cpp -O3 -Iinclude -I$(ProjectBase)/CommonCode/include -o bin/ReweightResults `root-config --cflags --glibs` \
+	$(ProjectBase)/CommonCode/library/Messenger.o
+
 bin/DataMC_ClosureTest: source/DataMC_ClosureTest.cpp
 	g++ source/DataMC_ClosureTest.cpp -O3 -Iinclude -I$(ProjectBase)/CommonCode/include -o bin/DataMC_ClosureTest `root-config --cflags --glibs`
 
-test: bin/MakeWeights bin/ClosureTest
+test: bin/MakeWeights bin/ClosureTest bin/ReweightResults bin/DataMC_ClosureTest
 	bin/MakeWeights \
 	--NumFileName /data00/cbaldene/forJanice/correctedcross_0nAn_PL.root \
 	--NumHistName hCrossSection \
@@ -29,6 +33,13 @@ test: bin/MakeWeights bin/ClosureTest
 	--UnweightedFileName /data00/UPCD0LowPtAnalysis_2023ZDCORData_2023reco/SkimsMC/20250213_v4_Pthat0_ForcedD0DecayD0Filtered_BeamA/mergedfile.root
 
 	bin/ClosureTest \
+	--UnweightedFileName /data00/UPCD0LowPtAnalysis_2023ZDCORData_2023reco/SkimsMC/20250227_v4_Pthat0_ForcedD0DecayD0Filtered_BeamB/mergedfile.root \
+	--IsGammaN false
+
+	bin/ReweightResults \
+	--UnweightedFileName /data00/UPCD0LowPtAnalysis_2023ZDCORData_2023reco/SkimsMC/20250213_v4_Pthat0_ForcedD0DecayD0Filtered_BeamA/mergedfile.root
+
+	bin/ReweightResults \
 	--UnweightedFileName /data00/UPCD0LowPtAnalysis_2023ZDCORData_2023reco/SkimsMC/20250227_v4_Pthat0_ForcedD0DecayD0Filtered_BeamB/mergedfile.root \
 	--IsGammaN false
 

@@ -102,6 +102,9 @@ public:
 
   TH1D *hEvtMult;
 
+  const double sideBandMinusUpperEdge = 1.82;
+  const double sideBandPlusLowerEdge = 1.9;
+
   DataAnalyzer(const char *filename, const char *outFilename, const char *mytitle = "")
       : inf(new TFile(filename)), MDzeroUPC(new DzeroUPCTreeMessenger(*inf, string("Tree"))), title(mytitle),
         outf(new TFile(outFilename, "recreate")) {
@@ -224,6 +227,9 @@ public:
           if (par.DoSystD==3 && MDzeroUPC->DpassCut23PASSystDalpha->at(j) == false) continue;
           if (par.DoSystD==4 && MDzeroUPC->DpassCut23PASSystDchi2cl->at(j) == false) continue;
 
+          // signal region Dmass window cut
+          if (MDzeroUPC->Dmass->at(j) < sideBandMinusUpperEdge || MDzeroUPC->Dmass->at(j) > sideBandPlusLowerEdge) continue;
+
           double thisDCA = (*MDzeroUPC->DsvpvDistance)[j] * \
                TMath::Sin( (*MDzeroUPC->Dalpha)[j] );
           hDmass->Fill((*MDzeroUPC->Dmass)[j]);
@@ -252,6 +258,8 @@ public:
             hHFEmaxPlus_vs_EvtMult->Fill(MDzeroUPC->HFEMaxPlus, MDzeroUPC->nTrackInAcceptanceHP);
           }
         } // end of reco-level Dzero loop
+
+        // Filling the tree for reweighting when there is a good reco D candidate that falls into the signal region
         if (_ntr_Dmass.size()!=0)
         {
           ntReweighting->Fill();
