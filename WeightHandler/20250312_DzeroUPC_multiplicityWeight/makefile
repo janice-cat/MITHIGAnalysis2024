@@ -94,50 +94,58 @@ test: bin/MakeWeights
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-2--1_IsGammaN1/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-2--1_IsGammaN1/Data.root \
 	--WeightFileName Weights/pt2-5_y-2--1_IsGammaN1.root \
-	--PlotDir pt2-5_y-2--1_IsGammaN1 --IsGammaN 1
+	--PlotDir pt2-5_y-2--1_IsGammaN1 --IsGammaN 1 \
+	--latexText "#gamma N, -2 < D^{0} y < -1"
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-1-0_IsGammaN1/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-1-0_IsGammaN1/Data.root \
 	--WeightFileName Weights/pt2-5_y-1-0_IsGammaN1.root \
-	--PlotDir pt2-5_y-1-0_IsGammaN1 --IsGammaN 1
+	--PlotDir pt2-5_y-1-0_IsGammaN1 --IsGammaN 1 \
+	--latexText "#gamma N, -1 < D^{0} y < 0"
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y0-1_IsGammaN1/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y0-1_IsGammaN1/Data.root \
 	--WeightFileName Weights/pt2-5_y0-1_IsGammaN1.root \
-	--PlotDir pt2-5_y0-1_IsGammaN1 --IsGammaN 1
+	--PlotDir pt2-5_y0-1_IsGammaN1 --IsGammaN 1 \
+	--latexText "#gamma N, 0 < D^{0} y < 1"
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y1-2_IsGammaN1/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y1-2_IsGammaN1/Data.root \
 	--WeightFileName Weights/pt2-5_y1-2_IsGammaN1.root \
-	--PlotDir pt2-5_y1-2_IsGammaN1 --IsGammaN 1
+	--PlotDir pt2-5_y1-2_IsGammaN1 --IsGammaN 1 \
+	--latexText "#gamma N, 1 < D^{0} y < 2"
 
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-2--1_IsGammaN0/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-2--1_IsGammaN0/Data.root \
 	--WeightFileName Weights/pt2-5_y-2--1_IsGammaN0.root \
-	--PlotDir pt2-5_y-2--1_IsGammaN0 --IsGammaN 0
+	--PlotDir pt2-5_y-2--1_IsGammaN0 --IsGammaN 0 \
+	--latexText "N #gamma, -2 < D^{0} y < -1"
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-1-0_IsGammaN0/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y-1-0_IsGammaN0/Data.root \
 	--WeightFileName Weights/pt2-5_y-1-0_IsGammaN0.root \
-	--PlotDir pt2-5_y-1-0_IsGammaN0 --IsGammaN 0
+	--PlotDir pt2-5_y-1-0_IsGammaN0 --IsGammaN 0 \
+	--latexText "N #gamma, -1 < D^{0} y < 0"
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y0-1_IsGammaN0/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y0-1_IsGammaN0/Data.root \
 	--WeightFileName Weights/pt2-5_y0-1_IsGammaN0.root \
-	--PlotDir pt2-5_y0-1_IsGammaN0 --IsGammaN 0
+	--PlotDir pt2-5_y0-1_IsGammaN0 --IsGammaN 0 \
+	--latexText "N #gamma, 0 < D^{0} y < 1"
 
 	bin/ClosureTest \
 	--UnweightedFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y1-2_IsGammaN0/MC.root \
 	--TargetFileName ../../MainAnalysis/20250313_DzeroUPC_dataMC/fullAnalysis/pt2-5_y1-2_IsGammaN0/Data.root \
 	--WeightFileName Weights/pt2-5_y1-2_IsGammaN0.root \
-	--PlotDir pt2-5_y1-2_IsGammaN0 --IsGammaN 0
+	--PlotDir pt2-5_y1-2_IsGammaN0 --IsGammaN 0 \
+	--latexText "N #gamma, 1 < D^{0} y < 2"
 
 	bin/GenSpectra \
   --UnweightedFileName /data00/UPCD0LowPtAnalysis_2023ZDCORData_2023reco/SkimsMC/20250213_v4_Pthat0_ForcedD0DecayD0Filtered_BeamA/mergedfile.root \

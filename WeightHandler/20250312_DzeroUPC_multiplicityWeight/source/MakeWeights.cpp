@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
   // Create histogram by using the same histogram binnings
   double _multBins[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
                         10,11,12,13,14,16,18,22,80 };
+  // double _multBins[] = { 0, 5, 7, 9, 12, 22, 80 };
   const int _nMultBins = sizeof(_multBins)/sizeof(double) - 1;
   TH1D *h_unweighted_EvtMult  = new TH1D("h_unweighted_EvtMult", ";Charged hadron multiplicity;", _nMultBins, _multBins); // 80, 0, 80);
   TH1D *h_target_EvtMult      = new TH1D("h_target_EvtMult", ";Charged hadron multiplicity;", _nMultBins, _multBins); // 80, 0, 80);

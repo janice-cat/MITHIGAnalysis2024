@@ -222,10 +222,13 @@ int main(int argc, char *argv[])
     leg->Draw();
 
     pad2->cd();
+    h_weightFactor->GetYaxis()->SetTitle("#frac{EMD correction}{No EMD}");
     h_weightFactor->GetYaxis()->SetNdivisions(505);
     h_weightFactor->GetYaxis()->SetLabelSize(0.1);
     h_weightFactor->GetXaxis()->SetLabelSize(0.1);
     h_weightFactor->GetXaxis()->SetTitleSize(0.1);
+    h_weightFactor->GetYaxis()->SetTitleSize(0.1);
+    h_weightFactor->GetYaxis()->SetTitleOffset(0.6);
     h_weightFactor->GetXaxis()->SetTitleOffset(1.3);
     h_weightFactor->SetLineColor(kBlack);
     h_weightFactor->SetMinimum(0.5);

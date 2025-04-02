@@ -9,6 +9,7 @@
 #include "TCanvas.h"
 #include "TPad.h"
 #include "TLegend.h"
+#include "TLatex.h"
 #include "TLine.h"
 #include "TStyle.h"
 
@@ -32,6 +33,7 @@ int main(int argc, char *argv[])
   string TargetFileName     = CL.Get      ("TargetFileName", "Data.root");
   string TreeName           = CL.Get      ("TreeName", "ntReweighting");
   string PlotDir            = CL.Get      ("PlotDir", "");
+  string latexText          = CL.Get      ("latexText", "");
   bool DoGptGyReweighting   = CL.GetBool  ("DoGptGyReweighting", "true");
   string GptGyWeightFileName= CL.Get      ("GptGyWeightFileName", "../20250305_DzeroUPC_GptGyWeight/Weights/testWeight.root");
   bool IsGammaN             = CL.GetBool  ("IsGammaN", true);
@@ -188,7 +190,8 @@ int main(int argc, char *argv[])
   auto plotClosure = [](TH1D * h_unweighted,
                         TH1D * h_weighted,
                         TH1D * h_target,
-                        bool plotLogy, string plotName
+                        bool plotLogy, string plotName,
+                        string latexText
   )
   {
     h_unweighted->SetLineStyle(1);
@@ -262,6 +265,13 @@ int main(int argc, char *argv[])
     h_weighted->Draw("h same");
     h_target->Draw("h same");
 
+    // Add TLatex for additional text
+    TLatex latex;
+    latex.SetNDC();
+    latex.SetTextSize(0.045);
+    latex.SetTextFont(62);
+    latex.DrawLatex(0.4, 0.95, latexText.c_str());
+
     TLegend *leg = new TLegend(0.65, 0.65, 0.85, 0.85);
     leg->AddEntry(h_unweighted, "MC Unweighted", "l");
     leg->AddEntry(h_weighted, "MC Weighted", "l");
@@ -270,10 +280,13 @@ int main(int argc, char *argv[])
     leg->Draw();
 
     pad2->cd();
+    h_closure->GetYaxis()->SetTitle("#frac{MC}{Data}");
     h_closure->GetYaxis()->SetNdivisions(505);
     h_closure->GetYaxis()->SetLabelSize(0.1);
     h_closure->GetXaxis()->SetLabelSize(0.1);
     h_closure->GetXaxis()->SetTitleSize(0.1);
+    h_closure->GetYaxis()->SetTitleSize(0.1);
+    h_closure->GetYaxis()->SetTitleOffset(0.6);
     h_closure->GetXaxis()->SetTitleOffset(1.3);
     h_closure->SetLineColor(kRed);
     h_closure->SetMinimum(0.5);
@@ -307,23 +320,23 @@ int main(int argc, char *argv[])
   system(Form("mkdir -p img/%s/", PlotDir.c_str()));
   plotClosure(h_unweighted_EvtMult, h_weighted_EvtMult,
               h_target_EvtMult, false, 
-              Form("img/%s/ClosureTest_EvtMult.pdf", PlotDir.c_str()));
+              Form("img/%s/ClosureTest_EvtMult.pdf", PlotDir.c_str()), latexText);
 
   plotClosure(h_unweighted_EvtMult, h_weighted_EvtMult,
               h_target_EvtMult, true, 
-              Form("img/%s/ClosureTest_EvtMult_logy.pdf", PlotDir.c_str()));
+              Form("img/%s/ClosureTest_EvtMult_logy.pdf", PlotDir.c_str()), latexText);
 
   plotClosure(h_unweighted_Dpt, h_weighted_Dpt,
               h_target_Dpt, false, 
-              Form("img/%s/ClosureTest_Dpt.pdf", PlotDir.c_str()));
+              Form("img/%s/ClosureTest_Dpt.pdf", PlotDir.c_str()), latexText);
 
   plotClosure(h_unweighted_Dy, h_weighted_Dy,
               h_target_Dy, false, 
-              Form("img/%s/ClosureTest_Dy.pdf", PlotDir.c_str()));
+              Form("img/%s/ClosureTest_Dy.pdf", PlotDir.c_str()), latexText);
 
   plotClosure(h_unweighted_DCA, h_weighted_DCA,
               h_target_DCA, true, 
-              Form("img/%s/ClosureTest_DCA.pdf", PlotDir.c_str()));
+              Form("img/%s/ClosureTest_DCA.pdf", PlotDir.c_str()), latexText);
 
 	return 0;
 }
