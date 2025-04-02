@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
   string         wSystDchi2cl     = CL.Get    ("wSystDchi2cl", "systDchi2cl");   // Include D selection systematics (with the variation on chi2cl). The input is the result directory name
   string         wSystFitSigMean  = CL.Get    ("wSystFitSigMean", "MassFit_systFitSigMean"); // Include fit systematics of different signal modeling. The input is the fit directory name
   string         wSystFitSigAlpha = CL.Get    ("wSystFitSigAlpha", "MassFit_systFitSigAlpha"); // Include fit systematics of different signal modeling. The input is the fit directory name
-  string         wSystFitComb     = CL.Get    ("wSystFitComb", "MassFit_systComb");// Include fit systematics of different combinatorics modeling. The input is the fit directory name
+  // string         wSystFitComb     = CL.Get    ("wSystFitComb", "MassFit_systComb");// Include fit systematics of different combinatorics modeling. The input is the fit directory name
   string         wSystFitPkBg     = CL.Get    ("wSystFitPkBg", "MassFit_systPkBg");// Include fit systematics of different background KK and pipi peak modeling. The input is the fit directory name
   string         wSystMassWindow  = CL.Get    ("wSystMassWindow", "MassFit_systMassWindow");
   string         nominalSampleRST = CL.Get    ("nominalSampleRST", "fullAnalysis");// Nominal sample directory name
@@ -165,9 +165,9 @@ int main(int argc, char *argv[])
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
 
   // FitComb
-  vector<double> systFitCombCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
-                    nominalFitRST, wSystFitComb,
-                    MinDzeroPT, MaxDzeroPT, IsGammaN);
+  // vector<double> systFitCombCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
+  //                   nominalFitRST, wSystFitComb,
+  //                   MinDzeroPT, MaxDzeroPT, IsGammaN);
   
   // FitPkBg
   vector<double> systFitPkBgCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
 
   vector<double> systEvtSelUncert(nPoints);
   vector<double> systRapGapUncert(nPoints);
+  // vector<double> systDSelUncert(nPoints);
   vector<double> systDsvpvUncert(nPoints);
   vector<double> systDtrkPtUncert(nPoints);
   vector<double> systDalphaUncert(nPoints);
@@ -187,7 +188,7 @@ int main(int argc, char *argv[])
   vector<double> systFitUncert(nPoints);
   vector<double> systFitSigMeanUncert(nPoints);
   vector<double> systFitSigAlphaUncert(nPoints);
-  vector<double> systFitCombUncert(nPoints);
+  // vector<double> systFitCombUncert(nPoints);
   vector<double> systFitPkBgUncert(nPoints);
   vector<double> systMassWindowUncert(nPoints);
   for (int i = 0; i < nPoints; ++i)
@@ -200,25 +201,28 @@ int main(int argc, char *argv[])
       if (thisUncert > systRapGapUncert[i]) systRapGapUncert[i] = thisUncert;
     }
 
+    // systDSelUncert[i]   = effDErrors[i]/effDValues[i]*correctedYieldValues[i];
+
     systDsvpvUncert[i]    = TMath::Abs(systDsvpvCorrectedYieldValues[i] - correctedYieldValues[i]);
     systDtrkPtUncert[i]   = TMath::Abs(systDtrkPtCorrectedYieldValues[i] - correctedYieldValues[i]);
     systDalphaUncert[i]   = TMath::Abs(systDalphaCorrectedYieldValues[i] - correctedYieldValues[i]);
     systDchi2clUncert[i]  = TMath::Abs(systDchi2clCorrectedYieldValues[i] - correctedYieldValues[i]);
     systFitSigMeanUncert[i]  = TMath::Abs(systFitSigMeanCorrectedYieldValues[i] - correctedYieldValues[i]);
     systFitSigAlphaUncert[i] = TMath::Abs(systFitSigAlphaCorrectedYieldValues[i] - correctedYieldValues[i]);
-    systFitCombUncert[i]  = TMath::Abs(systFitCombCorrectedYieldValues[i] - correctedYieldValues[i]);
+    // systFitCombUncert[i]  = TMath::Abs(systFitCombCorrectedYieldValues[i] - correctedYieldValues[i]);
     systFitPkBgUncert[i]  = TMath::Abs(systFitPkBgCorrectedYieldValues[i] - correctedYieldValues[i]);
     systMassWindowUncert[i]  = TMath::Abs(systMassWindowCorrectedYieldValues[i] - correctedYieldValues[i]);
     systFitUncert[i]      = TMath::Sqrt(
       systFitSigMeanUncert[i] * systFitSigMeanUncert[i] +
       systFitSigAlphaUncert[i] * systFitSigAlphaUncert[i] + 
-      systFitCombUncert[i] * systFitCombUncert[i] + 
+      // systFitCombUncert[i] * systFitCombUncert[i] + 
       systFitPkBgUncert[i] * systFitPkBgUncert[i] +
       systMassWindowUncert[i] * systMassWindowUncert[i]
     );
     if (UseMaxFitUncert) systFitUncert[i] = max({
       systFitSigMeanUncert[i], systFitSigAlphaUncert[i],
-      systFitCombUncert[i], systFitPkBgUncert[i], systMassWindowUncert[i]});
+      // systFitCombUncert[i], 
+      systFitPkBgUncert[i], systMassWindowUncert[i]});
   }
 
   printArr(correctedYieldValues, ", ", "correctedYieldValues: ");
@@ -226,6 +230,7 @@ int main(int argc, char *argv[])
   printArr(systRapGapCorrectedYieldValues[1], ", ", "systRapGapTight: ");
   printRatioArr(systEvtSelUncert, correctedYieldValues,   "  ", " EvtSel       ", "  ");
   printRatioArr(systRapGapUncert, correctedYieldValues,   "  ", " RapGap       ", "  ");
+  // printRatioArr(systDSelUncert, correctedYieldValues,     "  ", " DSel       ", "  ");
   printRatioArr(systDsvpvUncert, correctedYieldValues,    "  ", " Dsvpv        ", "  ");
   printRatioArr(systDtrkPtUncert, correctedYieldValues,   "  ", " DtrkPt       ", "  ");
   printRatioArr(systDalphaUncert, correctedYieldValues,   "  ", " Dalpha       ", "  ");
@@ -234,6 +239,7 @@ int main(int argc, char *argv[])
   vector<vector<double>> systList = {
     systEvtSelUncert,
     systRapGapUncert,
+    // systDSelUncert,
     systDsvpvUncert,
     systDtrkPtUncert,
     systDalphaUncert,
@@ -246,7 +252,7 @@ int main(int argc, char *argv[])
     double systLumiUncert = wSystLumi * correctedYieldValues[i];
     double systTrkUncert  = wSystTrk * correctedYieldValues[i];
     double systBRUncert   = wSystBR * correctedYieldValues[i];
-    double systPromptFrac = 0.05 * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
+    double systPromptFrac = 0.20 * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
     systTotUncert[i] = (
       systLumiUncert * systLumiUncert +
       systTrkUncert * systTrkUncert +
@@ -261,7 +267,7 @@ int main(int argc, char *argv[])
   printRatioArr(systTotUncert, correctedYieldValues,          "  ", " Total        ", "  ");
   printRatioArr(systFitSigMeanUncert, correctedYieldValues,   "  ", " Fit:SigMean  ", "  ");
   printRatioArr(systFitSigAlphaUncert, correctedYieldValues,  "  ", " Fit:SigAlpha ", "  ");
-  printRatioArr(systFitCombUncert, correctedYieldValues,      "  ", " Fit:Comb     ", "  ");
+  // printRatioArr(systFitCombUncert, correctedYieldValues,      "  ", " Fit:Comb     ", "  ");
   printRatioArr(systFitPkBgUncert, correctedYieldValues,      "  ", " Fit:PkBg     ", "  ");
   printRatioArr(systMassWindowUncert, correctedYieldValues,   "  ", " Fit:MassWin  ", "  ");
   printArr(systTotUncert, ", ", "systTotUncert: ");

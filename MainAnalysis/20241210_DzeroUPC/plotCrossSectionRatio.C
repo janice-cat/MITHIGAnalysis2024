@@ -79,16 +79,16 @@ int main(int argc, char *argv[])
   double MinDzeroPT = 2;
   double MaxDzeroPT = 5;
   vector<string> inputPoints_gammaN      = {
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y-2--1_IsGammaN1/MassFit/correctedYields.md",
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y-1-0_IsGammaN1/MassFit/correctedYields.md",
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y0-1_IsGammaN1/MassFit/correctedYields.md",
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y1-2_IsGammaN1/MassFit/correctedYields.md"};
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y-2--1_IsGammaN1/MassFit/correctedYields.md",
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y-1-0_IsGammaN1/MassFit/correctedYields.md",
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y0-1_IsGammaN1/MassFit/correctedYields.md",
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y1-2_IsGammaN1/MassFit/correctedYields.md"};
   vector<string> inputPoints_Ngamma      = {
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y1-2_IsGammaN0/MassFit/correctedYields.md",
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y0-1_IsGammaN0/MassFit/correctedYields.md",
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y-1-0_IsGammaN0/MassFit/correctedYields.md",
-            "RST_redo0326_MCReweighting_cf_PR101_nomp3/fullAnalysis/pt2-5_y-2--1_IsGammaN0/MassFit/correctedYields.md"};
-  string PlotDir = "RST_redo0326_MCReweighting_cf_PR101_nomp3/plot/";
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y1-2_IsGammaN0/MassFit/correctedYields.md",
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y0-1_IsGammaN0/MassFit/correctedYields.md",
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y-1-0_IsGammaN0/MassFit/correctedYields.md",
+            "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/fullAnalysis/pt2-5_y-2--1_IsGammaN0/MassFit/correctedYields.md"};
+  string PlotDir = "RST_redo0326_MCReweighting_cf_PR101_nomp3_ANv4GL/plot/";
 
   /////////////////////////////////
   // 0. Extract the points from the vector of .md
