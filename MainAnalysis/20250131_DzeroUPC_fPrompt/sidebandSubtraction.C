@@ -36,8 +36,8 @@ using namespace RooFit;
 #include <iostream>
 #include <map>
 
-#define DMASSMIN 1.68
-#define DMASSMAX 2.05
+#define DMASSMIN 1.66
+#define DMASSMAX 2.16
 
 int sidebandSubtraction(string sampleInput,
                         string massFitResult,
