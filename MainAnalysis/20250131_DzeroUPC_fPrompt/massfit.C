@@ -39,9 +39,9 @@ using namespace RooFit;
 
 using namespace std;
 
-#define DMASSMIN 1.68
-#define DMASSMAX 2.05
-#define DMASSNBINS 74
+#define DMASSMIN 1.66
+#define DMASSMAX 2.16
+#define DMASSNBINS 40
 
 struct ParamsBase {
   std::map<std::string, RooRealVar*> params; // Store RooRealVar objects
