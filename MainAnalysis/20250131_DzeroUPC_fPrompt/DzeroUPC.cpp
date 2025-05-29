@@ -18,14 +18,6 @@ using namespace std;
 #include "parameter.h"   // The parameters used in the analysis
 #include "utilities.h"   // Yen-Jie's random utility functions
 
-#include "WeightHandler2D.h"
-#include "WeightHandler1D.h"
-
-#define DMASS 1.86484
-#define DMASSMIN 1.66
-#define DMASSMAX 2.26
-#define DMASSNBINS 48
-
 //============================================================//
 // Function to check for configuration errors
 //============================================================//
@@ -66,14 +58,7 @@ bool eventSelection(DzeroUPCTreeMessenger *b, const Parameters &par) {
       return false;
     if (!par.IsGammaN && b->Ngamma_EThreshSyst5p5() == false)
       return false;
-  } 
-  else if (par.DoSystRapGap > 9) {
-    // Custom rapidity gap threshold decision
-    if (par.IsGammaN && b->gammaN_EThreshCustom(((float)par.DoSystRapGap)/10.) == false)
-      return false;
-    if (!par.IsGammaN && b->Ngamma_EThreshCustom(((float)par.DoSystRapGap)/10.) == false)
-      return false;
-  } 
+  }
   else
   {
     // nominal rapidity gap selection
@@ -91,11 +76,10 @@ class DataAnalyzer {
 public:
   TFile *inf, *outf;
   TH1D *hDmass;
+  TH1D *hDCA;
   DzeroUPCTreeMessenger *MDzeroUPC;
   TNtuple *nt;
   string title;
-  TH2D *hHFEmaxPlus_vs_EvtMult;
-  TH2D *hHFEmaxMinus_vs_EvtMult;
   TH1D *hDenEvtEff;
   TH1D *hNumEvtEff;
   TH1D *hRatioEvtEff;
@@ -107,7 +91,7 @@ public:
       : inf(new TFile(filename)), MDzeroUPC(new DzeroUPCTreeMessenger(*inf, string("Tree"))), title(mytitle),
         outf(new TFile(outFilename, "recreate")) {
     outf->cd();
-    nt = new TNtuple("nt", "D0 mass tree", "Dmass:Dgen");
+    nt = new TNtuple("nt", "D0 mass tree", "Dmass:DCA:Dgen");
   }
 
   ~DataAnalyzer() {
@@ -120,42 +104,21 @@ public:
 
   void analyze(Parameters &par) {
     outf->cd();
-    hDmass = new TH1D(Form("hDmass%s", title.c_str()), "", DMASSNBINS, DMASSMIN, DMASSMAX);
+    hDmass = new TH1D(Form("hDmass%s", title.c_str()), "", 60, 1.7, 2.0);
+    hDCA = new TH1D(Form("hDCA%s", title.c_str()), "", 100, 0.0, 0.0);
     hDenEvtEff = new TH1D(Form("hDenEvtEff%s", title.c_str()), "", 1, 0.5, 1.5);
     hNumEvtEff = new TH1D(Form("hNumEvtEff%s", title.c_str()), "", 1, 0.5, 1.5);
     hRatioEvtEff = (TH1D*) hNumEvtEff->Clone("hRatioEvtEff");
     hDenDEff = new TH1D(Form("hDenDEff%s", title.c_str()), "", 1, 0.5, 1.5);
     hNumDEff = new TH1D(Form("hNumDEff%s", title.c_str()), "", 1, 0.5, 1.5);
     hRatioDEff = (TH1D*) hNumDEff->Clone("hRatioDEff");
-    hHFEmaxMinus_vs_EvtMult = nullptr;
-    hHFEmaxPlus_vs_EvtMult = nullptr;
-
-    bool doHFEmaxDistributions=(par.DoSystRapGap > 9);
-    if (doHFEmaxDistributions) {
-      hHFEmaxMinus_vs_EvtMult = new TH2D(Form("hHFEmaxMinus_vs_EvtMult%s", title.c_str()), "", 80, 0, 20, 200, 0, 1000);
-      hHFEmaxPlus_vs_EvtMult = new TH2D(Form("hHFEmaxPlus_vs_EvtMult%s", title.c_str()), "", 80, 0, 20, 200, 0, 1000);
-
-      hHFEmaxMinus_vs_EvtMult->Sumw2();
-      hHFEmaxPlus_vs_EvtMult->Sumw2();
-    }
 
     hDmass->Sumw2();
+    hDCA->Sumw2();
     hDenEvtEff->Sumw2();
     hNumEvtEff->Sumw2();
     hDenDEff->Sumw2();
     hNumDEff->Sumw2();
-
-    WeightHandler2D GptGyWH;
-    if (par.DoGptGyReweighting)
-    {
-      GptGyWH.LoadFromFile(par.GptGyWeightFileName);
-    }
-
-    WeightHandler1D MultWH;
-    if (par.DoMultReweighting)
-    {
-      MultWH.LoadFromFile(par.MultWeightFileName);
-    }
 
     par.printParameters();
     unsigned long nEntry = MDzeroUPC->GetEntries() * par.scaleFactor;
@@ -171,18 +134,8 @@ public:
 
       // Check if the event is a signal MC event, a.k.a., having at least one gen-level D candidate that falls into the (pt,y) bin of interest
       bool isSigMCEvt = false;
-      double leadingGpt = -999.;
-      double leadingGy  = -999.;
       if (!par.IsData){
         for (unsigned long j = 0; j < MDzeroUPC->Gpt->size(); j++) {
-          if (MDzeroUPC->GisSignalCalc->at(j) == false)
-            continue;
-          if (MDzeroUPC->Gpt->at(j) > leadingGpt)
-          {
-            leadingGpt = MDzeroUPC->Gpt->at(j);
-            leadingGy  = MDzeroUPC->Gy ->at(j);
-          }
-
           if (MDzeroUPC->Gpt->at(j) < par.MinDzeroPT)
             continue;
           if (MDzeroUPC->Gpt->at(j) > par.MaxDzeroPT)
@@ -191,23 +144,17 @@ public:
             continue;
           if (MDzeroUPC->Gy->at(j) > par.MaxDzeroY)
             continue;
+          if (MDzeroUPC->GisSignalCalc->at(j) == false)
+            continue;
           isSigMCEvt = true;
         }
       }
 
-      double GptGyWeight = 1.0;
-      double MultWeight  = 1.0;
-      if (!par.IsData)
-      {
-        if (par.DoGptGyReweighting) GptGyWeight = GptGyWH.GetWeight(leadingGpt, leadingGy, (!par.IsGammaN));
-        if (par.DoMultReweighting ) MultWeight  = MultWH.GetWeight(MDzeroUPC->nTrackInAcceptanceHP);
-      }
-
-      if (!par.IsData && isSigMCEvt) hDenEvtEff->Fill(1, GptGyWeight*MultWeight);
+      if (!par.IsData && isSigMCEvt) hDenEvtEff->Fill(1);
 
       // Check if the event passes the selection criteria
       if (eventSelection(MDzeroUPC, par)) {
-        if (!par.IsData && isSigMCEvt) hNumEvtEff->Fill(1, GptGyWeight*MultWeight);
+        if (!par.IsData && isSigMCEvt) hNumEvtEff->Fill(1);
 
         for (unsigned long j = 0; j < MDzeroUPC->Dalpha->size(); j++) {
           if (MDzeroUPC->Dpt->at(j) < par.MinDzeroPT)
@@ -226,20 +173,17 @@ public:
           if (par.DoSystD==3 && MDzeroUPC->DpassCut23PASSystDalpha->at(j) == false) continue;
           if (par.DoSystD==4 && MDzeroUPC->DpassCut23PASSystDchi2cl->at(j) == false) continue;
 
+          double thisDCA = (*MDzeroUPC->DsvpvDistance)[j] * \
+               TMath::Sin( (*MDzeroUPC->Dalpha)[j] );
           hDmass->Fill((*MDzeroUPC->Dmass)[j]);
+          hDCA->Fill(thisDCA);
           if (!par.IsData) {
-            nt->Fill((*MDzeroUPC->Dmass)[j], (*MDzeroUPC->Dgen)[j]);
+            nt->Fill((*MDzeroUPC->Dmass)[j], thisDCA, (*MDzeroUPC->Dgen)[j]);
             if (MDzeroUPC->Dgen->at(j) == 23333) {
-              hNumDEff->Fill(1, GptGyWeight*MultWeight);
+              hNumDEff->Fill(1);
             }
           } else
-            nt->Fill((*MDzeroUPC->Dmass)[j], 0);
-
-          // Fill HF E_max distributions for data
-          if(doHFEmaxDistributions && par.IsData) {
-            hHFEmaxMinus_vs_EvtMult->Fill(MDzeroUPC->HFEMaxMinus, MDzeroUPC->nTrackInAcceptanceHP);
-            hHFEmaxPlus_vs_EvtMult->Fill(MDzeroUPC->HFEMaxPlus, MDzeroUPC->nTrackInAcceptanceHP);
-          }
+            nt->Fill((*MDzeroUPC->Dmass)[j], thisDCA, 0);
         } // end of reco-level Dzero loop
 
         if (!par.IsData && isSigMCEvt) {
@@ -254,12 +198,7 @@ public:
               continue;
             if (MDzeroUPC->GisSignalCalc->at(j) == false)
               continue;
-            hDenDEff->Fill(1, GptGyWeight*MultWeight);
-            // Fill HF E_max distributions for MC
-            if(doHFEmaxDistributions) {
-              hHFEmaxMinus_vs_EvtMult->Fill(MDzeroUPC->HFEMaxMinus, MDzeroUPC->nTrackInAcceptanceHP);
-              hHFEmaxPlus_vs_EvtMult->Fill(MDzeroUPC->HFEMaxPlus, MDzeroUPC->nTrackInAcceptanceHP);
-            }
+            hDenDEff->Fill(1);
           } // end of gen-level Dzero loop
         }   // end of gen-level Dzero loop
       }   // end of event selection
@@ -269,6 +208,7 @@ public:
   void writeHistograms(TFile *outf) {
     outf->cd();
     smartWrite(hDmass);
+    smartWrite(hDCA);
     hRatioEvtEff->Divide(hNumEvtEff, hDenEvtEff, 1, 1, "B");
     hRatioDEff->Divide(hNumDEff, hDenDEff, 1, 1, "B");
     hDenEvtEff->Write();
@@ -278,25 +218,18 @@ public:
     hNumDEff->Write();
     hRatioDEff->Write();
     smartWrite(nt);
-    smartWrite(hHFEmaxMinus_vs_EvtMult);
-    smartWrite(hHFEmaxPlus_vs_EvtMult);
   }
 
 private:
   void deleteHistograms() {
     delete hDmass;
+    delete hDCA;
     delete hDenEvtEff;
     delete hNumEvtEff;
     delete hRatioEvtEff;
     delete hDenDEff;
     delete hNumDEff;
     delete hRatioDEff;
-    if (hHFEmaxMinus_vs_EvtMult != nullptr) {
-      delete hHFEmaxMinus_vs_EvtMult;
-    }
-    if (hHFEmaxPlus_vs_EvtMult != nullptr) {
-      delete hHFEmaxPlus_vs_EvtMult;
-    }
   }
 };
 
@@ -307,8 +240,8 @@ int main(int argc, char *argv[]) {
   if (printHelpMessage(argc, argv))
     return 0;
   CommandLine CL(argc, argv);
-  float MinDzeroPT = CL.GetDouble("MinDzeroPT", 2);  // Minimum Dzero transverse momentum threshold for Dzero selection.
-  float MaxDzeroPT = CL.GetDouble("MaxDzeroPT", 5);  // Maximum Dzero transverse momentum threshold for Dzero selection.
+  float MinDzeroPT = CL.GetDouble("MinDzeroPT", 1);  // Minimum Dzero transverse momentum threshold for Dzero selection.
+  float MaxDzeroPT = CL.GetDouble("MaxDzeroPT", 2);  // Maximum Dzero transverse momentum threshold for Dzero selection.
   float MinDzeroY = CL.GetDouble("MinDzeroY", -2);   // Minimum Dzero rapidity threshold for Dzero selection.
   float MaxDzeroY = CL.GetDouble("MaxDzeroY", +2);   // Maximum Dzero rapidity threshold for Dzero selection.
   bool IsGammaN = CL.GetBool("IsGammaN", true);      // GammaN analysis (or NGamma)
@@ -316,20 +249,13 @@ int main(int argc, char *argv[]) {
   float scaleFactor = CL.GetDouble("scaleFactor", 1); // Scale factor for the number of events to be processed.
   int DoSystRapGap = CL.GetInt("DoSystRapGap", 0);   // Systematic study: apply the alternative event selections
                                                      // 0 = nominal, 1 = tight, -1: loose
-                                                     // 9 < DoSystRapGap: use custom HF energy threshold, the threshold value will be DoSystRapGap/10.
   int DoSystD = CL.GetInt("DoSystD", 0);             // Systematic study: apply the alternative D selections
                                                      // 0 = nominal, 1 = Dsvpv variation, 2: DtrkPt variation
                                                      // 3 = Dalpha variation, 4: Dchi2cl variation
-  bool DoGptGyReweighting   = CL.GetBool  ("DoGptGyReweighting", false);
-  string GptGyWeightFileName= CL.Get      ("GptGyWeightFileName", "../../WeightHandler/20250305_DzeroUPC_GptGyWeight/Weights/testWeight.root");
-  bool DoMultReweighting   = CL.GetBool  ("DoMultReweighting", false);
-  string MultWeightFileName= CL.Get      ("MultWeightFileName", "../../WeightHandler/20250312_DzeroUPC_multiplicityWeight/Weights/testWeight.root");
 
   bool IsData = CL.GetBool("IsData", 0);              // Data or MC
   Parameters par(MinDzeroPT, MaxDzeroPT, MinDzeroY, MaxDzeroY, IsGammaN, TriggerChoice, IsData, scaleFactor,
-                 DoSystRapGap, DoSystD,
-                 DoGptGyReweighting, GptGyWeightFileName,
-                 DoMultReweighting, MultWeightFileName);
+                 DoSystRapGap, DoSystD);
   par.input = CL.Get("Input", "mergedSample.root"); // Input file
   par.output = CL.Get("Output", "output.root");     // Output file
   par.nThread = CL.GetInt("nThread", 1);            // The number of threads to be used for parallel processing.
@@ -344,6 +270,4 @@ int main(int argc, char *argv[]) {
   analyzer.writeHistograms(analyzer.outf);
   saveParametersToHistograms(par, analyzer.outf);
   cout << "done!" << analyzer.outf->GetName() << endl;
-
-  return 0;
 }
