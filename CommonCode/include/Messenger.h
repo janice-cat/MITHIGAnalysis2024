@@ -637,11 +637,6 @@ public:
    std::vector<bool> *SingleMuIsTracker;
    std::vector<bool> *SingleMuHybridSoft;
 
-   std::vector<float> *GenSingleMuPT;
-   std::vector<float> *GenSingleMuEta;
-   std::vector<float> *GenSingleMuPhi;
-   std::vector<int> *GenSingleMuPID;
-
 public:
    SingleMuTreeMessenger(TFile &File, std::string TreeName = "muonAnalyzer/MuonTree");
    SingleMuTreeMessenger(TFile *File, std::string TreeName = "muonAnalyzer/MuonTree");
@@ -673,7 +668,7 @@ public:
    std::vector<float> *TrackEta;
    std::vector<float> *TrackPhi;
    std::vector<char>  *TrackCharge;
-   std::vector<int>   *TrackPDGId;
+   std::vector<int>   *TrackPDFID;
    std::vector<char>  *TrackNHits;
    std::vector<char>  *TrackNPixHits;
    std::vector<char>  *TrackNLayers;
@@ -1361,16 +1356,14 @@ public:
    float NCollWeight;
    float EventWeight;
    float PTHat;
+   float ExtraMuWeight[12];
+   float MuMuWeight;
    int NPU;
+   //std::vectors
    std::vector<float> *JetPT;
    std::vector<float> *JetEta;
    std::vector<float> *JetPhi;
    std::vector<bool> *IsMuMuTagged;
-   std::vector<float> *GenJetPT;
-   std::vector<float> *GenJetEta;
-   std::vector<float> *GenJetPhi;
-   std::vector<int> *GenJetMatchIdx;
-   std::vector<bool> *GenIsMuMuTagged;
    std::vector<float> *muPt1;
    std::vector<float> *muPt2;
    std::vector<float> *muEta1;
@@ -1394,7 +1387,6 @@ public:
    std::vector<float> *mumuY;
    std::vector<float> *mumuPhi;
    std::vector<float> *mumuPt;
-   std::vector<bool> *mumuIsGenMatched;
    //std::vector<int> *mumuisOnia;
    std::vector<float> *DRJetmu1;
    std::vector<float> *DRJetmu2;
