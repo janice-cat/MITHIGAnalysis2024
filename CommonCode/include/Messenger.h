@@ -636,7 +636,7 @@ public:
    std::vector<bool> *SingleMuIsGlobal;
    std::vector<bool> *SingleMuIsTracker;
    std::vector<bool> *SingleMuHybridSoft;
-   
+
    std::vector<float> *GenSingleMuPT;
    std::vector<float> *GenSingleMuEta;
    std::vector<float> *GenSingleMuPhi;
