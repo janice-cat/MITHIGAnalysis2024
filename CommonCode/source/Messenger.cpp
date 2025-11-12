@@ -7,6 +7,14 @@
 
 #include "Messenger.h"
 
+// Preprocessor functions
+#define CheckAndSetBranch(TREE, BRANCH)     \
+if(TREE->GetBranch(#BRANCH))                \
+{                                           \
+  TREE->SetBranchStatus(#BRANCH, 1);        \
+  TREE->SetBranchAddress(#BRANCH, &BRANCH); \
+}
+
 namespace EmptyVectors
 {
    std::vector<double> EmptyVectorDouble;
@@ -1605,297 +1613,6 @@ bool TrackTreeMessenger::PassZHadron2022CutTight(int index)
 }
 
 // ============================================================================
-// Read from Forest: DzeroTreeMessenger
-// ============================================================================
-
-DzeroTreeMessenger::DzeroTreeMessenger(TFile &File, std::string TreeName)
-{
-   Tree = (TTree *)File.Get(TreeName.c_str());
-   Initialize();
-}
-
-DzeroTreeMessenger::DzeroTreeMessenger(TFile *File, std::string TreeName)
-{
-   if(File != nullptr)
-      Tree = (TTree *)File->Get(TreeName.c_str());
-   else
-      Tree = nullptr;
-   Initialize();
-}
-
-DzeroTreeMessenger::DzeroTreeMessenger(TTree *DzeroTree)
-{
-   Initialize(DzeroTree);
-}
-
-bool DzeroTreeMessenger::Initialize(TTree *DzeroTree)
-{
-   Tree = DzeroTree;
-   return Initialize();
-}
-
-bool DzeroTreeMessenger::Initialize()
-{
-   if(Tree == nullptr)
-      return false;
-   Tree->SetBranchAddress("Dsize", &Dsize);
-   Tree->SetBranchAddress("Dpt", &Dpt);
-   Tree->SetBranchAddress("Dy", &Dy);
-   Tree->SetBranchAddress("Dphi", &Dphi);
-   Tree->SetBranchAddress("Dmass", &Dmass);
-   Tree->SetBranchAddress("Dtrk1Pt", &Dtrk1Pt);
-   Tree->SetBranchAddress("Dtrk1PtErr", &Dtrk1PtErr);
-   Tree->SetBranchAddress("Dtrk1Eta", &Dtrk1Eta);
-   if(Tree->GetBranch("Dtrk1P")) Tree->SetBranchAddress("Dtrk1P", &Dtrk1P);
-   if(Tree->GetBranch("Dtrk1dedx")) Tree->SetBranchAddress("Dtrk1dedx", &Dtrk1dedx);
-   if(Tree->GetBranch("Dtrk1MassHypo")) Tree->SetBranchAddress("Dtrk1MassHypo", &Dtrk1MassHypo);
-   if(Tree->GetBranch("Dtrk1PixelHit")) Tree->SetBranchAddress("Dtrk1PixelHit", &Dtrk1PixelHit);
-   if(Tree->GetBranch("Dtrk1StripHit")) Tree->SetBranchAddress("Dtrk1StripHit", &Dtrk1StripHit);
-   Tree->SetBranchAddress("Dtrk1highPurity", &Dtrk1highPurity);
-   Tree->SetBranchAddress("Dtrk2Pt", &Dtrk2Pt);
-   Tree->SetBranchAddress("Dtrk2PtErr", &Dtrk2PtErr);
-   Tree->SetBranchAddress("Dtrk2Eta", &Dtrk2Eta);
-   if(Tree->GetBranch("Dtrk2P")) Tree->SetBranchAddress("Dtrk2P", &Dtrk2P);
-   if(Tree->GetBranch("Dtrk2dedx")) Tree->SetBranchAddress("Dtrk2dedx", &Dtrk2dedx);
-   if(Tree->GetBranch("Dtrk2MassHypo")) Tree->SetBranchAddress("Dtrk2MassHypo", &Dtrk2MassHypo);
-   if(Tree->GetBranch("Dtrk2PixelHit")) Tree->SetBranchAddress("Dtrk2PixelHit", &Dtrk2PixelHit);
-   if(Tree->GetBranch("Dtrk2StripHit")) Tree->SetBranchAddress("Dtrk2StripHit", &Dtrk2StripHit);
-   Tree->SetBranchAddress("Dtrk2highPurity", &Dtrk2highPurity);
-   Tree->SetBranchAddress("Dchi2cl", &Dchi2cl);
-   Tree->SetBranchAddress("DsvpvDistance", &DsvpvDistance);
-   Tree->SetBranchAddress("DsvpvDisErr", &DsvpvDisErr);
-   Tree->SetBranchAddress("DsvpvDistance_2D", &DsvpvDistance_2D);
-   Tree->SetBranchAddress("DsvpvDisErr_2D", &DsvpvDisErr_2D);
-   if(Tree->GetBranch("Dip3d")) Tree->SetBranchAddress("Dip3d", &Dip3d);
-   if(Tree->GetBranch("Dip3derr")) Tree->SetBranchAddress("Dip3derr", &Dip3derr);
-   Tree->SetBranchAddress("Dalpha", &Dalpha);
-   Tree->SetBranchAddress("Ddtheta", &Ddtheta);
-   Tree->SetBranchAddress("Dgen", &Dgen);
-   Tree->SetBranchAddress("Dgenpt", &Dgenpt);
-   Tree->SetBranchAddress("DgenBAncestorpdgId", &DgenBAncestorpdgId);
-
-   return true;
-}
-
-bool DzeroTreeMessenger::GetEntry(int iEntry)
-{
-   if(Tree == nullptr)
-      return false;
-
-   Tree->GetEntry(iEntry);
-
-   return true;
-}
-
-// ============================================================================
-// Read from Forest: LambdaCTreeMessenger
-// ============================================================================
-
-LambdaCTreeMessenger::LambdaCTreeMessenger(TFile &File, std::string TreeName)
-{
-   Tree = (TTree *)File.Get(TreeName.c_str());
-   Initialize();
-}
-
-LambdaCTreeMessenger::LambdaCTreeMessenger(TFile *File, std::string TreeName)
-{
-   if(File != nullptr)
-      Tree = (TTree *)File->Get(TreeName.c_str());
-   else
-      Tree = nullptr;
-   Initialize();
-}
-
-LambdaCTreeMessenger::LambdaCTreeMessenger(TTree *LambdaCTree)
-{
-   Initialize(LambdaCTree);
-}
-
-bool LambdaCTreeMessenger::Initialize(TTree *LambdaCTree)
-{
-   Tree = LambdaCTree;
-   return Initialize();
-}
-
-bool LambdaCTreeMessenger::Initialize()
-{
-   if(Tree == nullptr)
-      return false;
-   Tree->SetBranchAddress("Dsize",              &Dsize);
-   Tree->SetBranchAddress("Dpt",                &Dpt);
-   Tree->SetBranchAddress("Dy",                 &Dy);
-   Tree->SetBranchAddress("Dphi",               &Dphi);
-   Tree->SetBranchAddress("Dmass",              &Dmass);
-   Tree->SetBranchAddress("Dtrk1P",             &Dtrk1P);
-   Tree->SetBranchAddress("Dtrk1Pt",            &Dtrk1Pt);
-   Tree->SetBranchAddress("Dtrk1PtErr",         &Dtrk1PtErr);
-   Tree->SetBranchAddress("Dtrk1Eta",           &Dtrk1Eta);
-   Tree->SetBranchAddress("Dtrk1dedx",          &Dtrk1dedx);
-   Tree->SetBranchAddress("Dtrk1MassHypo",      &Dtrk1MassHypo);
-   Tree->SetBranchAddress("Dtrk1PixelHit",      &Dtrk1PixelHit);
-   Tree->SetBranchAddress("Dtrk1StripHit",      &Dtrk1StripHit);
-   Tree->SetBranchAddress("Dtrk1highPurity",    &Dtrk1highPurity);
-   Tree->SetBranchAddress("Dtrk2P",             &Dtrk2P);
-   Tree->SetBranchAddress("Dtrk2Pt",            &Dtrk2Pt);
-   Tree->SetBranchAddress("Dtrk2PtErr",         &Dtrk2PtErr);
-   Tree->SetBranchAddress("Dtrk2Eta",           &Dtrk2Eta);
-   Tree->SetBranchAddress("Dtrk2dedx",          &Dtrk2dedx);
-   Tree->SetBranchAddress("Dtrk2MassHypo",      &Dtrk2MassHypo);
-   Tree->SetBranchAddress("Dtrk2PixelHit",      &Dtrk2PixelHit);
-   Tree->SetBranchAddress("Dtrk2StripHit",      &Dtrk2StripHit);
-   Tree->SetBranchAddress("Dtrk2highPurity",    &Dtrk2highPurity);
-   Tree->SetBranchAddress("Dtrk3P",             &Dtrk3P);
-   Tree->SetBranchAddress("Dtrk3Pt",            &Dtrk3Pt);
-   Tree->SetBranchAddress("Dtrk3PtErr",         &Dtrk3PtErr);
-   Tree->SetBranchAddress("Dtrk3Eta",           &Dtrk3Eta);
-   Tree->SetBranchAddress("Dtrk3dedx",          &Dtrk3dedx);
-   Tree->SetBranchAddress("Dtrk3MassHypo",      &Dtrk3MassHypo);
-   Tree->SetBranchAddress("Dtrk3PixelHit",      &Dtrk3PixelHit);
-   Tree->SetBranchAddress("Dtrk3StripHit",      &Dtrk3StripHit);
-   Tree->SetBranchAddress("Dtrk3highPurity",    &Dtrk3highPurity);
-   Tree->SetBranchAddress("Dchi2cl",            &Dchi2cl);
-   Tree->SetBranchAddress("DsvpvDistance",      &DsvpvDistance);
-   Tree->SetBranchAddress("DsvpvDisErr",        &DsvpvDisErr);
-   Tree->SetBranchAddress("DsvpvDistance_2D",   &DsvpvDistance_2D);
-   Tree->SetBranchAddress("DsvpvDisErr_2D",     &DsvpvDisErr_2D);
-   Tree->SetBranchAddress("Dip3d",              &Dip3d);
-   Tree->SetBranchAddress("Dip3derr",           &Dip3derr);
-   Tree->SetBranchAddress("Dalpha",             &Dalpha);
-   Tree->SetBranchAddress("Ddtheta",            &Ddtheta);
-   Tree->SetBranchAddress("Dgen",               &Dgen);
-   Tree->SetBranchAddress("Dgenpt",             &Dgenpt);
-   Tree->SetBranchAddress("DgenBAncestorpdgId", &DgenBAncestorpdgId);
-
-   return true;
-}
-
-bool LambdaCTreeMessenger::GetEntry(int iEntry)
-{
-   if(Tree == nullptr)
-      return false;
-
-   Tree->GetEntry(iEntry);
-
-   return true;
-}
-
-// ============================================================================
-// Read from Forest: DfinderGenTreeMessenger
-// ============================================================================
-
-DfinderGenTreeMessenger::DfinderGenTreeMessenger(TFile &File, std::string TreeName)
-{
-   Tree = (TTree *)File.Get(TreeName.c_str());
-   Initialize();
-}
-
-DfinderGenTreeMessenger::DfinderGenTreeMessenger(TFile *File, std::string TreeName)
-{
-   if(File != nullptr)
-      Tree = (TTree *)File->Get(TreeName.c_str());
-   else
-      Tree = nullptr;
-   Initialize();
-}
-
-DfinderGenTreeMessenger::DfinderGenTreeMessenger(TTree *DfinderGenTree)
-{
-   Initialize(DzeroGenTree);
-}
-
-bool DfinderGenTreeMessenger::Initialize(TTree *DfinderGenTree)
-{
-   Tree = DfinderGenTree;
-   return Initialize();
-}
-
-bool DfinderGenTreeMessenger::Initialize()
-{
-   if(Tree == nullptr)
-      return false;
-
-   Tree->SetBranchAddress("Gsize", &Gsize);
-   Tree->SetBranchAddress("Gpt", &Gpt);
-   Tree->SetBranchAddress("Gy", &Gy);
-   Tree->SetBranchAddress("GpdgId", &GpdgId);
-   Tree->SetBranchAddress("Gphi", &Gphi);
-   Tree->SetBranchAddress("GisSignal", &GisSignal);
-   Tree->SetBranchAddress("GcollisionId", &GcollisionId);
-   Tree->SetBranchAddress("GSignalType", &GSignalType);
-   Tree->SetBranchAddress("GBAncestorpdgId", &GBAncestorpdgId);
-
-   return true;
-}
-
-bool DfinderGenTreeMessenger::GetEntry(int iEntry)
-{
-   if(Tree == nullptr)
-      return false;
-
-   Tree->GetEntry(iEntry);
-
-   return true;
-}
-
-// ============================================================================
-// Read from Forest: DzeroGenTreeMessenger
-// ============================================================================
-
-DzeroGenTreeMessenger::DzeroGenTreeMessenger(TFile &File, std::string TreeName)
-{
-   Tree = (TTree *)File.Get(TreeName.c_str());
-   Initialize();
-}
-
-DzeroGenTreeMessenger::DzeroGenTreeMessenger(TFile *File, std::string TreeName)
-{
-   if(File != nullptr)
-      Tree = (TTree *)File->Get(TreeName.c_str());
-   else
-      Tree = nullptr;
-   Initialize();
-}
-
-DzeroGenTreeMessenger::DzeroGenTreeMessenger(TTree *DzeroGenTree)
-{
-   Initialize(DzeroGenTree);
-}
-
-bool DzeroGenTreeMessenger::Initialize(TTree *DzeroGenTree)
-{
-   Tree = DzeroGenTree;
-   return Initialize();
-}
-
-bool DzeroGenTreeMessenger::Initialize()
-{
-   if(Tree == nullptr)
-      return false;
-
-   Tree->SetBranchAddress("Gsize", &Gsize);
-   Tree->SetBranchAddress("Gpt", &Gpt);
-   Tree->SetBranchAddress("Gy", &Gy);
-   Tree->SetBranchAddress("GpdgId", &GpdgId);
-   Tree->SetBranchAddress("Gphi", &Gphi);
-   Tree->SetBranchAddress("GisSignal", &GisSignal);
-   Tree->SetBranchAddress("GcollisionId", &GcollisionId);
-   Tree->SetBranchAddress("GSignalType", &GSignalType);
-   Tree->SetBranchAddress("GBAncestorpdgId", &GBAncestorpdgId);
-
-   return true;
-}
-
-bool DzeroGenTreeMessenger::GetEntry(int iEntry)
-{
-   if(Tree == nullptr)
-      return false;
-
-   Tree->GetEntry(iEntry);
-
-   return true;
-}
-
-// ============================================================================
 // Read from Forest: MuTreeMessenger
 // ============================================================================
 
@@ -2987,7 +2704,274 @@ bool HFAdcMessenger::GetEntry(int iEntry)
    return true;
 }
 
+// ============================================================================
+// Read from Forest: DfinderMasterMessenger
+// ============================================================================
 
+DfinderMasterMessenger::DfinderMasterMessenger(TFile &File, std::string TreeName)
+{
+    Tree = (TTree *)File.Get(TreeName.c_str());
+    Initialize();
+}
+
+DfinderMasterMessenger::DfinderMasterMessenger(TFile *File, std::string TreeName)
+{
+    if(File != nullptr)
+      Tree = (TTree *)File->Get(TreeName.c_str());
+    else
+      Tree = nullptr;
+    Initialize();
+}
+
+DfinderMasterMessenger::DfinderMasterMessenger(TTree *DfinderTree)
+{
+    Initialize(DfinderTree);
+}
+
+bool DfinderMasterMessenger::Initialize(TTree *DfinderTree)
+{
+    Tree = DfinderTree;
+    return Initialize();
+}
+
+bool DfinderMasterMessenger::Initialize()
+{
+    if(Tree == nullptr)
+      return false;
+    
+    // Turn off all branches, then initialize only necessary branches
+    Tree->SetBranchStatus("*", 0);
+    
+    // Candidate info
+    CheckAndSetBranch(Tree, Dsize);
+    CheckAndSetBranch(Tree, Dpt);
+    CheckAndSetBranch(Tree, Dy);
+    CheckAndSetBranch(Tree, Dmass);
+    CheckAndSetBranch(Tree, Dchi2cl);
+    CheckAndSetBranch(Tree, DsvpvDistance);
+    CheckAndSetBranch(Tree, DsvpvDistance_2D);
+    CheckAndSetBranch(Tree, DsvpvDisErr_2D);
+    CheckAndSetBranch(Tree, Dalpha);
+    CheckAndSetBranch(Tree, Ddtheta);
+    CheckAndSetBranch(Tree, DsvpvDistance);
+    CheckAndSetBranch(Tree, DsvpvDisErr);
+    CheckAndSetBranch(Tree, DsvpvDistance_2D);
+    CheckAndSetBranch(Tree, DsvpvDisErr_2D);
+    CheckAndSetBranch(Tree, Dalpha);
+    CheckAndSetBranch(Tree, Ddtheta);
+    // Candidate gen info
+    CheckAndSetBranch(Tree, Dgen);
+    CheckAndSetBranch(Tree, Dgenpt);
+    CheckAndSetBranch(Tree, DgenBAncestorpdgId);
+    
+    // Candidate daughter track 1
+    CheckAndSetBranch(Tree, Dtrk1P);
+    CheckAndSetBranch(Tree, Dtrk1Pt);
+    CheckAndSetBranch(Tree, Dtrk1PtErr);
+    CheckAndSetBranch(Tree, Dtrk1Eta);
+    CheckAndSetBranch(Tree, Dtrk1dedx);
+    CheckAndSetBranch(Tree, Dtrk1MassHypo);
+    CheckAndSetBranch(Tree, Dtrk1PixelHit);
+    CheckAndSetBranch(Tree, Dtrk1StripHit);
+    CheckAndSetBranch(Tree, Dtrk1highPurity);
+    // Candidate daughter track 2
+    CheckAndSetBranch(Tree, Dtrk2P);
+    CheckAndSetBranch(Tree, Dtrk2Pt);
+    CheckAndSetBranch(Tree, Dtrk2PtErr);
+    CheckAndSetBranch(Tree, Dtrk2Eta);
+    CheckAndSetBranch(Tree, Dtrk2dedx);
+    CheckAndSetBranch(Tree, Dtrk2MassHypo);
+    CheckAndSetBranch(Tree, Dtrk2PixelHit);
+    CheckAndSetBranch(Tree, Dtrk2StripHit);
+    CheckAndSetBranch(Tree, Dtrk2highPurity);
+    // Candidate daughter track 3
+    CheckAndSetBranch(Tree, Dtrk3P);
+    CheckAndSetBranch(Tree, Dtrk3Pt);
+    CheckAndSetBranch(Tree, Dtrk3PtErr);
+    CheckAndSetBranch(Tree, Dtrk3Eta);
+    CheckAndSetBranch(Tree, Dtrk3dedx);
+    CheckAndSetBranch(Tree, Dtrk3MassHypo);
+    CheckAndSetBranch(Tree, Dtrk3PixelHit);
+    CheckAndSetBranch(Tree, Dtrk3StripHit);
+    CheckAndSetBranch(Tree, Dtrk3highPurity);
+    
+    // Candidate resonance info
+    CheckAndSetBranch(Tree, DtktkResmass);
+    CheckAndSetBranch(Tree, DtktkRespt);
+    CheckAndSetBranch(Tree, DtktkReseta);
+    CheckAndSetBranch(Tree, DtktkRes_chi2cl);
+    // Resonance daughter track 1
+    CheckAndSetBranch(Tree, DRestrk1P);
+    CheckAndSetBranch(Tree, DRestrk1Pt);
+    CheckAndSetBranch(Tree, DRestrk1PtErr);
+    CheckAndSetBranch(Tree, DRestrk1Eta);
+    CheckAndSetBranch(Tree, DRestrk1dedx);
+    CheckAndSetBranch(Tree, DRestrk1MassHypo);
+    CheckAndSetBranch(Tree, DRestrk1highPurity);
+    // Resonance daughter track 2
+    CheckAndSetBranch(Tree, DRestrk2P);
+    CheckAndSetBranch(Tree, DRestrk2Pt);
+    CheckAndSetBranch(Tree, DRestrk2PtErr);
+    CheckAndSetBranch(Tree, DRestrk2Eta);
+    CheckAndSetBranch(Tree, DRestrk2dedx);
+    CheckAndSetBranch(Tree, DRestrk2MassHypo);
+    CheckAndSetBranch(Tree, DRestrk2highPurity);
+    
+//    // Candidate info
+//    Tree->SetBranchAddress("Dsize",              &Dsize);
+//    Tree->SetBranchAddress("Dpt",                &Dpt);
+//    Tree->SetBranchAddress("Dy",                 &Dy);
+//    Tree->SetBranchAddress("Dphi",               &Dphi);
+//    Tree->SetBranchAddress("Dmass",              &Dmass);
+//    Tree->SetBranchAddress("Dchi2cl",            &Dchi2cl);
+//    Tree->SetBranchAddress("DsvpvDistance",      &DsvpvDistance);
+//    Tree->SetBranchAddress("DsvpvDisErr",        &DsvpvDisErr);
+//    Tree->SetBranchAddress("DsvpvDistance_2D",   &DsvpvDistance_2D);
+//    Tree->SetBranchAddress("DsvpvDisErr_2D",     &DsvpvDisErr_2D);
+//    Tree->SetBranchAddress("Dalpha",             &Dalpha);
+//    Tree->SetBranchAddress("Ddtheta",            &Ddtheta);
+//    // Candidate gen info
+//    Tree->SetBranchAddress("Dgen",               &Dgen);
+//    Tree->SetBranchAddress("Dgenpt",             &Dgenpt);
+//    Tree->SetBranchAddress("DgenBAncestorpdgId", &DgenBAncestorpdgId);
+//    
+//    // Candidate daughter track 1
+//    Tree->SetBranchAddress("Dtrk1P",             &Dtrk1P);
+//    Tree->SetBranchAddress("Dtrk1Pt",            &Dtrk1Pt);
+//    Tree->SetBranchAddress("Dtrk1PtErr",         &Dtrk1PtErr);
+//    Tree->SetBranchAddress("Dtrk1Eta",           &Dtrk1Eta);
+//    Tree->SetBranchAddress("Dtrk1dedx",          &Dtrk1dedx);
+//    Tree->SetBranchAddress("Dtrk1MassHypo",      &Dtrk1MassHypo);
+//    Tree->SetBranchAddress("Dtrk1PixelHit",      &Dtrk1PixelHit);
+//    Tree->SetBranchAddress("Dtrk1StripHit",      &Dtrk1StripHit);
+//    Tree->SetBranchAddress("Dtrk1highPurity",    &Dtrk1highPurity);
+//    // Candidate daughter track 2
+//    Tree->SetBranchAddress("Dtrk2P",             &Dtrk2P);
+//    Tree->SetBranchAddress("Dtrk2Pt",            &Dtrk2Pt);
+//    Tree->SetBranchAddress("Dtrk2PtErr",         &Dtrk2PtErr);
+//    Tree->SetBranchAddress("Dtrk2Eta",           &Dtrk2Eta);
+//    Tree->SetBranchAddress("Dtrk2dedx",          &Dtrk2dedx);
+//    Tree->SetBranchAddress("Dtrk2MassHypo",      &Dtrk2MassHypo);
+//    Tree->SetBranchAddress("Dtrk2PixelHit",      &Dtrk2PixelHit);
+//    Tree->SetBranchAddress("Dtrk2StripHit",      &Dtrk2StripHit);
+//    Tree->SetBranchAddress("Dtrk2highPurity",    &Dtrk2highPurity);
+//    // Candidate daughter track 3
+//    Tree->SetBranchAddress("Dtrk3P",             &Dtrk3P);
+//    Tree->SetBranchAddress("Dtrk3Pt",            &Dtrk3Pt);
+//    Tree->SetBranchAddress("Dtrk3PtErr",         &Dtrk3PtErr);
+//    Tree->SetBranchAddress("Dtrk3Eta",           &Dtrk3Eta);
+//    Tree->SetBranchAddress("Dtrk3dedx",          &Dtrk3dedx);
+//    Tree->SetBranchAddress("Dtrk3MassHypo",      &Dtrk3MassHypo);
+//    Tree->SetBranchAddress("Dtrk3PixelHit",      &Dtrk3PixelHit);
+//    Tree->SetBranchAddress("Dtrk3StripHit",      &Dtrk3StripHit);
+//    Tree->SetBranchAddress("Dtrk3highPurity",    &Dtrk3highPurity);
+//
+//    // Candidate resonance info
+//    Tree->SetBranchAddress("DtktkResmass",       &DtktkResmass);
+//    Tree->SetBranchAddress("DtktkRespt",         &DtktkRespt);
+//    Tree->SetBranchAddress("DtktkReseta",        &DtktkReseta);
+//    Tree->SetBranchAddress("DtktkRes_chi2cl",    &DtktkRes_chi2cl);
+//    // Resonance daughter track 1
+//    Tree->SetBranchAddress("DRestrk1P",          &DRestrk1P);
+//    Tree->SetBranchAddress("DRestrk1Pt",         &DRestrk1Pt);
+//    Tree->SetBranchAddress("DRestrk1PtErr",      &DRestrk1PtErr);
+//    Tree->SetBranchAddress("DRestrk1Eta",        &DRestrk1Eta);
+//    Tree->SetBranchAddress("DRestrk1dedx",       &DRestrk1dedx);
+//    Tree->SetBranchAddress("DRestrk1MassHypo",   &DRestrk1MassHypo);
+//    Tree->SetBranchAddress("DRestrk1highPurity", &DRestrk1highPurity);
+//    // Resonance daughter track 2
+//    Tree->SetBranchAddress("DRestrk2P",          &DRestrk2P);
+//    Tree->SetBranchAddress("DRestrk2Pt",         &DRestrk2Pt);
+//    Tree->SetBranchAddress("DRestrk2PtErr",      &DRestrk2PtErr);
+//    Tree->SetBranchAddress("DRestrk2Eta",        &DRestrk2Eta);
+//    Tree->SetBranchAddress("DRestrk2dedx",       &DRestrk2dedx);
+//    Tree->SetBranchAddress("DRestrk2MassHypo",   &DRestrk2MassHypo);
+//    Tree->SetBranchAddress("DRestrk2highPurity", &DRestrk2highPurity);
+
+    return true;
+}
+
+bool DfinderMasterMessenger::GetEntry(int iEntry)
+{
+    if(Tree == nullptr)
+      return false;
+
+    Tree->GetEntry(iEntry);
+
+    return true;
+}
+
+// ============================================================================
+// Read from Forest: DfinderGenTreeMessenger
+// ============================================================================
+
+DfinderGenTreeMessenger::DfinderGenTreeMessenger(TFile &File, std::string TreeName)
+{
+    Tree = (TTree *)File.Get(TreeName.c_str());
+    Initialize();
+}
+
+DfinderGenTreeMessenger::DfinderGenTreeMessenger(TFile *File, std::string TreeName)
+{
+    if(File != nullptr)
+      Tree = (TTree *)File->Get(TreeName.c_str());
+    else
+      Tree = nullptr;
+    Initialize();
+}
+
+DfinderGenTreeMessenger::DfinderGenTreeMessenger(TTree *DfinderGenTree)
+{
+    Initialize(DfinderGenTree);
+}
+
+bool DfinderGenTreeMessenger::Initialize(TTree *DfinderGenTree)
+{
+    Tree = DfinderGenTree;
+    return Initialize();
+}
+
+bool DfinderGenTreeMessenger::Initialize()
+{
+    if(Tree == nullptr)
+      return false;
+
+    // Turn off all branches, then initialize only necessary branches
+    Tree->SetBranchStatus("*", 0);
+
+    // Candidate info
+    CheckAndSetBranch(Tree, Gsize);
+    CheckAndSetBranch(Tree, Gpt);
+    CheckAndSetBranch(Tree, Gy);
+    CheckAndSetBranch(Tree, GpdgId);
+    CheckAndSetBranch(Tree, Gphi);
+    CheckAndSetBranch(Tree, GisSignal);
+    CheckAndSetBranch(Tree, GcollisionId);
+    CheckAndSetBranch(Tree, GSignalType);
+    CheckAndSetBranch(Tree, GBAncestorpdgId);
+
+//    Tree->SetBranchAddress("Gsize", &Gsize);
+//    Tree->SetBranchAddress("Gpt", &Gpt);
+//    Tree->SetBranchAddress("Gy", &Gy);
+//    Tree->SetBranchAddress("GpdgId", &GpdgId);
+//    Tree->SetBranchAddress("Gphi", &Gphi);
+//    Tree->SetBranchAddress("GisSignal", &GisSignal);
+//    Tree->SetBranchAddress("GcollisionId", &GcollisionId);
+//    Tree->SetBranchAddress("GSignalType", &GSignalType);
+//    Tree->SetBranchAddress("GBAncestorpdgId", &GBAncestorpdgId);
+
+    return true;
+}
+
+bool DfinderGenTreeMessenger::GetEntry(int iEntry)
+{
+    if(Tree == nullptr)
+      return false;
+
+    Tree->GetEntry(iEntry);
+
+    return true;
+}
 
 // ============================================================================
 // Write/Read Skim: ZHadronMessenger
@@ -4249,6 +4233,18 @@ LambdaCUPCTreeMessenger::~LambdaCUPCTreeMessenger()
       delete DpassCutSystDchi2cl;
       delete Dy;
       delete Dmass;
+      delete Dchi2cl;
+      delete DsvpvDistance;
+      delete DsvpvDisErr;
+      delete DsvpvDistance_2D;
+      delete DsvpvDisErr_2D;
+      delete Dalpha;
+      delete Ddtheta;
+      delete Dgen;
+      delete DisSignalCalc;
+      delete DisSignalCalcPrompt;
+      delete DisSignalCalcFeeddown;
+      
       delete Dtrk1P;
       delete Dtrk1Pt;
       delete Dtrk1PtErr;
@@ -4282,19 +4278,7 @@ LambdaCUPCTreeMessenger::~LambdaCUPCTreeMessenger()
       delete Dtrk3PionScore;
       delete Dtrk3KaonScore;
       delete Dtrk3ProtScore;
-      delete Dchi2cl;
-      delete DsvpvDistance;
-      delete DsvpvDisErr;
-      delete DsvpvDistance_2D;
-      delete DsvpvDisErr_2D;
-      delete Dip3d;
-      delete Dip3derr;
-      delete Dalpha;
-      delete Ddtheta;
-      delete Dgen;
-      delete DisSignalCalc;
-      delete DisSignalCalcPrompt;
-      delete DisSignalCalcFeeddown;
+      
       delete Gpt;
       delete Gy;
       delete GisSignalCalc;
@@ -4327,6 +4311,18 @@ bool LambdaCUPCTreeMessenger::Initialize(bool Debug)
    DpassCutSystDchi2cl = nullptr;
    Dy = nullptr;
    Dmass = nullptr;
+   Dchi2cl = nullptr;
+   DsvpvDistance = nullptr;
+   DsvpvDisErr = nullptr;
+   DsvpvDistance_2D = nullptr;
+   DsvpvDisErr_2D = nullptr;
+   Dalpha = nullptr;
+   Ddtheta = nullptr;
+   Dgen = nullptr;
+   DisSignalCalc = nullptr;
+   DisSignalCalcPrompt = nullptr;
+   DisSignalCalcFeeddown = nullptr;
+   
    Dtrk1P = nullptr;
    Dtrk1Pt = nullptr;
    Dtrk1PtErr = nullptr;
@@ -4360,19 +4356,7 @@ bool LambdaCUPCTreeMessenger::Initialize(bool Debug)
    Dtrk3PionScore = nullptr;
    Dtrk3KaonScore = nullptr;
    Dtrk3ProtScore = nullptr;
-   Dchi2cl = nullptr;
-   DsvpvDistance = nullptr;
-   DsvpvDisErr = nullptr;
-   DsvpvDistance_2D = nullptr;
-   DsvpvDisErr_2D = nullptr;
-   Dip3d = nullptr;
-   Dip3derr = nullptr;
-   Dalpha = nullptr;
-   Ddtheta = nullptr;
-   Dgen = nullptr;
-   DisSignalCalc = nullptr;
-   DisSignalCalcPrompt = nullptr;
-   DisSignalCalcFeeddown = nullptr;
+   
    Gpt = nullptr;
    Gy = nullptr;
    GisSignalCalc = nullptr;
@@ -4410,6 +4394,25 @@ bool LambdaCUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("Dpt",                  &Dpt);
    Tree->SetBranchAddress("Dy",                   &Dy);
    Tree->SetBranchAddress("Dmass",                &Dmass);
+   Tree->SetBranchAddress("Dchi2cl",              &Dchi2cl);
+   Tree->SetBranchAddress("DsvpvDistance",        &DsvpvDistance);
+   Tree->SetBranchAddress("DsvpvDisErr",          &DsvpvDisErr);
+   Tree->SetBranchAddress("DsvpvDistance_2D",     &DsvpvDistance_2D);
+   Tree->SetBranchAddress("DsvpvDisErr_2D",       &DsvpvDisErr_2D);
+   Tree->SetBranchAddress("Dalpha",               &Dalpha);
+   Tree->SetBranchAddress("Ddtheta",              &Ddtheta);
+   Tree->SetBranchAddress("DpassCutNominal",      &DpassCutNominal);
+   Tree->SetBranchAddress("DpassCutLoose",        &DpassCutLoose);
+   Tree->SetBranchAddress("DpassCutSystDsvpvSig", &DpassCutSystDsvpvSig);
+   Tree->SetBranchAddress("DpassCutSystDtrkPt",   &DpassCutSystDtrkPt);
+   Tree->SetBranchAddress("DpassCutSystDalpha",   &DpassCutSystDalpha);
+   Tree->SetBranchAddress("DpassCutSystDdtheta",  &DpassCutSystDdtheta);
+   Tree->SetBranchAddress("DpassCutSystDchi2cl",  &DpassCutSystDchi2cl);
+   Tree->SetBranchAddress("Dgen",                 &Dgen);
+   Tree->SetBranchAddress("DisSignalCalc",        &DisSignalCalc);
+   Tree->SetBranchAddress("DisSignalCalcPrompt",  &DisSignalCalcPrompt);
+   Tree->SetBranchAddress("DisSignalCalcFeeddown",&DisSignalCalcFeeddown);
+   
    Tree->SetBranchAddress("Dtrk1P",               &Dtrk1P);
    Tree->SetBranchAddress("Dtrk1Pt",              &Dtrk1Pt);
    Tree->SetBranchAddress("Dtrk1PtErr",           &Dtrk1PtErr);
@@ -4443,26 +4446,7 @@ bool LambdaCUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("Dtrk3PionScore",       &Dtrk3PionScore);
    Tree->SetBranchAddress("Dtrk3KaonScore",       &Dtrk3KaonScore);
    Tree->SetBranchAddress("Dtrk3ProtScore",       &Dtrk3ProtScore);
-   Tree->SetBranchAddress("Dchi2cl",              &Dchi2cl);
-   Tree->SetBranchAddress("DsvpvDistance",        &DsvpvDistance);
-   Tree->SetBranchAddress("DsvpvDisErr",          &DsvpvDisErr);
-   Tree->SetBranchAddress("DsvpvDistance_2D",     &DsvpvDistance_2D);
-   Tree->SetBranchAddress("DsvpvDisErr_2D",       &DsvpvDisErr_2D);
-   Tree->SetBranchAddress("Dip3d",                &Dip3d);
-   Tree->SetBranchAddress("Dip3derr",             &Dip3derr);
-   Tree->SetBranchAddress("Dalpha",               &Dalpha);
-   Tree->SetBranchAddress("Ddtheta",              &Ddtheta);
-   Tree->SetBranchAddress("DpassCutNominal",      &DpassCutNominal);
-   Tree->SetBranchAddress("DpassCutLoose",        &DpassCutLoose);
-   Tree->SetBranchAddress("DpassCutSystDsvpvSig", &DpassCutSystDsvpvSig);
-   Tree->SetBranchAddress("DpassCutSystDtrkPt",   &DpassCutSystDtrkPt);
-   Tree->SetBranchAddress("DpassCutSystDalpha",   &DpassCutSystDalpha);
-   Tree->SetBranchAddress("DpassCutSystDdtheta",  &DpassCutSystDdtheta);
-   Tree->SetBranchAddress("DpassCutSystDchi2cl",  &DpassCutSystDchi2cl);
-   Tree->SetBranchAddress("Dgen",                 &Dgen);
-   Tree->SetBranchAddress("DisSignalCalc",        &DisSignalCalc);
-   Tree->SetBranchAddress("DisSignalCalcPrompt",  &DisSignalCalcPrompt);
-   Tree->SetBranchAddress("DisSignalCalcFeeddown",&DisSignalCalcFeeddown);
+   
    Tree->SetBranchAddress("Gsize",                &Gsize);
    Tree->SetBranchAddress("Gpt",                  &Gpt);
    Tree->SetBranchAddress("Gy",                   &Gy);
@@ -4508,6 +4492,19 @@ bool LambdaCUPCTreeMessenger::SetBranch(TTree *T)
    DpassCutSystDchi2cl = new std::vector<bool>();
    Dy = new std::vector<float>();
    Dmass = new std::vector<float>();
+   Dchi2cl = new std::vector<float>();
+   DsvpvDistance = new std::vector<float>();
+   DsvpvDisErr = new std::vector<float>();
+   DsvpvDistance_2D = new std::vector<float>();
+   DsvpvDisErr_2D = new std::vector<float>();
+   Dalpha = new std::vector<float>();
+   Ddtheta = new std::vector<float>();
+   Dgen = new std::vector<int>();
+   DisSignalCalc = new std::vector<bool>();
+   DisSignalCalcPrompt = new std::vector<bool>();
+   DisSignalCalcFeeddown = new std::vector<bool>();
+   
+   Dtrk1P = new std::vector<float>();
    Dtrk1Pt = new std::vector<float>();
    Dtrk1PtErr = new std::vector<float>();
    Dtrk1Eta = new std::vector<float>();
@@ -4515,10 +4512,10 @@ bool LambdaCUPCTreeMessenger::SetBranch(TTree *T)
    Dtrk1MassHypo = new std::vector<float>();
    Dtrk1PixelHit = new std::vector<float>();
    Dtrk1StripHit = new std::vector<float>();
-   Dtrk1P = new std::vector<float>();
    Dtrk1PionScore = new std::vector<float>();
    Dtrk1KaonScore = new std::vector<float>();
    Dtrk1ProtScore = new std::vector<float>();
+   Dtrk2P = new std::vector<float>();
    Dtrk2Pt = new std::vector<float>();
    Dtrk2PtErr = new std::vector<float>();
    Dtrk2Eta = new std::vector<float>();
@@ -4526,23 +4523,20 @@ bool LambdaCUPCTreeMessenger::SetBranch(TTree *T)
    Dtrk2MassHypo = new std::vector<float>();
    Dtrk2PixelHit = new std::vector<float>();
    Dtrk2StripHit = new std::vector<float>();
-   Dtrk2P = new std::vector<float>();
    Dtrk2PionScore = new std::vector<float>();
    Dtrk2KaonScore = new std::vector<float>();
    Dtrk2ProtScore = new std::vector<float>();
-   Dchi2cl = new std::vector<float>();
-   DsvpvDistance = new std::vector<float>();
-   DsvpvDisErr = new std::vector<float>();
-   DsvpvDistance_2D = new std::vector<float>();
-   DsvpvDisErr_2D = new std::vector<float>();
-   Dip3d = new std::vector<float>();
-   Dip3derr = new std::vector<float>();
-   Dalpha = new std::vector<float>();
-   Ddtheta = new std::vector<float>();
-   Dgen = new std::vector<int>();
-   DisSignalCalc = new std::vector<bool>();
-   DisSignalCalcPrompt = new std::vector<bool>();
-   DisSignalCalcFeeddown = new std::vector<bool>();
+   Dtrk3P = new std::vector<float>();
+   Dtrk3Pt = new std::vector<float>();
+   Dtrk3PtErr = new std::vector<float>();
+   Dtrk3Eta = new std::vector<float>();
+   Dtrk3dedx = new std::vector<float>();
+   Dtrk3MassHypo = new std::vector<float>();
+   Dtrk3PixelHit = new std::vector<float>();
+   Dtrk3StripHit = new std::vector<float>();
+   Dtrk3PionScore = new std::vector<float>();
+   Dtrk3KaonScore = new std::vector<float>();
+   Dtrk3ProtScore = new std::vector<float>();
 
    Gpt = new std::vector<float>();
    Gy = new std::vector<float>();
@@ -4584,35 +4578,11 @@ bool LambdaCUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("Dpt",                   &Dpt);
    Tree->Branch("Dy",                    &Dy);
    Tree->Branch("Dmass",                 &Dmass);
-   Tree->Branch("Dtrk1Pt",               &Dtrk1Pt);
-   Tree->Branch("Dtrk1PtErr",            &Dtrk1PtErr);
-   Tree->Branch("Dtrk1Eta",              &Dtrk1Eta);
-   Tree->Branch("Dtrk1dedx",             &Dtrk1dedx);
-   Tree->Branch("Dtrk1MassHypo",         &Dtrk1MassHypo);
-   Tree->Branch("Dtrk1PixelHit",         &Dtrk1PixelHit);
-   Tree->Branch("Dtrk1StripHit",         &Dtrk1StripHit);
-   Tree->Branch("Dtrk1P",                &Dtrk1P);
-   Tree->Branch("Dtrk1PionScore",        &Dtrk1PionScore);
-   Tree->Branch("Dtrk1KaonScore",        &Dtrk1KaonScore);
-   Tree->Branch("Dtrk1ProtScore",        &Dtrk1ProtScore);
-   Tree->Branch("Dtrk2Pt",               &Dtrk2Pt);
-   Tree->Branch("Dtrk2PtErr",            &Dtrk2PtErr);
-   Tree->Branch("Dtrk2Eta",              &Dtrk2Eta);
-   Tree->Branch("Dtrk2dedx",             &Dtrk2dedx);
-   Tree->Branch("Dtrk2MassHypo",         &Dtrk2MassHypo);
-   Tree->Branch("Dtrk2PixelHit",         &Dtrk2PixelHit);
-   Tree->Branch("Dtrk2StripHit",         &Dtrk2StripHit);
-   Tree->Branch("Dtrk2P",                &Dtrk2P);
-   Tree->Branch("Dtrk2PionScore",        &Dtrk2PionScore);
-   Tree->Branch("Dtrk2KaonScore",        &Dtrk2KaonScore);
-   Tree->Branch("Dtrk2ProtScore",        &Dtrk2ProtScore);
    Tree->Branch("Dchi2cl",               &Dchi2cl);
    Tree->Branch("DsvpvDistance",         &DsvpvDistance);
    Tree->Branch("DsvpvDisErr",           &DsvpvDisErr);
    Tree->Branch("DsvpvDistance_2D",      &DsvpvDistance_2D);
    Tree->Branch("DsvpvDisErr_2D",        &DsvpvDisErr_2D);
-   Tree->Branch("Dip3d",                 &Dip3d);
-   Tree->Branch("Dip3derr",              &Dip3derr);
    Tree->Branch("Dalpha",                &Dalpha);
    Tree->Branch("Ddtheta",               &Ddtheta);
    Tree->Branch("DpassCutNominal",       &DpassCutNominal);
@@ -4626,6 +4596,40 @@ bool LambdaCUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("DisSignalCalc",         &DisSignalCalc);
    Tree->Branch("DisSignalCalcPrompt",   &DisSignalCalcPrompt);
    Tree->Branch("DisSignalCalcFeeddown", &DisSignalCalcFeeddown);
+   
+   Tree->Branch("Dtrk1P",                &Dtrk1P);
+   Tree->Branch("Dtrk1Pt",               &Dtrk1Pt);
+   Tree->Branch("Dtrk1PtErr",            &Dtrk1PtErr);
+   Tree->Branch("Dtrk1Eta",              &Dtrk1Eta);
+   Tree->Branch("Dtrk1dedx",             &Dtrk1dedx);
+   Tree->Branch("Dtrk1MassHypo",         &Dtrk1MassHypo);
+   Tree->Branch("Dtrk1PixelHit",         &Dtrk1PixelHit);
+   Tree->Branch("Dtrk1StripHit",         &Dtrk1StripHit);
+   Tree->Branch("Dtrk1PionScore",        &Dtrk1PionScore);
+   Tree->Branch("Dtrk1KaonScore",        &Dtrk1KaonScore);
+   Tree->Branch("Dtrk1ProtScore",        &Dtrk1ProtScore);
+   Tree->Branch("Dtrk2P",                &Dtrk2P);
+   Tree->Branch("Dtrk2Pt",               &Dtrk2Pt);
+   Tree->Branch("Dtrk2PtErr",            &Dtrk2PtErr);
+   Tree->Branch("Dtrk2Eta",              &Dtrk2Eta);
+   Tree->Branch("Dtrk2dedx",             &Dtrk2dedx);
+   Tree->Branch("Dtrk2MassHypo",         &Dtrk2MassHypo);
+   Tree->Branch("Dtrk2PixelHit",         &Dtrk2PixelHit);
+   Tree->Branch("Dtrk2StripHit",         &Dtrk2StripHit);
+   Tree->Branch("Dtrk2PionScore",        &Dtrk2PionScore);
+   Tree->Branch("Dtrk2KaonScore",        &Dtrk2KaonScore);
+   Tree->Branch("Dtrk2ProtScore",        &Dtrk2ProtScore);
+   Tree->Branch("Dtrk3P",                &Dtrk3P);
+   Tree->Branch("Dtrk3Pt",               &Dtrk3Pt);
+   Tree->Branch("Dtrk3PtErr",            &Dtrk3PtErr);
+   Tree->Branch("Dtrk3Eta",              &Dtrk3Eta);
+   Tree->Branch("Dtrk3dedx",             &Dtrk3dedx);
+   Tree->Branch("Dtrk3MassHypo",         &Dtrk3MassHypo);
+   Tree->Branch("Dtrk3PixelHit",         &Dtrk3PixelHit);
+   Tree->Branch("Dtrk3StripHit",         &Dtrk3StripHit);
+   Tree->Branch("Dtrk3PionScore",        &Dtrk3PionScore);
+   Tree->Branch("Dtrk3KaonScore",        &Dtrk3KaonScore);
+   Tree->Branch("Dtrk3ProtScore",        &Dtrk3ProtScore);
 
    Tree->Branch("Gsize",                 &Gsize);
    Tree->Branch("Gpt",                   &Gpt);
@@ -4672,6 +4676,25 @@ void LambdaCUPCTreeMessenger::Clear()
    Dpt->clear();
    Dy->clear();
    Dmass->clear();
+   Dchi2cl->clear();
+   DsvpvDistance->clear();
+   DsvpvDisErr->clear();
+   DsvpvDistance_2D->clear();
+   DsvpvDisErr_2D->clear();
+   Dalpha->clear();
+   Ddtheta->clear();
+   DpassCutNominal->clear();
+   DpassCutLoose->clear();
+   DpassCutSystDsvpvSig->clear();
+   DpassCutSystDtrkPt->clear();
+   DpassCutSystDalpha->clear();
+   DpassCutSystDdtheta->clear();
+   DpassCutSystDchi2cl->clear();
+   Dgen->clear();
+   DisSignalCalc->clear();
+   DisSignalCalcPrompt->clear();
+   DisSignalCalcFeeddown->clear();
+   
    Dtrk1P->clear();
    Dtrk1Pt->clear();
    Dtrk1PtErr->clear();
@@ -4705,26 +4728,7 @@ void LambdaCUPCTreeMessenger::Clear()
    Dtrk3PionScore->clear();
    Dtrk3KaonScore->clear();
    Dtrk3ProtScore->clear();
-   Dchi2cl->clear();
-   DsvpvDistance->clear();
-   DsvpvDisErr->clear();
-   DsvpvDistance_2D->clear();
-   DsvpvDisErr_2D->clear();
-   Dip3d->clear();
-   Dip3derr->clear();
-   Dalpha->clear();
-   Ddtheta->clear();
-   DpassCutNominal->clear();
-   DpassCutLoose->clear();
-   DpassCutSystDsvpvSig->clear();
-   DpassCutSystDtrkPt->clear();
-   DpassCutSystDalpha->clear();
-   DpassCutSystDdtheta->clear();
-   DpassCutSystDchi2cl->clear();
-   Dgen->clear();
-   DisSignalCalc->clear();
-   DisSignalCalcPrompt->clear();
-   DisSignalCalcFeeddown->clear();
+   
    Gsize = 0;
    Gpt->clear();
    Gy->clear();
@@ -4762,11 +4766,31 @@ void LambdaCUPCTreeMessenger::CopyNonTrack(LambdaCUPCTreeMessenger &M)
    if (gammaN != nullptr && M.gammaN != nullptr) *gammaN = *(M.gammaN);
    if (Ngamma != nullptr && M.Ngamma != nullptr) *Ngamma = *(M.Ngamma);
    nTrackInAcceptanceHP = M.nTrackInAcceptanceHP;
+   
    // from LambdaCTreeMessenger
    Dsize = M.Dsize;
-   if(Dpt            != nullptr && M.Dpt            != nullptr) *Dpt            = *(M.Dpt);
-   if(Dy             != nullptr && M.Dy             != nullptr) *Dy             = *(M.Dy);
-   if(Dmass          != nullptr && M.Dmass          != nullptr) *Dmass          = *(M.Dmass);
+   if(Dpt                   != nullptr && M.Dpt                   != nullptr) *Dpt                    = *(M.Dpt);
+   if(Dy                    != nullptr && M.Dy                    != nullptr) *Dy                     = *(M.Dy);
+   if(Dmass                 != nullptr && M.Dmass                 != nullptr) *Dmass                  = *(M.Dmass);
+   if(Dchi2cl               != nullptr && M.Dchi2cl               != nullptr) *Dchi2cl                = *(M.Dchi2cl);
+   if(DsvpvDistance         != nullptr && M.DsvpvDistance         != nullptr) *DsvpvDistance          = *(M.DsvpvDistance);
+   if(DsvpvDisErr           != nullptr && M.DsvpvDisErr           != nullptr) *DsvpvDisErr            = *(M.DsvpvDisErr);
+   if(DsvpvDistance_2D      != nullptr && M.DsvpvDistance_2D      != nullptr) *DsvpvDistance_2D       = *(M.DsvpvDistance_2D);
+   if(DsvpvDisErr_2D        != nullptr && M.DsvpvDisErr_2D        != nullptr) *DsvpvDisErr_2D         = *(M.DsvpvDisErr_2D);
+   if(Dalpha                != nullptr && M.Dalpha                != nullptr) *Dalpha                 = *(M.Dalpha);
+   if(Ddtheta               != nullptr && M.Ddtheta               != nullptr) *Ddtheta                = *(M.Ddtheta);
+   if(DpassCutNominal       != nullptr && M.DpassCutNominal       != nullptr) *DpassCutNominal        = *(M.DpassCutNominal);
+   if(DpassCutLoose         != nullptr && M.DpassCutLoose         != nullptr) *DpassCutLoose          = *(M.DpassCutLoose);
+   if(DpassCutSystDsvpvSig  != nullptr && M.DpassCutSystDsvpvSig  != nullptr) *DpassCutSystDsvpvSig   = *(M.DpassCutSystDsvpvSig);
+   if(DpassCutSystDtrkPt    != nullptr && M.DpassCutSystDtrkPt    != nullptr) *DpassCutSystDtrkPt     = *(M.DpassCutSystDtrkPt);
+   if(DpassCutSystDalpha    != nullptr && M.DpassCutSystDalpha    != nullptr) *DpassCutSystDalpha     = *(M.DpassCutSystDalpha);
+   if(DpassCutSystDdtheta   != nullptr && M.DpassCutSystDdtheta   != nullptr) *DpassCutSystDdtheta    = *(M.DpassCutSystDdtheta);
+   if(DpassCutSystDchi2cl   != nullptr && M.DpassCutSystDchi2cl   != nullptr) *DpassCutSystDchi2cl    = *(M.DpassCutSystDchi2cl);
+   if(Dgen                  != nullptr && M.Dgen                  != nullptr) *Dgen                   = *(M.Dgen);
+   if(DisSignalCalc         != nullptr && M.DisSignalCalc         != nullptr) *DisSignalCalc          = *(M.DisSignalCalc);
+   if(DisSignalCalcPrompt   != nullptr && M.DisSignalCalcPrompt   != nullptr) *DisSignalCalcPrompt    = *(M.DisSignalCalcPrompt);
+   if(DisSignalCalcFeeddown != nullptr && M.DisSignalCalcFeeddown != nullptr) *DisSignalCalcFeeddown  = *(M.DisSignalCalcFeeddown);
+   
    if(Dtrk1P         != nullptr && M.Dtrk1P         != nullptr) *Dtrk1P         = *(M.Dtrk1P);
    if(Dtrk1Pt        != nullptr && M.Dtrk1Pt        != nullptr) *Dtrk1Pt        = *(M.Dtrk1Pt);
    if(Dtrk1PtErr     != nullptr && M.Dtrk1PtErr     != nullptr) *Dtrk1PtErr     = *(M.Dtrk1PtErr);
@@ -4778,6 +4802,7 @@ void LambdaCUPCTreeMessenger::CopyNonTrack(LambdaCUPCTreeMessenger &M)
    if(Dtrk1PionScore != nullptr && M.Dtrk1PionScore != nullptr) *Dtrk1PionScore = *(M.Dtrk1PionScore);
    if(Dtrk1KaonScore != nullptr && M.Dtrk1KaonScore != nullptr) *Dtrk1KaonScore = *(M.Dtrk1KaonScore);
    if(Dtrk1ProtScore != nullptr && M.Dtrk1ProtScore != nullptr) *Dtrk1ProtScore = *(M.Dtrk1ProtScore);
+   
    if(Dtrk2P         != nullptr && M.Dtrk2P         != nullptr) *Dtrk2P         = *(M.Dtrk2P);
    if(Dtrk2Pt        != nullptr && M.Dtrk2Pt        != nullptr) *Dtrk2Pt        = *(M.Dtrk2Pt);
    if(Dtrk2PtErr     != nullptr && M.Dtrk2PtErr     != nullptr) *Dtrk2PtErr     = *(M.Dtrk2PtErr);
@@ -4789,6 +4814,7 @@ void LambdaCUPCTreeMessenger::CopyNonTrack(LambdaCUPCTreeMessenger &M)
    if(Dtrk2PionScore != nullptr && M.Dtrk2PionScore != nullptr) *Dtrk2PionScore = *(M.Dtrk2PionScore);
    if(Dtrk2KaonScore != nullptr && M.Dtrk2KaonScore != nullptr) *Dtrk2KaonScore = *(M.Dtrk2KaonScore);
    if(Dtrk2ProtScore != nullptr && M.Dtrk2ProtScore != nullptr) *Dtrk2ProtScore = *(M.Dtrk2ProtScore);
+   
    if(Dtrk3P         != nullptr && M.Dtrk3P         != nullptr) *Dtrk3P         = *(M.Dtrk3P);
    if(Dtrk3Pt        != nullptr && M.Dtrk3Pt        != nullptr) *Dtrk3Pt        = *(M.Dtrk3Pt);
    if(Dtrk3PtErr     != nullptr && M.Dtrk3PtErr     != nullptr) *Dtrk3PtErr     = *(M.Dtrk3PtErr);
@@ -4800,27 +4826,8 @@ void LambdaCUPCTreeMessenger::CopyNonTrack(LambdaCUPCTreeMessenger &M)
    if(Dtrk3PionScore != nullptr && M.Dtrk3PionScore != nullptr) *Dtrk3PionScore = *(M.Dtrk3PionScore);
    if(Dtrk3KaonScore != nullptr && M.Dtrk3KaonScore != nullptr) *Dtrk3KaonScore = *(M.Dtrk3KaonScore);
    if(Dtrk3ProtScore != nullptr && M.Dtrk3ProtScore != nullptr) *Dtrk3ProtScore = *(M.Dtrk3ProtScore);
-   if(Dchi2cl        != nullptr && M.Dchi2cl        != nullptr) *Dchi2cl        = *(M.Dchi2cl);
-   if(DsvpvDistance  != nullptr && M.DsvpvDistance  != nullptr) *DsvpvDistance  = *(M.DsvpvDistance);
-   if(DsvpvDisErr    != nullptr && M.DsvpvDisErr    != nullptr) *DsvpvDisErr    = *(M.DsvpvDisErr);
-   if(DsvpvDistance_2D != nullptr && M.DsvpvDistance_2D != nullptr) *DsvpvDistance_2D = *(M.DsvpvDistance_2D);
-   if(DsvpvDisErr_2D != nullptr && M.DsvpvDisErr_2D != nullptr) *DsvpvDisErr_2D = *(M.DsvpvDisErr_2D);
-   if(Dip3d          != nullptr && M.Dip3d          != nullptr) *Dip3d          = *(M.Dip3d);
-   if(Dip3derr       != nullptr && M.Dip3derr       != nullptr) *Dip3derr       = *(M.Dip3derr);
-   if(Dalpha         != nullptr && M.Dalpha         != nullptr) *Dalpha         = *(M.Dalpha);
-   if(Ddtheta        != nullptr && M.Ddtheta        != nullptr) *Ddtheta        = *(M.Ddtheta);
-   if(DpassCutNominal       != nullptr && M.DpassCutNominal       != nullptr) *DpassCutNominal       = *(M.DpassCutNominal);
-   if(DpassCutLoose         != nullptr && M.DpassCutLoose         != nullptr) *DpassCutLoose         = *(M.DpassCutLoose);
-   if(DpassCutSystDsvpvSig  != nullptr && M.DpassCutSystDsvpvSig  != nullptr) *DpassCutSystDsvpvSig  = *(M.DpassCutSystDsvpvSig);
-   if(DpassCutSystDtrkPt    != nullptr && M.DpassCutSystDtrkPt    != nullptr) *DpassCutSystDtrkPt    = *(M.DpassCutSystDtrkPt);
-   if(DpassCutSystDalpha    != nullptr && M.DpassCutSystDalpha    != nullptr) *DpassCutSystDalpha    = *(M.DpassCutSystDalpha);
-   if(DpassCutSystDdtheta   != nullptr && M.DpassCutSystDdtheta   != nullptr) *DpassCutSystDdtheta   = *(M.DpassCutSystDdtheta);
-   if(DpassCutSystDchi2cl   != nullptr && M.DpassCutSystDchi2cl   != nullptr) *DpassCutSystDchi2cl   = *(M.DpassCutSystDchi2cl);
-   if(Dgen                  != nullptr && M.Dgen                  != nullptr) *Dgen                  = *(M.Dgen);
-   if(DisSignalCalc         != nullptr && M.DisSignalCalc         != nullptr) *DisSignalCalc         = *(M.DisSignalCalc);
-   if(DisSignalCalcPrompt   != nullptr && M.DisSignalCalcPrompt   != nullptr) *DisSignalCalcPrompt   = *(M.DisSignalCalcPrompt);
-   if(DisSignalCalcFeeddown != nullptr && M.DisSignalCalcFeeddown != nullptr) *DisSignalCalcFeeddown = *(M.DisSignalCalcFeeddown);
-   // from DfinderTreeMessenger
+   
+   // from DfinderGenTreeMessenger
    Gsize = M.Gsize;
    if(Gpt                   != nullptr && M.Gpt                   != nullptr) *Gpt                   = *(M.Gpt);
    if(Gy                    != nullptr && M.Gy                    != nullptr) *Gy                    = *(M.Gy);

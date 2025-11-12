@@ -10,8 +10,9 @@
 #define JETCOUNTMAX 500
 #define GENCOUNTMAX 250
 #define VERTEXCOUNTMAX 200
-#define DZEROCOUNTMAX 20000 //FIXME: to be fined tuned
-#define LAMBDACCOUNTMAX 20000 //FIXME: to be fined tuned
+#define DFINDERCOUNTMAX 20000
+#define DZEROCOUNTMAX 20000
+#define LAMBDACCOUNTMAX 20000
 #define DZEROGENCOUNTMAX 300 //FIXME: to be fined tuned
 #define DFINDERGENCOUNTMAX 300 //FIXME: to be fined tuned for Dfinder
 #define SVTXCOUNTMAX 50
@@ -460,155 +461,147 @@ public:
    bool PassZHadron2022CutTight(int index);
 };
 
-class DzeroTreeMessenger
+class DfinderMasterMessenger
 {
 public:
-   TTree *Tree;
-   int Dsize;
-   float Dpt[DZEROCOUNTMAX];
-   float Dphi[DZEROCOUNTMAX];
-   float Dy[DZEROCOUNTMAX];
-   float Dmass[DZEROCOUNTMAX];
-   float Dtrk1Pt[DZEROCOUNTMAX];
-   float Dtrk1PtErr[DZEROCOUNTMAX];
-   float Dtrk1Eta[DZEROCOUNTMAX];
-   float Dtrk1P[DZEROCOUNTMAX];
-   float Dtrk1dedx[DZEROCOUNTMAX];
-   float Dtrk1MassHypo[DZEROCOUNTMAX];
-   float Dtrk1PixelHit[DZEROCOUNTMAX];
-   float Dtrk1StripHit[DZEROCOUNTMAX];
-   float Dtrk1highPurity[DZEROCOUNTMAX];
-   float Dtrk2Pt[DZEROCOUNTMAX];
-   float Dtrk2PtErr[DZEROCOUNTMAX];
-   float Dtrk2Eta[DZEROCOUNTMAX];
-   float Dtrk2P[DZEROCOUNTMAX];
-   float Dtrk2dedx[DZEROCOUNTMAX];
-   float Dtrk2MassHypo[DZEROCOUNTMAX];
-   float Dtrk2PixelHit[DZEROCOUNTMAX];
-   float Dtrk2StripHit[DZEROCOUNTMAX];
-   float Dtrk2highPurity[DZEROCOUNTMAX];
-   float Dchi2cl[DZEROCOUNTMAX];
-   float DsvpvDistance[DZEROCOUNTMAX];
-   float DsvpvDisErr[DZEROCOUNTMAX];
-   float DsvpvDistance_2D[DZEROCOUNTMAX];
-   float DsvpvDisErr_2D[DZEROCOUNTMAX];
-   float Dip3d[DZEROCOUNTMAX];
-   float Dip3derr[DZEROCOUNTMAX];
-   float Dalpha[DZEROCOUNTMAX];
-   float Ddtheta[DZEROCOUNTMAX];
-   int Dgen[DZEROCOUNTMAX];
-   float Dgenpt[DZEROCOUNTMAX];
-   int DgenBAncestorpdgId[DZEROCOUNTMAX];
+    TTree *Tree;
+
+    // Candidate info
+    int   Dsize;
+    float Dpt[DFINDERCOUNTMAX];
+    float Dphi[DFINDERCOUNTMAX];
+    float Dy[DFINDERCOUNTMAX];
+    float Dmass[DFINDERCOUNTMAX];
+    float Dchi2cl[DFINDERCOUNTMAX];
+    float DsvpvDistance[DFINDERCOUNTMAX];
+    float DsvpvDisErr[DFINDERCOUNTMAX];
+    float DsvpvDistance_2D[DFINDERCOUNTMAX];
+    float DsvpvDisErr_2D[DFINDERCOUNTMAX];
+    float Dalpha[DFINDERCOUNTMAX];
+    float Ddtheta[DFINDERCOUNTMAX];
+    // Candidate gen info
+    int   Dgen[DFINDERCOUNTMAX];
+    float Dgenpt[DFINDERCOUNTMAX];
+    int   DgenBAncestorpdgId[DFINDERCOUNTMAX];
+
+    // Candidate daughter track 1
+    float Dtrk1P[DFINDERCOUNTMAX];
+    float Dtrk1Pt[DFINDERCOUNTMAX];
+    float Dtrk1PtErr[DFINDERCOUNTMAX];
+    float Dtrk1Eta[DFINDERCOUNTMAX];
+    float Dtrk1dedx[DFINDERCOUNTMAX];
+    float Dtrk1MassHypo[DFINDERCOUNTMAX];
+    float Dtrk1PixelHit[DFINDERCOUNTMAX];
+    float Dtrk1StripHit[DFINDERCOUNTMAX];
+    float Dtrk1highPurity[DFINDERCOUNTMAX];
+    // Candidate daughter track 2
+    float Dtrk2P[DFINDERCOUNTMAX];
+    float Dtrk2Pt[DFINDERCOUNTMAX];
+    float Dtrk2PtErr[DFINDERCOUNTMAX];
+    float Dtrk2Eta[DFINDERCOUNTMAX];
+    float Dtrk2dedx[DFINDERCOUNTMAX];
+    float Dtrk2MassHypo[DFINDERCOUNTMAX];
+    float Dtrk2PixelHit[DFINDERCOUNTMAX];
+    float Dtrk2StripHit[DFINDERCOUNTMAX];
+    float Dtrk2highPurity[DFINDERCOUNTMAX];
+    // Candidate daughter track 3
+    float Dtrk3P[DFINDERCOUNTMAX];
+    float Dtrk3Pt[DFINDERCOUNTMAX];
+    float Dtrk3PtErr[DFINDERCOUNTMAX];
+    float Dtrk3Eta[DFINDERCOUNTMAX];
+    float Dtrk3dedx[DFINDERCOUNTMAX];
+    float Dtrk3MassHypo[DFINDERCOUNTMAX];
+    float Dtrk3PixelHit[DFINDERCOUNTMAX];
+    float Dtrk3StripHit[DFINDERCOUNTMAX];
+    float Dtrk3highPurity[DFINDERCOUNTMAX];
+    
+    // Candidate resonance info
+    float DtktkResmass[DFINDERCOUNTMAX];
+    float DtktkRespt[DFINDERCOUNTMAX];
+    float DtktkReseta[DFINDERCOUNTMAX];
+    float DtktkRes_chi2cl[DFINDERCOUNTMAX];
+    // Resonance daughter track 1
+    float DRestrk1P[DFINDERCOUNTMAX];
+    float DRestrk1Pt[DFINDERCOUNTMAX];
+    float DRestrk1PtErr[DFINDERCOUNTMAX];
+    float DRestrk1Eta[DFINDERCOUNTMAX];
+    float DRestrk1dedx[DFINDERCOUNTMAX];
+    float DRestrk1MassHypo[DFINDERCOUNTMAX];
+    float DRestrk1highPurity[DFINDERCOUNTMAX];
+    // Resonance daughter track 2
+    float DRestrk2P[DFINDERCOUNTMAX];
+    float DRestrk2Pt[DFINDERCOUNTMAX];
+    float DRestrk2PtErr[DFINDERCOUNTMAX];
+    float DRestrk2Eta[DFINDERCOUNTMAX];
+    float DRestrk2dedx[DFINDERCOUNTMAX];
+    float DRestrk2MassHypo[DFINDERCOUNTMAX];
+    float DRestrk2highPurity[DFINDERCOUNTMAX];
+    
 public:
-   DzeroTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntDkpi");
-   DzeroTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntDkpi");
-   DzeroTreeMessenger(TTree *DzeroTree);
-   bool Initialize(TTree *DzeroTree);
-   bool Initialize();
-   bool GetEntry(int iEntry);
+    DfinderMasterMessenger(TFile &File, std::string TreeName);
+    DfinderMasterMessenger(TFile *File, std::string TreeName);
+    DfinderMasterMessenger(TTree *DfinderTree);
+    bool Initialize(TTree *DfinderTree);
+    bool Initialize();
+    bool GetEntry(int iEntry);
 };
 
-
-class LambdaCTreeMessenger
-{
-public:
-   TTree *Tree;
-   int Dsize;
-   float Dpt[LAMBDACCOUNTMAX];
-   float Dphi[LAMBDACCOUNTMAX];
-   float Dy[LAMBDACCOUNTMAX];
-   float Dmass[LAMBDACCOUNTMAX];
-   float Dtrk1Pt[LAMBDACCOUNTMAX];
-   float Dtrk1PtErr[LAMBDACCOUNTMAX];
-   float Dtrk1Eta[LAMBDACCOUNTMAX];
-   float Dtrk1P[LAMBDACCOUNTMAX];
-   float Dtrk1dedx[LAMBDACCOUNTMAX];
-   float Dtrk1MassHypo[LAMBDACCOUNTMAX];
-   float Dtrk1PixelHit[LAMBDACCOUNTMAX];
-   float Dtrk1StripHit[LAMBDACCOUNTMAX];
-   float Dtrk1highPurity[LAMBDACCOUNTMAX];
-   float Dtrk2Pt[LAMBDACCOUNTMAX];
-   float Dtrk2PtErr[LAMBDACCOUNTMAX];
-   float Dtrk2Eta[LAMBDACCOUNTMAX];
-   float Dtrk2P[LAMBDACCOUNTMAX];
-   float Dtrk2dedx[LAMBDACCOUNTMAX];
-   float Dtrk2MassHypo[LAMBDACCOUNTMAX];
-   float Dtrk2PixelHit[LAMBDACCOUNTMAX];
-   float Dtrk2StripHit[LAMBDACCOUNTMAX];
-   float Dtrk2highPurity[LAMBDACCOUNTMAX];
-   float Dtrk3Pt[LAMBDACCOUNTMAX];
-   float Dtrk3PtErr[LAMBDACCOUNTMAX];
-   float Dtrk3Eta[LAMBDACCOUNTMAX];
-   float Dtrk3P[LAMBDACCOUNTMAX];
-   float Dtrk3dedx[LAMBDACCOUNTMAX];
-   float Dtrk3MassHypo[LAMBDACCOUNTMAX];
-   float Dtrk3PixelHit[LAMBDACCOUNTMAX];
-   float Dtrk3StripHit[LAMBDACCOUNTMAX];
-   float Dtrk3highPurity[LAMBDACCOUNTMAX];
-   float Dchi2cl[LAMBDACCOUNTMAX];
-   float DsvpvDistance[LAMBDACCOUNTMAX];
-   float DsvpvDisErr[LAMBDACCOUNTMAX];
-   float DsvpvDistance_2D[LAMBDACCOUNTMAX];
-   float DsvpvDisErr_2D[LAMBDACCOUNTMAX];
-   float Dip3d[LAMBDACCOUNTMAX];
-   float Dip3derr[LAMBDACCOUNTMAX];
-   float Dalpha[LAMBDACCOUNTMAX];
-   float Ddtheta[LAMBDACCOUNTMAX];
-   int Dgen[LAMBDACCOUNTMAX];
-   float Dgenpt[LAMBDACCOUNTMAX];
-   int DgenBAncestorpdgId[LAMBDACCOUNTMAX];
-public:
-   LambdaCTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntLambdaCtopkpi");
-   LambdaCTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntLambdaCtopkpi");
-   LambdaCTreeMessenger(TTree *DzeroTree);
-   bool Initialize(TTree *DzeroTree);
-   bool Initialize();
-   bool GetEntry(int iEntry);
+class DzeroTreeMessenger: public DfinderMasterMessenger {
+  public:
+    DzeroTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntDkpi")
+      : DfinderMasterMessenger{File, TreeName}
+    {
+    }
+    DzeroTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntDkpi")
+      : DfinderMasterMessenger{File, TreeName}
+    {
+    }
 };
 
-
-class DzeroGenTreeMessenger
-{
-public:
-   TTree *Tree;
-   int Gsize;
-   float Gpt[DZEROGENCOUNTMAX];
-   float Gy[DZEROGENCOUNTMAX];
-   float Gphi[DZEROGENCOUNTMAX];
-   int GpdgId[DZEROGENCOUNTMAX];
-   int GisSignal[DZEROGENCOUNTMAX];
-   int GcollisionId[DZEROGENCOUNTMAX];
-   int GSignalType[DZEROGENCOUNTMAX];
-   int GBAncestorpdgId[DZEROGENCOUNTMAX];
-public:
-   DzeroGenTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntGen");
-   DzeroGenTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntGen");
-   DzeroGenTreeMessenger(TTree *DzeroGenTree);
-   bool Initialize(TTree *DzeroGenTree);
-   bool Initialize();
-   bool GetEntry(int iEntry);
+class LambdaCTreeMessenger: public DfinderMasterMessenger {
+  public:
+    LambdaCTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntLambdaCtopkpi")
+      : DfinderMasterMessenger{File, TreeName}
+    {
+    }
+    LambdaCTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntLambdaCtopkpi")
+      : DfinderMasterMessenger{File, TreeName}
+    {
+    }
 };
 
 class DfinderGenTreeMessenger
 {
 public:
-   TTree *Tree;
-   int Gsize;
-   float Gpt[DFINDERGENCOUNTMAX];
-   float Gy[DFINDERGENCOUNTMAX];
-   float Gphi[DFINDERGENCOUNTMAX];
-   int GpdgId[DFINDERGENCOUNTMAX];
-   int GisSignal[DFINDERGENCOUNTMAX];
-   int GcollisionId[DFINDERGENCOUNTMAX];
-   int GSignalType[DFINDERGENCOUNTMAX];
-   int GBAncestorpdgId[DFINDERGENCOUNTMAX];
+    TTree *Tree;
+    int Gsize;
+    float Gpt[DFINDERGENCOUNTMAX];
+    float Gy[DFINDERGENCOUNTMAX];
+    float Gphi[DFINDERGENCOUNTMAX];
+    int GpdgId[DFINDERGENCOUNTMAX];
+    int GisSignal[DFINDERGENCOUNTMAX];
+    int GcollisionId[DFINDERGENCOUNTMAX];
+    int GSignalType[DFINDERGENCOUNTMAX];
+    int GBAncestorpdgId[DFINDERGENCOUNTMAX];
+
 public:
-   DfinderGenTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntGen");
-   DfinderGenTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntGen");
-   DfinderGenTreeMessenger(TTree *DfinderGenTree);
-   bool Initialize(TTree *DfinderGenTree);
-   bool Initialize();
-   bool GetEntry(int iEntry);
+    DfinderGenTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntGen");
+    DfinderGenTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntGen");
+    DfinderGenTreeMessenger(TTree *DfinderGenTree);
+    bool Initialize(TTree *DfinderGenTree);
+    bool Initialize();
+    bool GetEntry(int iEntry);
+};
+
+class DzeroGenTreeMessenger: public DfinderGenTreeMessenger {
+    DzeroGenTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntGen")
+      : DfinderGenTreeMessenger{File, TreeName}
+    {
+    }
+    DzeroGenTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntGen")
+      : DfinderGenTreeMessenger{File, TreeName}
+    {
+    }
 };
 
 class MuTreeMessenger
@@ -734,6 +727,7 @@ public:
    bool Initialize();
    bool GetEntry(int iEntry);
 };
+
 class PbPbTrackTreeMessenger
 {
 public:
@@ -1263,8 +1257,6 @@ public:
    std::vector<float> *DsvpvDisErr;
    std::vector<float> *DsvpvDistance_2D;
    std::vector<float> *DsvpvDisErr_2D;
-   std::vector<float> *Dip3d;
-   std::vector<float> *Dip3derr;
    std::vector<float> *Dalpha;
    std::vector<float> *Ddtheta;
    std::vector<bool> *DpassCutNominal;
@@ -1306,7 +1298,7 @@ public:
    LambdaCUPCTreeMessenger(TFile &File, std::string TreeName = "tree", bool Debug = false);
    LambdaCUPCTreeMessenger(TFile *File, std::string TreeName = "tree", bool Debug = false);
    LambdaCUPCTreeMessenger(TTree *LambdaCUPCTree = nullptr, bool Debug = false);
-   ~DzeroUPCTreeMessenger();
+   ~LambdaCUPCTreeMessenger();
    bool Initialize(TTree *LambdaCUPCTree, bool Debug = false);
    bool Initialize(bool Debug = false);
    int GetEntries();
