@@ -578,11 +578,11 @@ class DzeroTreeMessenger: public DfinderMasterMessenger {
 
 class LambdaCpkpiTreeMessenger: public DfinderMasterMessenger {
   public:
-    LambdaCpkpiTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntLambdaCtopkpi")
+    LambdaCpkpiTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntLctopkpi")
       : DfinderMasterMessenger{File, TreeName}
     {
     }
-    LambdaCpkpiTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntLambdaCtopkpi")
+    LambdaCpkpiTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntLctopkpi")
       : DfinderMasterMessenger{File, TreeName}
     {
     }
@@ -590,11 +590,11 @@ class LambdaCpkpiTreeMessenger: public DfinderMasterMessenger {
 
 class LambdaCpksTreeMessenger: public DfinderMasterMessenger {
   public:
-    LambdaCpksTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntLctopkstopipi")
+    LambdaCpksTreeMessenger(TFile &File, std::string TreeName = "Dfinder/ntLctopkstoppipi")
       : DfinderMasterMessenger{File, TreeName}
     {
     }
-    LambdaCpksTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntLctopkstopipi")
+    LambdaCpksTreeMessenger(TFile *File, std::string TreeName = "Dfinder/ntLctopkstoppipi")
       : DfinderMasterMessenger{File, TreeName}
     {
     }

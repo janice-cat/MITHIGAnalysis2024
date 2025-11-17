@@ -4,6 +4,8 @@ using namespace std;
 // ============================================================================
 // CUT FUNCTIONS --------------------------------------------------------------
 
+namespace LambdaCpkpiSelection {
+
 bool CheckCut(
   vector<vector<float>> DcutValue,
   float Dvalue,
@@ -329,3 +331,5 @@ bool DpassCutSystDchi2cl(LambdaCpkpiTreeMessenger &MLambdaC, int iD) {
     Dtrk3PtCutValue_nom
   );
 }
+
+} // End namespace

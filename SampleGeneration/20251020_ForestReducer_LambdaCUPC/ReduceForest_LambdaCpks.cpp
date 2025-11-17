@@ -23,6 +23,7 @@ using namespace std;
 #include "trackingEfficiency2023PbPb.h"
 
 #include "include/LambdaCpksSelection.h"
+using namespace LambdaCpksSelection;
 #include "include/PIDScoring.h"
 
 bool logical_or_vectBool(std::vector<bool>* vec) {

@@ -1,6 +1,7 @@
 using namespace std;
 #include <vector>
 
+namespace DzeroSelection {
 // ============================================================================
 // CUT FUNCTIONS --------------------------------------------------------------
 
@@ -566,3 +567,5 @@ bool DmesonSelectionSkimLowPt23(DzeroTreeMessenger &MDzero, int iD) {
   */
   return true;
 }
+
+} // End namespace
