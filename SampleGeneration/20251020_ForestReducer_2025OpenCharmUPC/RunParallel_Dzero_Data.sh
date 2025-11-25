@@ -5,23 +5,25 @@ DATE=$(date +%Y%m%d)
 # SKIM FOR: LAMBDA_C -> P + K + PI
 
 # Input settings:
-YEAR=2023
+YEAR=2025
 ISDATA=true
-TAG="Dzero_2023Data_Feb2025ReReco_HIForward0"
+
+# TAG="Dzero_2023Data_Feb2025ReReco_HIForward0"
+TAG=$1
 FILELIST="filelist_${TAG}.txt"
 INPUT_ON_XRD=1
-#XRDSERV="root://eoscms.cern.ch/"
-XRDSERV="root://xrootd.cmsaf.mit.edu/"
+XRDSERV="root://eoscms.cern.ch/"
+# XRDSERV="root://xrootd.cmsaf.mit.edu/"
 MAXCORES=40
 
 # Output Settings:
-OUTPUT="/data00/jdlang/UPCDzeroAnalysis/SkimsData/output_${TAG}_${DATE}"
-MERGEDOUTPUT="/data00/jdlang/UPCDzeroAnalysis/SkimsData/${TAG}_${DATE}.root"
+OUTPUT="/data00/yuchenc/UPCDzeroAnalysis/SkimsData/output_${TAG}_${DATE}"
+MERGEDOUTPUT="/data00/yuchenc/UPCDzeroAnalysis/SkimsData/${TAG}_${DATE}.root"
 
 # Skim/Rejection Settings:
-TRIG_REJECT=2
-EVENT_REJECT=true
-ZDCGAP_REJECT=true
+TRIG_REJECT=0
+EVENT_REJECT=false
+ZDCGAP_REJECT=false
 D_REJECT=no
 
 # =============================================================================
@@ -60,7 +62,7 @@ mkdir -p $OUTPUT
 COUNTER=1
 while IFS= read -r FILEPATH; do
     if (( $INPUT_ON_XRD == 1 )); then
-        ./ProcessSkim_XRD.sh Execute_Dzero $SERVER \
+        ./ProcessSkim_XRD.sh Execute_Dzero $XRDSERV \
             $FILEPATH $COUNTER $OUTPUT $YEAR $ISDATA \
             $TRIG_REJECT $EVENT_REJECT $ZDCGAP_REJECT $D_REJECT \
             $ZDCM_THRESH $ZDCP_THRESH $MAXCORES &

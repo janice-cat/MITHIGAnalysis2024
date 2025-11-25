@@ -19,7 +19,12 @@ mkdir -p "${OUTPUT}/temp_inputs/"
 FILEPATH="${OUTPUT}/temp_inputs/job_${COUNTER}.root"
 rm $FILEPATH &> /dev/null
 xrdcp -C auto -N --parallel $MAXCORES -t 2 $SERVER$SERVERPATH $FILEPATH
-wait
+status=$?
+echo "xrdcp exit code: $status"
+if [ $status -ne 0 ]; then
+    echo "xrdcp failed, aborting job" >&2
+    exit 1
+fi
 
 echo "Processing $FILEPATH"
 ./$EXECUTABLE --Input "$FILEPATH" \
