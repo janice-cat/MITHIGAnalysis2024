@@ -115,7 +115,8 @@ int main(int argc, char *argv[]) {
     TFile InputFile(InputFileName.c_str());
 
     HiEventTreeMessenger MEvent(InputFile); // hiEvtAnalyzer/HiTree
-    PbPbUPCTrackTreeMessenger MTrackPbPbUPC(InputFile); // ppTracks/trackTree
+    PbPbUPCTrackTreeMessenger MTrackPbPbUPC(InputFile, (Year == 2025)? "PbPbTracks/trackTree":
+                                                                       "ppTracks/trackTree"); // ppTracks/trackTree
     GenParticleTreeMessenger MGen(InputFile); // HiGenParticleAna/hi
     PFTreeMessenger MPF(InputFile, PFTreeName); // particleFlowAnalyser/pftree
     SkimTreeMessenger MSkim(InputFile); // skimanalysis/HltTree
@@ -243,6 +244,32 @@ int main(int argc, char *argv[]) {
           MDzeroUPC.isL1ZDCXORJet12 = false;
           MDzeroUPC.isL1ZDCXORJet16 = false;
           if (ApplyTriggerRejection == 1 && IsData) std::cout << "Trigger rejection ZDCOR || ZDCXORJet8 not implemented for 2024" << std::endl;
+          if (ApplyTriggerRejection == 2 && IsData && isL1ZDCOr == false) continue;
+        }
+        else if (Year == 2025){
+          int HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v16");
+          int HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
+          int HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000_v5");
+          int HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster10000");
+          bool isL1ZDCOr =  HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 == 1;
+          // [Note] If we prescale the HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 in the upcoming run, we will change to the following
+          //   bool isL1ZDCOr = HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400 == 1 ||
+          //                    HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000 == 1;
+          MDzeroUPC.isL1ZDCOr = isL1ZDCOr;
+          MDzeroUPC.isL1ZDCOr_Min400 = HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000;
+          MDzeroUPC.isL1ZDCOr_Max400 = HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400;
+          MDzeroUPC.isL1ZDCXORJet8 = false;
+          MDzeroUPC.isL1ZDCXORJet12 = false;
+          MDzeroUPC.isL1ZDCXORJet16 = false;
+
+          // [Note] If we prescale the HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5 in the upcoming run, we will change to the following
+          // bool isZeroBias = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrack_MaxPixelTrack_v16") == 1 ||
+          //                 MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v15") == 1 ||
+          //                 MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5") == 1;
+          MDzeroUPC.isZeroBias = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5");
+          MDzeroUPC.isZeroBias_Min400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v16");
+          MDzeroUPC.isZeroBias_Max400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
+          if (ApplyTriggerRejection == 1 && IsData) std::cout << "Trigger rejection ZDCOR || ZDCXORJet8 not implemented for 2025" << std::endl;
           if (ApplyTriggerRejection == 2 && IsData && isL1ZDCOr == false) continue;
         }
       }
