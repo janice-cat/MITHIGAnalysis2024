@@ -1,2 +1,0 @@
-### Placeholder OO RAA ###
-
