@@ -1277,6 +1277,9 @@ void TriggerTreeMessenger::FillTriggerNames()
    Name.push_back("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v16");
    Name.push_back("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000_v5");
    Name.push_back("HLT_HIUPC_SingleJet12_ZDC1nXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIUPC_SingleJet12_ZDC1nAsymXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nAsymXOR_MaxPixelCluster10000_v4");
 
    std::sort(Name.begin(), Name.end());
    std::vector<std::string>::iterator iter = std::unique(Name.begin(), Name.end());
