@@ -249,9 +249,9 @@ int main(int argc, char *argv[]) {
           if (ApplyTriggerRejection == 2 && IsData && isL1ZDCOr == false) continue;
         }
         else if (Year == 2025){
-          int HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v16");
-          int HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
-          int HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000_v5");
+          int HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000");
+          int HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400");
+          int HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000");
           int HLT_HIUPC_SingleJet12_ZDC1nXOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet12_ZDC1nXOR_MaxPixelCluster10000");
           int HLT_HIUPC_SingleJet12_ZDC1nAsymXOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet12_ZDC1nAsymXOR_MaxPixelCluster10000");
           int HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000");
@@ -275,9 +275,9 @@ int main(int argc, char *argv[]) {
           // bool isZeroBias = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrack_MaxPixelTrack_v16") == 1 ||
           //                 MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v15") == 1 ||
           //                 MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5") == 1;
-          MDzeroUPC.isZeroBias = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5");
-          MDzeroUPC.isZeroBias_Min400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v16");
-          MDzeroUPC.isZeroBias_Max400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
+          MDzeroUPC.isZeroBias = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MaxPixelCluster10000");
+          MDzeroUPC.isZeroBias_Min400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000");
+          MDzeroUPC.isZeroBias_Max400 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400");
           if (ApplyTriggerRejection == 1 && IsData && (MDzeroUPC.isL1ZDCOr || MDzeroUPC.isL1ZDCOr_Min400 || MDzeroUPC.isL1ZDCOr_Max400 || MDzeroUPC.isL1ZDCXORJet12)==false) continue;
           if (ApplyTriggerRejection == 2 && IsData && (MDzeroUPC.isL1ZDCOr || MDzeroUPC.isL1ZDCOr_Min400 || MDzeroUPC.isL1ZDCOr_Max400)==false) continue;
         }
