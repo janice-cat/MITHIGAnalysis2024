@@ -65,6 +65,8 @@
 # Steps for Full Analysis
 
 ### Setup Environment
+- Slides: https://www.dropbox.com/scl/fi/srm11gxdaivbvrkz5jbpo/20250121_newAnalysisFramework.pdf?rlkey=02y94bcpxoha4zod0oog6bz7x&dl=0
+
 ```bash
 source clean.sh
 ```
