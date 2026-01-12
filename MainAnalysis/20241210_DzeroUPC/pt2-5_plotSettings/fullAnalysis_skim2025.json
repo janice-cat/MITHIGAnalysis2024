@@ -1,11 +1,11 @@
 {
-  "PlotDir": "plot/fullAnalysis_skim2025_260103/",
+  "PlotDir": "plot/fullAnalysis/",
   "Plots": [
     {
       "MinDzeroPT": 2,
       "MaxDzeroPT": 5,
       "IsGammaN": 1,
-      "InputPoints": "fullAnalysis_skim2025_260103/pt2-5_y-2--1_IsGammaN1/MassFit/correctedYields.md,fullAnalysis_skim2025_260103/pt2-5_y-1-0_IsGammaN1/MassFit/correctedYields.md,fullAnalysis_skim2025_260103/pt2-5_y0-1_IsGammaN1/MassFit/correctedYields.md,fullAnalysis_skim2025_260103/pt2-5_y1-2_IsGammaN1/MassFit/correctedYields.md",
+      "InputPoints": "fullAnalysis/pt2-5_y-2--1_IsGammaN1/MassFit/correctedYields.md,fullAnalysis/pt2-5_y-1-0_IsGammaN1/MassFit/correctedYields.md,fullAnalysis/pt2-5_y0-1_IsGammaN1/MassFit/correctedYields.md,fullAnalysis/pt2-5_y1-2_IsGammaN1/MassFit/correctedYields.md",
       "UseMaxFitUncert": true,
       "wSystLumi": 0,
       "wSystTrk": 0,
@@ -26,7 +26,7 @@
       "MinDzeroPT": 2,
       "MaxDzeroPT": 5,
       "IsGammaN": 0,
-      "InputPoints": "fullAnalysis_skim2025_260103/pt2-5_y-2--1_IsGammaN0/MassFit/correctedYields.md,fullAnalysis_skim2025_260103/pt2-5_y-1-0_IsGammaN0/MassFit/correctedYields.md,fullAnalysis_skim2025_260103/pt2-5_y0-1_IsGammaN0/MassFit/correctedYields.md,fullAnalysis_skim2025_260103/pt2-5_y1-2_IsGammaN0/MassFit/correctedYields.md",
+      "InputPoints": "fullAnalysis/pt2-5_y-2--1_IsGammaN0/MassFit/correctedYields.md,fullAnalysis/pt2-5_y-1-0_IsGammaN0/MassFit/correctedYields.md,fullAnalysis/pt2-5_y0-1_IsGammaN0/MassFit/correctedYields.md,fullAnalysis/pt2-5_y1-2_IsGammaN0/MassFit/correctedYields.md",
       "UseMaxFitUncert": true,
       "wSystLumi": 0,
       "wSystTrk": 0,
