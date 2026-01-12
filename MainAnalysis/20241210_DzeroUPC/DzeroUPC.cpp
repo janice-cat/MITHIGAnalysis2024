@@ -42,10 +42,18 @@ bool dzeroSelection(DzeroUPCTreeMessenger *b, Parameters par, int j) { return tr
 bool eventSelection(DzeroUPCTreeMessenger *b, const Parameters &par) {
   if (par.IsData)
   {
+    if (par.TriggerChoice == 0 && b->isZeroBias == false)
+      return false;
     if (par.TriggerChoice == 1 && b->isL1ZDCOr == false)
       return false;
     if (par.TriggerChoice == 2 && b->isL1ZDCXORJet8 == false)
       return false;
+    if (par.TriggerChoice == 110400 && 
+        (b->isL1ZDCOr_Min400 == false && b->isL1ZDCOr_Max400 == false)
+       ) return false;
+    if (par.TriggerChoice ==  10400 && 
+        (b->isZeroBias_Min400 == false && b->isZeroBias_Max400 == false)
+       ) return false;
   }
 
   if (b->selectedBkgFilter == false || b->selectedVtxFilter == false)
@@ -240,10 +248,10 @@ public:
               (MDzeroUPC->Dtrk1PtErr->at(j) / MDzeroUPC->Dtrk1Pt->at(j)) > 0.1 ||
               (MDzeroUPC->Dtrk2PtErr->at(j) / MDzeroUPC->Dtrk2Pt->at(j)) > 0.1
             ) continue;
-//            if (
-//              (MDzeroUPC->Dtrk1PixelHit->at(j) + MDzeroUPC->Dtrk1StripHit->at(j)) < 11 ||
-//              (MDzeroUPC->Dtrk2PixelHit->at(j) + MDzeroUPC->Dtrk2StripHit->at(j)) < 11
-//            ) continue;
+           if (
+             (MDzeroUPC->Dtrk1PixelHit->at(j) + MDzeroUPC->Dtrk1StripHit->at(j)) < 11 ||
+             (MDzeroUPC->Dtrk2PixelHit->at(j) + MDzeroUPC->Dtrk2StripHit->at(j)) < 11
+           ) continue;
           }
 
           hDmass->Fill((*MDzeroUPC->Dmass)[j]);

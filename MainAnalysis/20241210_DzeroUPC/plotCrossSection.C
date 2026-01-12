@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
   double         wSystTrk         = CL.GetDouble("wSystTrk", 0.046);             // Include tracking systematics (relative uncertainty)
   double         wSystBR          = CL.GetDouble("wSystBR", 0.0076);             // Include branching ratio systematics (relative uncertainty)
   bool           wSystEvtSel      = CL.GetBool("wSystEvtSel", true);             // Include event selection systematics
+  double         wSystPromptFrac  = CL.GetDouble("wSystPromptFrac", 0.20);       // Include prompt-fraction data-MC systematics (20% is a conservative estimate for all bins, in the future we'll replace the rel. syst. to the new study)
   vector<string> wSystRapGapSel   = CL.GetStringVector("wSystRapGapSel", "systRapGapLoose,systRapGapTight");  // Include rapidity gap selection systematics -- the uncertainty is the average variation of the two
   string         wSystDsvpv       = CL.Get    ("wSystDsvpv", "systDsvpv");       // Include D selection systematics (with the variation on svpv significance). The input is the result directory name
   string         wSystDtrkPt      = CL.Get    ("wSystDtrkPt", "systDtrkPt");     // Include D selection systematics (with the variation on trkPt). The input is the result directory name
@@ -126,51 +127,89 @@ int main(int argc, char *argv[])
   vector<vector<double> > systRapGapCorrectedYieldValues;
   for (auto rapGapConfig: wSystRapGapSel)
   {
-    systRapGapCorrectedYieldValues.push_back( 
-      getAltCorrectedYieldArr(inputPoints, 
-                    nominalSampleRST, rapGapConfig,
-                    MinDzeroPT, MaxDzeroPT, IsGammaN) 
-    );
+    if (rapGapConfig!="no") 
+    {
+      systRapGapCorrectedYieldValues.push_back( 
+        getAltCorrectedYieldArr(inputPoints, 
+                      nominalSampleRST, rapGapConfig,
+                      MinDzeroPT, MaxDzeroPT, IsGammaN) 
+      );
+    } else {
+      systRapGapCorrectedYieldValues.push_back( correctedYieldValues );
+    }
+
   }
 
   // Dsvpv
-  vector<double> systDsvpvCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
+  vector<double> systDsvpvCorrectedYieldValues = correctedYieldValues;
+  if (wSystDsvpv!="no") 
+  {
+    systDsvpvCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
                     nominalSampleRST, wSystDsvpv,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // DtrkPt
-  vector<double> systDtrkPtCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
+  vector<double> systDtrkPtCorrectedYieldValues = correctedYieldValues;
+  if (wSystDtrkPt!="no") 
+  {
+    systDtrkPtCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
                     nominalSampleRST, wSystDtrkPt,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // Dalpha
-  vector<double> systDalphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systDalphaCorrectedYieldValues = correctedYieldValues;
+  if (wSystDalpha!="no") 
+  {
+    systDalphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalSampleRST, wSystDalpha,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // Dchi2cl
-  vector<double> systDchi2clCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systDchi2clCorrectedYieldValues = correctedYieldValues;
+  if (wSystDchi2cl!="no") 
+  {
+    systDchi2clCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalSampleRST, wSystDchi2cl,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // FitSiglMean
-  vector<double> systFitSiglMeanCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitSiglMeanCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitSiglMean!="no") 
+  {
+    systFitSiglMeanCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitSiglMean,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
   
   // FitSiglAlpha
-  vector<double> systFitSiglAlphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitSiglAlphaCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitSiglAlpha!="no") 
+  {
+    systFitSiglAlphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitSiglAlpha,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
   
   // FitPkBg
-  vector<double> systFitPkBgCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitPkBgCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitPkBg!="no") 
+  {
+    systFitPkBgCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitPkBg,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
   // FitMassWindow
-  vector<double> systFitMassWindowCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitMassWindowCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitMassWindow!="no") 
+  {
+    systFitMassWindowCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitMassWindow,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   vector<double> systEvtSelUncert(nPoints);
   vector<double> systRapGapUncert(nPoints);
@@ -242,7 +281,7 @@ int main(int argc, char *argv[])
     double systLumiUncert = wSystLumi * correctedYieldValues[i];
     double systTrkUncert  = wSystTrk * correctedYieldValues[i];
     double systBRUncert   = wSystBR * correctedYieldValues[i];
-    double systPromptFrac = 0.20 * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
+    double systPromptFrac = wSystPromptFrac * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
     systTotUncert[i] = (
       systLumiUncert * systLumiUncert +
       systTrkUncert * systTrkUncert +
@@ -276,7 +315,7 @@ int main(int argc, char *argv[])
   hFrame->GetXaxis()->SetTitle("D^{0} y");
   hFrame->SetStats(0);
   hFrame->GetYaxis()->SetTitleOffset(1.5);
-  hFrame->GetYaxis()->SetRangeUser(0, 6.0);
+  hFrame->GetYaxis()->SetRangeUser(0, 8.0);
   hFrame->Draw();
 
   TGraphErrors* gr = new TGraphErrors(nPoints, yValues.data(), correctedYieldValues.data(), yErrors.data(), correctedYieldErrors.data());
@@ -324,7 +363,7 @@ int main(int argc, char *argv[])
   TLegend* leg = new TLegend(0.2, 0.78, 0.55, 0.90);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
-  leg->AddEntry(gr, "HIN-25-002", "P");
+  leg->AddEntry(gr, "2025 Data", "P");
   leg->AddEntry(gr_ref, "HIN-24-003", "P");
   leg->Draw();
 

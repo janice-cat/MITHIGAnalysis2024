@@ -114,9 +114,17 @@ int getCorrectedYields(string rawYieldInput, string effInput, string outputMD)
   const float BR = 0.03947;
   const float lumipathinvnbZDC = 1.379766654 / 1.11;
   const float lumipathinvnbNotHFAND = 0.74130;
-  const float lumipathinvnbZDCOR = 0.007802890;
+//   const float lumipathinvnbZDCOR = 0.001893851 + 0.002769042; // 0.007802890;
+//   const float lumipathinvnbZDCORPixelGated = 0.001893851 + 0.002769042;
+  const float lumipathinvnbZDCOR = 0.060364110 * 2 / 24.; // 0.001893851 + 0.002769042; // 0.007802890;
+  const float lumipathinvnbZDCORPixelGated = 0.060364110 * 2 / 24.; // 0.001893851 + 0.002769042;
+  const float lumipathinvnbZeroBias = 0.000025211; // 0.007802890;
+  const float lumipathinvnbZeroBiasPixelGated = 0.000025211;
   float lumitrigger = (parTriggerChoice==1)? lumipathinvnbZDCOR : // ZDCOR
                       (parTriggerChoice==2)? lumipathinvnbZDC   : // ZDCXORJet8
+                      (parTriggerChoice==110400)?   lumipathinvnbZDCORPixelGated :
+                      (parTriggerChoice==0)?        lumipathinvnbZeroBias :
+                      (parTriggerChoice== 10400)?   lumipathinvnbZeroBiasPixelGated :
                       -999; // [WARN] Check this
   float triggereff = 1.; // [WARN] Change this
   double cross = yield / (eff * lumitrigger * triggereff *

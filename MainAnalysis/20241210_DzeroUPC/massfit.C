@@ -42,7 +42,7 @@ using namespace std;
 #define DMASS 1.86484
 #define DMASSMIN 1.66
 #define DMASSMAX 2.16
-#define DMASSNBINS 48
+#define DMASSNBINS 20
 
 struct ParamsBase {
   std::map<std::string, RooRealVar*> params; // Store RooRealVar objects
@@ -197,7 +197,7 @@ struct SignalParams : public ParamsBase {
     if (sigAlphaRange > 0.)
     {
       alpha.setConstant(false);
-      alpha.setRange(0.0 - sigAlphaRange, 0.0 + sigAlphaRange);
+      alpha.setRange(0.0, 0.0 + sigAlphaRange);
     }
   }
 };
@@ -892,7 +892,7 @@ int main(int argc, char *argv[]) {
   ///// for fitting systematics study
   bool doSyst_sig      = CL.GetBool  ("doSyst_sig", false); // do systematics study for the signal
   double sigMeanRange  = CL.GetDouble("sigMeanRange", 0.015); // let signal mean float within <D0_mass> +/- <value>
-  double sigAlphaRange = CL.GetDouble("sigAlphaRange", 0.25); // let signal width float by <MC_width> * (1 +/- <value>)
+  double sigAlphaRange = CL.GetDouble("sigAlphaRange", 1.2); // let signal width float by <MC_width> * (1 +/- <value>)
   bool doSyst_comb     = CL.GetBool  ("doSyst_comb", false); // do systematics study for the combinatorics background
   bool doPkkk          = CL.GetBool  ("doPkkk", true); // include KK peak in background model
   bool doPkpp          = CL.GetBool  ("doPkpp", true); // include pipi peak in background model
@@ -961,7 +961,11 @@ int main(int argc, char *argv[]) {
   plotTitle << parMinDzeroPT << " #leq D_{p_{T}} < " << parMaxDzeroPT
             << " (GeV), " << parMinDzeroY << " #leq D_{y} < " << parMaxDzeroY
             << (parIsGammaN == 1 ? ", #gammaN" : ", N#gamma")
-            << (parTriggerChoice == 1 ? ", ZDCOR" : ", ZDCXORJet8");
+            << (parTriggerChoice == 1 ? ", ZDCOR" : 
+                parTriggerChoice == 0 ? ", ZeroBias" :
+                parTriggerChoice == 110400 ? ", ZDCOR+Pixel" :
+                parTriggerChoice ==  10400 ? ", ZeroBias+Pixel" :
+                                             ", ZDCXORJet8");
 
   TChain *mctree = new TChain("nt");
   for (auto file : mcInputs) mctree->Add(file.c_str());
