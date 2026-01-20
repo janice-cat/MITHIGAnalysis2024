@@ -52,7 +52,9 @@ int main(int argc, char *argv[]) {
   bool IsData = CL.GetBool("IsData", false);
   bool IsGammaNMCtype = CL.GetBool("IsGammaNMCtype", true); // This is only meaningful when IsData==false. gammaN: BeamA, Ngamma: BeamB
   int Year = CL.GetInt("Year", 2023);
-
+  bool DoPID = CL.GetBool("DoPID", true);
+  auto RootPID = CL.Get("RootPID", "../../CommonCode/root/DzeroUPC_dedxMap.root");
+  
   double Fraction = CL.GetDouble("Fraction", 1.00);
   float ZDCMinus1nThreshold = CL.GetDouble("ZDCMinus1nThreshold", 1000.);
   float ZDCPlus1nThreshold = CL.GetDouble("ZDCPlus1nThreshold", 1100.);
@@ -96,11 +98,30 @@ int main(int argc, char *argv[]) {
     ApplyDRejection = "no";
   }
 
-  for (string InputFileName : InputFileNames) {
-    TFile InputFile(InputFileName.c_str());
+  TF1 *fdedxPionCenter = 0, *fdedxPionSigmaLo = 0, *fdedxPionSigmaHi = 0,
+    *fdedxKaonCenter = 0, *fdedxKaonSigmaLo = 0, *fdedxKaonSigmaHi = 0,
+    *fdedxProtCenter = 0, *fdedxProtSigmaLo = 0, *fdedxProtSigmaHi = 0;
+  if (DoPID) {
+    std::cout<<"PID functions from: "<<RootPID<<std::endl;
+    auto dedxFunctions = ImportPIDRoot(RootPID.c_str());
+    fdedxPionCenter  = dedxFunctions[0];
+    fdedxPionSigmaLo = dedxFunctions[1];
+    fdedxPionSigmaHi = dedxFunctions[2];
+    fdedxKaonCenter  = dedxFunctions[3];
+    fdedxKaonSigmaLo = dedxFunctions[4];
+    fdedxKaonSigmaHi = dedxFunctions[5];
+    fdedxProtCenter  = dedxFunctions[6];
+    fdedxProtSigmaLo = dedxFunctions[7];
+    fdedxProtSigmaHi = dedxFunctions[8];
+  }
+  
+  for (const auto& InputFileName : InputFileNames) {
+    auto* InputFile = TFile::Open(InputFileName.c_str());
 
     HiEventTreeMessenger MEvent(InputFile); // hiEvtAnalyzer/HiTree
-    PbPbUPCTrackTreeMessenger MTrackPbPbUPC(InputFile); // ppTracks/trackTree
+    PbPbUPCTrackTreeMessenger MTrackPbPbUPC(InputFile, InputFile->Get("PbPbTracks/trackTree") ?
+                                            "PbPbTracks/trackTree" :
+                                            "ppTracks/trackTree");
     GenParticleTreeMessenger MGen(InputFile); // HiGenParticleAna/hi
     PFTreeMessenger MPF(InputFile, PFTreeName); // particleFlowAnalyser/pftree
     SkimTreeMessenger MSkim(InputFile); // skimanalysis/HltTree
@@ -115,17 +136,6 @@ int main(int argc, char *argv[]) {
     if (!HideProgressBar) {
       Bar.SetStyle(-1);
     }
-    
-    vector<TF1*> dedxFunctions = ImportPIDRoot("../../CommonCode/root/DzeroUPC_dedxMap.root");
-    TF1* fdedxPionCenter  = dedxFunctions[0];
-    TF1* fdedxPionSigmaLo = dedxFunctions[1];
-    TF1* fdedxPionSigmaHi = dedxFunctions[2];
-    TF1* fdedxKaonCenter  = dedxFunctions[3];
-    TF1* fdedxKaonSigmaLo = dedxFunctions[4];
-    TF1* fdedxKaonSigmaHi = dedxFunctions[5];
-    TF1* fdedxProtCenter  = dedxFunctions[6];
-    TF1* fdedxProtSigmaLo = dedxFunctions[7];
-    TF1* fdedxProtSigmaHi = dedxFunctions[8];
 
     /////////////////////////////////
     //////// Main Event Loop ////////
@@ -180,9 +190,10 @@ int main(int argc, char *argv[]) {
       }
       MLambdaCUPC.nVtx = MTrackPbPbUPC.nVtx;
 
-      /////////////////////////////////////
-      ////////// Event selection //////////
-      /////////////////////////////////////
+      ///////////////////////////
+      ////////// Gen D //////////
+      ///////////////////////////
+      
       if (IsData == false) {
         MLambdaCUPC.Gsize = MDfinderGen.Gsize;
         for (int iDGen = 0; iDGen < MDfinderGen.Gsize; iDGen++) {
@@ -198,65 +209,76 @@ int main(int argc, char *argv[]) {
           MLambdaCUPC.GisSignalCalcFeeddown->push_back(isSignalGen && isFeeddownGen);
         }
       }
-      if (IsData == true) {
+
+      /////////////////////////////
+      ////////// Trigger //////////
+      /////////////////////////////
+
+      if (IsData) {
+        bool incl_ZDCOr = true, incl_ZDCXORJet = true, incl_ZB = true; // for trigger rejection
+        
         if (Year == 2023) {
-          int HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000_2023 =
-              MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000");
-          int HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000_2023 =
-              MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000");
-          int HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_2023 =
-              MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400");
-          int HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_2023 =
-              MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000");
-          bool isL1ZDCOr = HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_2023 == 1 ||
-                           HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_2023 == 1;
-          bool isL1ZDCXORJet8 = HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000_2023 == 1 ||
-                                HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000_2023 == 1;
-          MLambdaCUPC.isL1ZDCOr = isL1ZDCOr;
-          MLambdaCUPC.isL1ZDCXORJet8 = isL1ZDCXORJet8;
+          MLambdaCUPC.isL1ZDCOr_Min400_Max10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000");
+          MLambdaCUPC.isL1ZDCOr_Max400_Pixel =  MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400");
+          MLambdaCUPC.isL1ZDCOr = MLambdaCUPC.isL1ZDCOr_Min400_Max10000 || MLambdaCUPC.isL1ZDCOr_Max400_Pixel;
+          MLambdaCUPC.isL1ZDCOr_Max10000 = false;
+          
+          MLambdaCUPC.isL1ZDCXORJet8 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster50000") || MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000");
           MLambdaCUPC.isL1ZDCXORJet12 = false;
           MLambdaCUPC.isL1ZDCXORJet16 = false;
-          if (ApplyTriggerRejection == 1 && IsData && (isL1ZDCOr == false && isL1ZDCXORJet8 == false)) continue;
-          if (ApplyTriggerRejection == 2 && IsData && isL1ZDCOr == false) continue;
+
+          incl_ZDCOr = MLambdaCUPC.isL1ZDCOr;
+          incl_ZDCXORJet = MLambdaCUPC.isL1ZDCXORJet8;
+          // incl_ZB = ?
         }
-        else if (Year == 2024){
-          int HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v13");
-          int HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000_v2");
-          int HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet8_ZDC1nXOR_MaxPixelCluster10000");
-          bool isL1ZDCOr = HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000 == 1 || HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000 == 1;
-          MLambdaCUPC.isL1ZDCOr = isL1ZDCOr;
+        else if (Year == 2024 || Year == 2025) {
+          MLambdaCUPC.isL1ZDCOr_Min400_Max10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000");
+          MLambdaCUPC.isL1ZDCOr_Max400_Pixel =  MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400");
+          MLambdaCUPC.isL1ZDCOr = MLambdaCUPC.isL1ZDCOr_Min400_Max10000 || MLambdaCUPC.isL1ZDCOr_Max400_Pixel;
+          MLambdaCUPC.isL1ZDCOr_Max10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000");
+
+          MLambdaCUPC.isZeroBias_Min400_Max10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000");
+          MLambdaCUPC.isZeroBias_Max400_Pixel = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400");
+          MLambdaCUPC.isZeroBias = MLambdaCUPC.isZeroBias_Min400_Max10000 || MLambdaCUPC.isZeroBias_Max400_Pixel;
+          MLambdaCUPC.isZeroBias_Max10000 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_ZeroBias_MaxPixelCluster10000");
+
           MLambdaCUPC.isL1ZDCXORJet8 = false;
-          MLambdaCUPC.isL1ZDCXORJet12 = false;
-          MLambdaCUPC.isL1ZDCXORJet16 = false;
-          if (ApplyTriggerRejection == 1 && IsData) std::cout << "Trigger rejection ZDCOR || ZDCXORJet8 not implemented for 2024" << std::endl;
-          if (ApplyTriggerRejection == 2 && IsData && isL1ZDCOr == false) continue;
+          MLambdaCUPC.isL1ZDCXORJet12 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet12_ZDC1nXOR_MaxPixelCluster10000") || MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet12_ZDC1nAsymXOR_MaxPixelCluster10000");
+          MLambdaCUPC.isL1ZDCXORJet16 = MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000") || MTrigger.CheckTriggerStartWith("HLT_HIUPC_SingleJet16_ZDC1nAsymXOR_MaxPixelCluster10000");
+
+          incl_ZDCOr = MLambdaCUPC.isL1ZDCOr_Max10000 || MLambdaCUPC.isL1ZDCOr_Min400_Max10000 || MLambdaCUPC.isL1ZDCOr_Max400_Pixel || MLambdaCUPC.isL1ZDCXORJet12;
+          incl_ZDCXORJet = MLambdaCUPC.isL1ZDCXORJet8 || MLambdaCUPC.isL1ZDCXORJet12 || MLambdaCUPC.isL1ZDCXORJet16;
+          incl_ZB = MLambdaCUPC.isZeroBias_Min400_Max10000 || MLambdaCUPC.isZeroBias_Max400_Pixel || MLambdaCUPC.isZeroBias || MLambdaCUPC.isZeroBias_Max10000;
         }
-      }
-      if (IsData == true) {
-        MLambdaCUPC.ZDCsumPlus = MZDC.sumPlus;
-        MLambdaCUPC.ZDCsumMinus = MZDC.sumMinus;
-        bool selectedBkgFilter = MSkim.ClusterCompatibilityFilter == 1 && MMETFilter.cscTightHalo2015Filter;
-        bool selectedVtxFilter = MSkim.PVFilter == 1 && fabs(MTrackPbPbUPC.zVtx->at(0)) < 15.;
-        if (ApplyEventRejection && IsData && (selectedBkgFilter == false || selectedVtxFilter == false)) continue;
-        MLambdaCUPC.selectedBkgFilter = selectedBkgFilter;
-        MLambdaCUPC.selectedVtxFilter = selectedVtxFilter;
-        bool ZDCgammaN = (MZDC.sumMinus > ZDCMinus1nThreshold && MZDC.sumPlus < ZDCPlus1nThreshold);
-        bool ZDCNgamma = (MZDC.sumMinus < ZDCMinus1nThreshold && MZDC.sumPlus > ZDCPlus1nThreshold);
-        MLambdaCUPC.ZDCgammaN = ZDCgammaN;
-        MLambdaCUPC.ZDCNgamma = ZDCNgamma;
-      } // end of if (IsData == true)
-      else { // if (IsData == false)
-        // MLambdaCUPC.ZDCsumPlus = MZDC.sumPlus;
-        // MLambdaCUPC.ZDCsumMinus = MZDC.sumMinus;
-        bool selectedBkgFilter = MSkim.ClusterCompatibilityFilter == 1; // METFilter always true for MC
-        bool selectedVtxFilter = MSkim.PVFilter == 1 && fabs(MTrackPbPbUPC.zVtx->at(0)) < 15.;
-        MLambdaCUPC.selectedBkgFilter = selectedBkgFilter;
-        MLambdaCUPC.selectedVtxFilter = selectedVtxFilter;
-        bool ZDCgammaN =  IsGammaNMCtype;
-        bool ZDCNgamma = !IsGammaNMCtype;
-        MLambdaCUPC.ZDCgammaN = ZDCgammaN;
-        MLambdaCUPC.ZDCNgamma = ZDCNgamma;
-      } // end of if (IsData == false)
+
+        if (ApplyTriggerRejection == 1 && !(incl_ZDCOr || incl_ZDCXORJet)) continue;
+        if (ApplyTriggerRejection == 2 && !incl_ZDCOr) continue;
+        if (ApplyTriggerRejection == 3 && !incl_ZB) continue;
+      } /* if (IsData) { */
+
+      /////////////////////////////////////////////
+      ////////// Offline event selection //////////
+      /////////////////////////////////////////////
+      
+      MLambdaCUPC.ZDCsumPlus = IsData ? MZDC.sumPlus : -9999.;
+      MLambdaCUPC.ZDCsumMinus = IsData ? MZDC.sumMinus : -9999.;
+      bool selectedVtxFilter = MSkim.PVFilter == 1 && fabs(MTrackPbPbUPC.zVtx->at(0)) < 15.;
+      MLambdaCUPC.selectedVtxFilter = selectedVtxFilter;
+      MLambdaCUPC.ClusterCompatibilityFilter = MSkim.ClusterCompatibilityFilter;
+      bool selectedBkgFilter = IsData ?
+        (MSkim.ClusterCompatibilityFilter && MMETFilter.cscTightHalo2015Filter) :
+        (MSkim.ClusterCompatibilityFilter);
+      MLambdaCUPC.selectedBkgFilter = selectedBkgFilter;
+      bool ZDCgammaN = IsData ?
+        (MZDC.sumMinus > ZDCMinus1nThreshold && MZDC.sumPlus < ZDCPlus1nThreshold) :
+        (IsGammaNMCtype);
+      MLambdaCUPC.ZDCgammaN = ZDCgammaN;
+      bool ZDCNgamma = IsData ?
+        (MZDC.sumMinus < ZDCMinus1nThreshold && MZDC.sumPlus > ZDCPlus1nThreshold) :
+        (!IsGammaNMCtype);
+      MLambdaCUPC.ZDCNgamma = ZDCNgamma;
+
+      if (ApplyEventRejection && IsData && (selectedBkgFilter == false || selectedVtxFilter == false)) continue;
 
       // Loop through the specified ranges for gapgammaN and gapNgamma
       // gammaN[4] and Ngamma[4] are nominal selection criteria
@@ -295,7 +317,11 @@ int main(int argc, char *argv[]) {
         nTrackInAcceptanceHP++;
       }
       MLambdaCUPC.nTrackInAcceptanceHP = nTrackInAcceptanceHP;
-      int countSelDzero = 0;
+
+      /////////////////////////////////////
+      /////////////    D loop    //////////
+      /////////////////////////////////////
+      int countSelD = 0;
       for (int iD = 0; iD < MLambdaC.Dsize; iD++) {
         bool DpassCutNominal_           = DpassCutNominal(MLambdaC, iD);
         bool DpassCutLoose_             = DpassCutLoose(MLambdaC, iD);
@@ -324,7 +350,7 @@ int main(int argc, char *argv[]) {
           else if (ApplyDRejection=="passystddtheta"  && !DpassCutSystDdtheta_) continue;
           else if (ApplyDRejection=="passystdchi2cl"  && !DpassCutSystDchi2cl_) continue;
         }
-        countSelDzero++;
+        countSelD++;
         MLambdaCUPC.Dpt->push_back(             MLambdaC.Dpt[iD]);
         MLambdaCUPC.Dy->push_back(              MLambdaC.Dy[iD]);
         MLambdaCUPC.Dmass->push_back(           MLambdaC.Dmass[iD]);
@@ -430,7 +456,7 @@ int main(int argc, char *argv[]) {
           MLambdaCUPC.DisSignalCalcFeeddown->push_back(isSignalGenMatched && isFeeddownGenMatched);
         }
       }
-      MLambdaCUPC.Dsize = countSelDzero;
+      MLambdaCUPC.Dsize = countSelD;
       MLambdaCUPC.FillEntry();
     }
     if (!HideProgressBar) {
@@ -439,7 +465,8 @@ int main(int argc, char *argv[]) {
       Bar.PrintLine();
     }
 
-    InputFile.Close();
+    InputFile->Close();
+    std::cout<<"Processed "<<EntryCount<<" events."<<std::endl;
   }
 
   OutputFile.cd();

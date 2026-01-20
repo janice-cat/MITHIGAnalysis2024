@@ -1049,6 +1049,7 @@ void TriggerTreeMessenger::FillTriggerNames()
 
    // pp trigger
    Name.push_back("HLT_AK4PFJet80_Eta5p1_v1");
+   Name.push_back("HLT_HIAK4PFJet30_v1");
    Name.push_back("HLT_HIAK4PFJet40_v1");
    Name.push_back("HLT_HIAK4PFJet60_v1");
    Name.push_back("HLT_HIAK4PFJet80_v1");
@@ -1265,6 +1266,35 @@ void TriggerTreeMessenger::FillTriggerNames()
 
    // muon triggers for mumu analysis
    Name.push_back("HLT_HIL3DoubleMuOpen_v1");
+
+   // 2025 HI ZB trigger
+   Name.push_back("HLT_HIUPC_ZeroBias_SinglePixelTrack_MaxPixelTrack_v16");
+   Name.push_back("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
+   Name.push_back("HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v16");
+   Name.push_back("HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5");
+
+   Name.push_back("HLT_HIUPC_ZDC1nOR_SingLePixelTrack_MaxPixelTrack_v16");
+   Name.push_back("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
+   Name.push_back("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v16");
+   Name.push_back("HLT_HIUPC_ZDC1nOR_MaxPixelCluster10000_v5");
+   Name.push_back("HLT_HIUPC_SingleJet12_ZDC1nXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIUPC_SingleJet12_ZDC1nAsymXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nAsymXOR_MaxPixelCluster10000_v4");
+
+   // 2018 ppref HI ZB Trigger
+   Name.push_back("HLT_HIZeroBias_part0_v6");
+   Name.push_back("HLT_HIZeroBias_part1_v6");
+   Name.push_back("HLT_HIZeroBias_part2_v6");
+   Name.push_back("HLT_HIZeroBias_part3_v6");
+   Name.push_back("HLT_HIZeroBias_part4_v6");
+   Name.push_back("HLT_HIZeroBias_part5_v6");
+   Name.push_back("HLT_HIZeroBias_part6_v6");
+   Name.push_back("HLT_HIZeroBias_part7_v6");
+   Name.push_back("HLT_HIZeroBias_part8_v6");
+   Name.push_back("HLT_HIZeroBias_part9_v6");
+   Name.push_back("HLT_HIZeroBias_part10_v6");
+   Name.push_back("HLT_HIZeroBias_part11_v6");
 
    std::sort(Name.begin(), Name.end());
    std::vector<std::string>::iterator iter = std::unique(Name.begin(), Name.end());
@@ -1814,6 +1844,7 @@ bool SingleMuTreeMessenger::Initialize(){
     SingleMuIsGlobal = nullptr;
     SingleMuIsTracker = nullptr;
     SingleMuHybridSoft = nullptr;
+    SingleMuSoft = nullptr;
 
     GenSingleMuPT = nullptr;
     GenSingleMuEta = nullptr;
@@ -1832,6 +1863,7 @@ bool SingleMuTreeMessenger::Initialize(){
     Tree->SetBranchAddress("recoIsGlobal", &SingleMuIsGlobal);
     Tree->SetBranchAddress("recoIsTracker", &SingleMuIsTracker);
     Tree->SetBranchAddress("recoIDHybridSoft", &SingleMuHybridSoft);
+    Tree->SetBranchAddress("recoIDSoft", &SingleMuSoft);
 
     Tree->SetBranchAddress("genPt", &GenSingleMuPT);
     Tree->SetBranchAddress("genEta", &GenSingleMuEta);
@@ -2753,12 +2785,6 @@ bool DfinderMasterMessenger::Initialize()
     CheckAndSetBranch(Tree, DsvpvDisErr_2D);
     CheckAndSetBranch(Tree, Dalpha);
     CheckAndSetBranch(Tree, Ddtheta);
-    CheckAndSetBranch(Tree, DsvpvDistance);
-    CheckAndSetBranch(Tree, DsvpvDisErr);
-    CheckAndSetBranch(Tree, DsvpvDistance_2D);
-    CheckAndSetBranch(Tree, DsvpvDisErr_2D);
-    CheckAndSetBranch(Tree, Dalpha);
-    CheckAndSetBranch(Tree, Ddtheta);
     // Candidate gen info
     CheckAndSetBranch(Tree, Dgen);
     CheckAndSetBranch(Tree, Dgenpt);
@@ -3657,11 +3683,19 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("VZError", &VZError);
    Tree->SetBranchAddress("nVtx", &nVtx);
    Tree->SetBranchAddress("isL1ZDCOr", &isL1ZDCOr);
+   Tree->SetBranchAddress("isL1ZDCOr_Min400_Max10000", &isL1ZDCOr_Min400_Max10000);
+   Tree->SetBranchAddress("isL1ZDCOr_Max400_Pixel", &isL1ZDCOr_Max400_Pixel);
+   Tree->SetBranchAddress("isL1ZDCOr_Max10000", &isL1ZDCOr_Max10000);
    Tree->SetBranchAddress("isL1ZDCXORJet8", &isL1ZDCXORJet8);
    Tree->SetBranchAddress("isL1ZDCXORJet12", &isL1ZDCXORJet12);
    Tree->SetBranchAddress("isL1ZDCXORJet16", &isL1ZDCXORJet16);
+   Tree->SetBranchAddress("isZeroBias", &isZeroBias);
+   Tree->SetBranchAddress("isZeroBias_Min400_Max10000", &isZeroBias_Min400_Max10000);
+   Tree->SetBranchAddress("isZeroBias_Max400_Pixel", &isZeroBias_Max400_Pixel);
+   Tree->SetBranchAddress("isZeroBias_Max10000", &isZeroBias_Max10000);
    Tree->SetBranchAddress("selectedBkgFilter", &selectedBkgFilter);
    Tree->SetBranchAddress("selectedVtxFilter", &selectedVtxFilter);
+   Tree->SetBranchAddress("ClusterCompatibilityFilter", &ClusterCompatibilityFilter);
    Tree->SetBranchAddress("ZDCsumPlus", &ZDCsumPlus);
    Tree->SetBranchAddress("ZDCsumMinus", &ZDCsumMinus);
    Tree->SetBranchAddress("HFEMaxPlus", &HFEMaxPlus);
@@ -3834,11 +3868,19 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("VZError",               &VZError, "VZError/F");
    Tree->Branch("nVtx",                  &nVtx, "nVtx/I");
    Tree->Branch("isL1ZDCOr",             &isL1ZDCOr, "isL1ZDCOr/O");
+   Tree->Branch("isL1ZDCOr_Min400_Max10000",      &isL1ZDCOr_Min400_Max10000, "isL1ZDCOr_Min400_Max10000/O");
+   Tree->Branch("isL1ZDCOr_Max400_Pixel",      &isL1ZDCOr_Max400_Pixel, "isL1ZDCOr_Max400_Pixel/O");
+   Tree->Branch("isL1ZDCOr_Max10000",      &isL1ZDCOr_Max10000, "isL1ZDCOr_Max10000/O");
    Tree->Branch("isL1ZDCXORJet8",        &isL1ZDCXORJet8, "isL1ZDCXORJet8/O");
    Tree->Branch("isL1ZDCXORJet12",       &isL1ZDCXORJet12, "isL1ZDCXORJet12/O");
    Tree->Branch("isL1ZDCXORJet16",       &isL1ZDCXORJet16, "isL1ZDCXORJet16/O");
+   Tree->Branch("isZeroBias",            &isZeroBias, "isZeroBias/O");
+   Tree->Branch("isZeroBias_Min400_Max10000",     &isZeroBias_Min400_Max10000, "isZeroBias_Min400_Max10000/O");
+   Tree->Branch("isZeroBias_Max400_Pixel",     &isZeroBias_Max400_Pixel, "isZeroBias_Max400_Pixel/O");
+   Tree->Branch("isZeroBias_Max10000",     &isZeroBias_Max10000, "isZeroBias_Max10000/O");
    Tree->Branch("selectedBkgFilter",     &selectedBkgFilter, "selectedBkgFilter/O");
    Tree->Branch("selectedVtxFilter",     &selectedVtxFilter, "selectedVtxFilter/O");
+   Tree->Branch("ClusterCompatibilityFilter",     &ClusterCompatibilityFilter, "ClusterCompatibilityFilter/O");
    Tree->Branch("ZDCgammaN",             &ZDCgammaN, "ZDCgammaN/O");
    Tree->Branch("ZDCNgamma",             &ZDCNgamma, "ZDCNgamma/O");
    Tree->Branch("gapgammaN",             &gapgammaN, "gapgammaN/O");
@@ -3930,11 +3972,19 @@ void DzeroUPCTreeMessenger::Clear()
    VZError = 0.;
    nVtx = 0;
    isL1ZDCOr = false;
+   isL1ZDCOr_Min400_Max10000 = false;
+   isL1ZDCOr_Max400_Pixel = false;
+   isL1ZDCOr_Max10000 = false;
    isL1ZDCXORJet8 = false;
    isL1ZDCXORJet12 = false;
    isL1ZDCXORJet16 = false;
+   isZeroBias = false;
+   isZeroBias_Min400_Max10000 = false;
+   isZeroBias_Max400_Pixel = false;
+   isZeroBias_Max10000 = false;
    selectedBkgFilter = false;
    selectedVtxFilter = false;
+   ClusterCompatibilityFilter = false;
    ZDCgammaN = false;
    ZDCNgamma = false;
    gapgammaN = false;
@@ -4020,11 +4070,19 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    VZError              = M.VZError;
    nVtx                 = M.nVtx;
    isL1ZDCOr            = M.isL1ZDCOr;
+   isL1ZDCOr_Min400_Max10000     = M.isL1ZDCOr_Min400_Max10000;
+   isL1ZDCOr_Max400_Pixel     = M.isL1ZDCOr_Max400_Pixel;
+   isL1ZDCOr_Max10000     = M.isL1ZDCOr_Max10000;
    isL1ZDCXORJet8       = M.isL1ZDCXORJet8;
    isL1ZDCXORJet12      = M.isL1ZDCXORJet12;
    isL1ZDCXORJet16      = M.isL1ZDCXORJet16;
+   isZeroBias           = M.isZeroBias;
+   isZeroBias_Min400_Max10000 = M.isZeroBias_Min400_Max10000;
+   isZeroBias_Max400_Pixel = M.isZeroBias_Max400_Pixel;
+   isZeroBias_Max10000 = M.isZeroBias_Max10000;
    selectedBkgFilter    = M.selectedBkgFilter;
    selectedVtxFilter    = M.selectedVtxFilter;
+   ClusterCompatibilityFilter    = M.ClusterCompatibilityFilter;
    ZDCsumPlus           = M.ZDCsumPlus;
    ZDCsumMinus          = M.ZDCsumMinus;
    HFEMaxPlus           = M.HFEMaxPlus;
@@ -4174,18 +4232,6 @@ LambdaCpksUPCTreeMessenger::~LambdaCpksUPCTreeMessenger()
     delete DisSignalCalcPrompt;
     delete DisSignalCalcFeeddown;
     
-    delete Dtrk1P;
-    delete Dtrk1Pt;
-    delete Dtrk1PtErr;
-    delete Dtrk1Eta;
-    delete Dtrk1dedx;
-    delete Dtrk1MassHypo;
-    delete Dtrk1PixelHit;
-    delete Dtrk1StripHit;
-    delete Dtrk1PionScore;
-    delete Dtrk1KaonScore;
-    delete Dtrk1ProtScore;
-    
     delete Dtrk2P;
     delete Dtrk2Pt;
     delete Dtrk2PtErr;
@@ -4197,6 +4243,8 @@ LambdaCpksUPCTreeMessenger::~LambdaCpksUPCTreeMessenger()
     delete Dtrk2PionScore;
     delete Dtrk2KaonScore;
     delete Dtrk2ProtScore;
+
+    delete DtktkResmass;    
     
     delete DRestrk1P;
     delete DRestrk1Pt;
@@ -4262,18 +4310,6 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   DisSignalCalcPrompt = nullptr;
   DisSignalCalcFeeddown = nullptr;
 
-  Dtrk1P = nullptr;
-  Dtrk1Pt = nullptr;
-  Dtrk1PtErr = nullptr;
-  Dtrk1Eta = nullptr;
-  Dtrk1dedx = nullptr;
-  Dtrk1MassHypo = nullptr;
-  Dtrk1PixelHit = nullptr;
-  Dtrk1StripHit = nullptr;
-  Dtrk1PionScore = nullptr;
-  Dtrk1KaonScore = nullptr;
-  Dtrk1ProtScore = nullptr;
-
   Dtrk2P = nullptr;
   Dtrk2Pt = nullptr;
   Dtrk2PtErr = nullptr;
@@ -4286,6 +4322,8 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   Dtrk2KaonScore = nullptr;
   Dtrk2ProtScore = nullptr;
 
+  DtktkResmass = nullptr;
+  
   DRestrk1P = nullptr;
   DRestrk1Pt = nullptr;
   DRestrk1PtErr = nullptr;
@@ -4323,11 +4361,19 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("VZError",              &VZError);
   Tree->SetBranchAddress("nVtx",                 &nVtx);
   Tree->SetBranchAddress("isL1ZDCOr",            &isL1ZDCOr);
+  Tree->SetBranchAddress("isL1ZDCOr_Min400_Max10000",     &isL1ZDCOr_Min400_Max10000);
+  Tree->SetBranchAddress("isL1ZDCOr_Max400_Pixel",     &isL1ZDCOr_Max400_Pixel);
+  Tree->SetBranchAddress("isL1ZDCOr_Max10000",     &isL1ZDCOr_Max10000);
   Tree->SetBranchAddress("isL1ZDCXORJet8",       &isL1ZDCXORJet8);
   Tree->SetBranchAddress("isL1ZDCXORJet12",      &isL1ZDCXORJet12);
   Tree->SetBranchAddress("isL1ZDCXORJet16",      &isL1ZDCXORJet16);
+  Tree->SetBranchAddress("isZeroBias",           &isZeroBias);
+  Tree->SetBranchAddress("isZeroBias_Min400_Max10000",    &isZeroBias_Min400_Max10000);
+  Tree->SetBranchAddress("isZeroBias_Max400_Pixel",    &isZeroBias_Max400_Pixel);
+  Tree->SetBranchAddress("isZeroBias_Max10000",    &isZeroBias_Max10000);
   Tree->SetBranchAddress("selectedBkgFilter",    &selectedBkgFilter);
   Tree->SetBranchAddress("selectedVtxFilter",    &selectedVtxFilter);
+  Tree->SetBranchAddress("ClusterCompatibilityFilter",    &ClusterCompatibilityFilter);
   Tree->SetBranchAddress("ZDCsumPlus",           &ZDCsumPlus);
   Tree->SetBranchAddress("ZDCsumMinus",          &ZDCsumMinus);
   Tree->SetBranchAddress("HFEMaxPlus",           &HFEMaxPlus);
@@ -4363,18 +4409,6 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("DisSignalCalcPrompt",  &DisSignalCalcPrompt);
   Tree->SetBranchAddress("DisSignalCalcFeeddown",&DisSignalCalcFeeddown);
 
-  Tree->SetBranchAddress("Dtrk1P",               &Dtrk1P);
-  Tree->SetBranchAddress("Dtrk1Pt",              &Dtrk1Pt);
-  Tree->SetBranchAddress("Dtrk1PtErr",           &Dtrk1PtErr);
-  Tree->SetBranchAddress("Dtrk1Eta",             &Dtrk1Eta);
-  Tree->SetBranchAddress("Dtrk1dedx",            &Dtrk1dedx);
-  Tree->SetBranchAddress("Dtrk1MassHypo",        &Dtrk1MassHypo);
-  Tree->SetBranchAddress("Dtrk1PixelHit",        &Dtrk1PixelHit);
-  Tree->SetBranchAddress("Dtrk1StripHit",        &Dtrk1StripHit);
-  Tree->SetBranchAddress("Dtrk1PionScore",       &Dtrk1PionScore);
-  Tree->SetBranchAddress("Dtrk1KaonScore",       &Dtrk1KaonScore);
-  Tree->SetBranchAddress("Dtrk1ProtScore",       &Dtrk1ProtScore);
-
   Tree->SetBranchAddress("Dtrk2P",               &Dtrk2P);
   Tree->SetBranchAddress("Dtrk2Pt",              &Dtrk2Pt);
   Tree->SetBranchAddress("Dtrk2PtErr",           &Dtrk2PtErr);
@@ -4387,6 +4421,8 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("Dtrk2KaonScore",       &Dtrk2KaonScore);
   Tree->SetBranchAddress("Dtrk2ProtScore",       &Dtrk2ProtScore);
 
+  Tree->SetBranchAddress("DtktkResmass",         &DtktkResmass);
+  
   Tree->SetBranchAddress("DRestrk1P",            &DRestrk1P);
   Tree->SetBranchAddress("DRestrk1Pt",           &DRestrk1Pt);
   Tree->SetBranchAddress("DRestrk1PtErr",        &DRestrk1PtErr);
@@ -4464,18 +4500,6 @@ bool LambdaCpksUPCTreeMessenger::SetBranch(TTree *T)
   DisSignalCalcPrompt = new std::vector<bool>();
   DisSignalCalcFeeddown = new std::vector<bool>();
 
-  Dtrk1P = new std::vector<float>();
-  Dtrk1Pt = new std::vector<float>();
-  Dtrk1PtErr = new std::vector<float>();
-  Dtrk1Eta = new std::vector<float>();
-  Dtrk1dedx = new std::vector<float>();
-  Dtrk1MassHypo = new std::vector<float>();
-  Dtrk1PixelHit = new std::vector<float>();
-  Dtrk1StripHit = new std::vector<float>();
-  Dtrk1PionScore = new std::vector<float>();
-  Dtrk1KaonScore = new std::vector<float>();
-  Dtrk1ProtScore = new std::vector<float>();
-
   Dtrk2P = new std::vector<float>();
   Dtrk2Pt = new std::vector<float>();
   Dtrk2PtErr = new std::vector<float>();
@@ -4488,6 +4512,8 @@ bool LambdaCpksUPCTreeMessenger::SetBranch(TTree *T)
   Dtrk2KaonScore = new std::vector<float>();
   Dtrk2ProtScore = new std::vector<float>();
 
+  DtktkResmass = new std::vector<float>();
+  
   DRestrk1P = new std::vector<float>();
   DRestrk1Pt = new std::vector<float>();
   DRestrk1PtErr = new std::vector<float>();
@@ -4527,11 +4553,19 @@ bool LambdaCpksUPCTreeMessenger::SetBranch(TTree *T)
   Tree->Branch("VZError",               &VZError,               "VZError/F");
   Tree->Branch("nVtx",                  &nVtx,                  "nVtx/I");
   Tree->Branch("isL1ZDCOr",             &isL1ZDCOr,             "isL1ZDCOr/O");
+  Tree->Branch("isL1ZDCOr_Min400_Max10000",      &isL1ZDCOr_Min400_Max10000,      "isL1ZDCOr_Min400_Max10000/O");
+  Tree->Branch("isL1ZDCOr_Max400_Pixel",      &isL1ZDCOr_Max400_Pixel,      "isL1ZDCOr_Max400_Pixel/O");
+  Tree->Branch("isL1ZDCOr_Max10000",      &isL1ZDCOr_Max10000,      "isL1ZDCOr_Max10000/O");
   Tree->Branch("isL1ZDCXORJet8",        &isL1ZDCXORJet8,        "isL1ZDCXORJet8/O");
   Tree->Branch("isL1ZDCXORJet12",       &isL1ZDCXORJet12,       "isL1ZDCXORJet12/O");
   Tree->Branch("isL1ZDCXORJet16",       &isL1ZDCXORJet16,       "isL1ZDCXORJet16/O");
+  Tree->Branch("isZeroBias",            &isZeroBias,            "isZeroBias/O");
+  Tree->Branch("isZeroBias_Min400_Max10000",     &isZeroBias_Min400_Max10000,     "isZeroBias_Min400_Max10000/O");
+  Tree->Branch("isZeroBias_Max400_Pixel",     &isZeroBias_Max400_Pixel,     "isZeroBias_Max400_Pixel/O");
+  Tree->Branch("isZeroBias_Max10000",     &isZeroBias_Max10000,     "isZeroBias_Max10000/O");
   Tree->Branch("selectedBkgFilter",     &selectedBkgFilter,     "selectedBkgFilter/O");
   Tree->Branch("selectedVtxFilter",     &selectedVtxFilter,     "selectedVtxFilter/O");
+  Tree->Branch("ClusterCompatibilityFilter",     &ClusterCompatibilityFilter,     "ClusterCompatibilityFilter/O");
   Tree->Branch("ZDCgammaN",             &ZDCgammaN,             "ZDCgammaN/O");
   Tree->Branch("ZDCNgamma",             &ZDCNgamma,             "ZDCNgamma/O");
   Tree->Branch("gapgammaN",             &gapgammaN,             "gapgammaN/O");
@@ -4567,18 +4601,6 @@ bool LambdaCpksUPCTreeMessenger::SetBranch(TTree *T)
   Tree->Branch("DisSignalCalcPrompt",   &DisSignalCalcPrompt);
   Tree->Branch("DisSignalCalcFeeddown", &DisSignalCalcFeeddown);
 
-  Tree->Branch("Dtrk1P",                &Dtrk1P);
-  Tree->Branch("Dtrk1Pt",               &Dtrk1Pt);
-  Tree->Branch("Dtrk1PtErr",            &Dtrk1PtErr);
-  Tree->Branch("Dtrk1Eta",              &Dtrk1Eta);
-  Tree->Branch("Dtrk1dedx",             &Dtrk1dedx);
-  Tree->Branch("Dtrk1MassHypo",         &Dtrk1MassHypo);
-  Tree->Branch("Dtrk1PixelHit",         &Dtrk1PixelHit);
-  Tree->Branch("Dtrk1StripHit",         &Dtrk1StripHit);
-  Tree->Branch("Dtrk1PionScore",        &Dtrk1PionScore);
-  Tree->Branch("Dtrk1KaonScore",        &Dtrk1KaonScore);
-  Tree->Branch("Dtrk1ProtScore",        &Dtrk1ProtScore);
-
   Tree->Branch("Dtrk2P",                &Dtrk2P);
   Tree->Branch("Dtrk2Pt",               &Dtrk2Pt);
   Tree->Branch("Dtrk2PtErr",            &Dtrk2PtErr);
@@ -4591,6 +4613,8 @@ bool LambdaCpksUPCTreeMessenger::SetBranch(TTree *T)
   Tree->Branch("Dtrk2KaonScore",        &Dtrk2KaonScore);
   Tree->Branch("Dtrk2ProtScore",        &Dtrk2ProtScore);
 
+  Tree->Branch("DtktkResmass",          &DtktkResmass);
+  
   Tree->Branch("DRestrk1P",             &DRestrk1P);
   Tree->Branch("DRestrk1Pt",            &DRestrk1Pt);
   Tree->Branch("DRestrk1PtErr",         &DRestrk1PtErr);
@@ -4636,11 +4660,19 @@ void LambdaCpksUPCTreeMessenger::Clear()
   VZError = 0.;
   nVtx = 0;
   isL1ZDCOr = false;
+  isL1ZDCOr_Min400_Max10000 = false;
+  isL1ZDCOr_Max400_Pixel = false;
+  isL1ZDCOr_Max10000 = false;
   isL1ZDCXORJet8 = false;
   isL1ZDCXORJet12 = false;
   isL1ZDCXORJet16 = false;
+  isZeroBias = false;
+  isZeroBias_Min400_Max10000 = false;
+  isZeroBias_Max400_Pixel = false;
+  isZeroBias_Max10000 = false;
   selectedBkgFilter = false;
   selectedVtxFilter = false;
+  ClusterCompatibilityFilter = false;
   ZDCgammaN = false;
   ZDCNgamma = false;
   gapgammaN = false;
@@ -4676,18 +4708,6 @@ void LambdaCpksUPCTreeMessenger::Clear()
   DisSignalCalcPrompt->clear();
   DisSignalCalcFeeddown->clear();
 
-  Dtrk1P->clear();
-  Dtrk1Pt->clear();
-  Dtrk1PtErr->clear();
-  Dtrk1Eta->clear();
-  Dtrk1dedx->clear();
-  Dtrk1MassHypo->clear();
-  Dtrk1PixelHit->clear();
-  Dtrk1StripHit->clear();
-  Dtrk1PionScore->clear();
-  Dtrk1KaonScore->clear();
-  Dtrk1ProtScore->clear();
-
   Dtrk2P->clear();
   Dtrk2Pt->clear();
   Dtrk2PtErr->clear();
@@ -4700,6 +4720,8 @@ void LambdaCpksUPCTreeMessenger::Clear()
   Dtrk2KaonScore->clear();
   Dtrk2ProtScore->clear();
 
+  DtktkResmass->clear();
+  
   DRestrk1P->clear();
   DRestrk1Pt->clear();
   DRestrk1PtErr->clear();
@@ -4741,11 +4763,19 @@ void LambdaCpksUPCTreeMessenger::CopyNonTrack(LambdaCpksUPCTreeMessenger &M)
   VZError              = M.VZError;
   nVtx                 = M.nVtx;
   isL1ZDCOr            = M.isL1ZDCOr;
+  isL1ZDCOr_Min400_Max10000 = M.isL1ZDCOr_Min400_Max10000;
+  isL1ZDCOr_Max400_Pixel = M.isL1ZDCOr_Max400_Pixel;
+  isL1ZDCOr_Max10000 = M.isL1ZDCOr_Max10000;
   isL1ZDCXORJet8       = M.isL1ZDCXORJet8;
   isL1ZDCXORJet12      = M.isL1ZDCXORJet12;
   isL1ZDCXORJet16      = M.isL1ZDCXORJet16;
+  isZeroBias           = M.isZeroBias;
+  isZeroBias_Min400_Max10000 = M.isZeroBias_Min400_Max10000;
+  isZeroBias_Max400_Pixel = M.isZeroBias_Max400_Pixel;
+  isZeroBias_Max10000 = M.isZeroBias_Max10000;
   selectedBkgFilter    = M.selectedBkgFilter;
   selectedVtxFilter    = M.selectedVtxFilter;
+  ClusterCompatibilityFilter = M.ClusterCompatibilityFilter;
   ZDCsumPlus           = M.ZDCsumPlus;
   ZDCsumMinus          = M.ZDCsumMinus;
   HFEMaxPlus           = M.HFEMaxPlus;
@@ -4803,29 +4833,6 @@ void LambdaCpksUPCTreeMessenger::CopyNonTrack(LambdaCpksUPCTreeMessenger &M)
   if(DisSignalCalcFeeddown  != nullptr && M.DisSignalCalcFeeddown  != nullptr)
     *DisSignalCalcFeeddown            = *(M.DisSignalCalcFeeddown);
   
-  if(Dtrk1P                 != nullptr && M.Dtrk1P                 != nullptr)
-    *Dtrk1P                           = *(M.Dtrk1P);
-  if(Dtrk1Pt                != nullptr && M.Dtrk1Pt                != nullptr)
-    *Dtrk1Pt                          = *(M.Dtrk1Pt);
-  if(Dtrk1PtErr             != nullptr && M.Dtrk1PtErr             != nullptr)
-    *Dtrk1PtErr                       = *(M.Dtrk1PtErr);
-  if(Dtrk1Eta               != nullptr && M.Dtrk1Eta               != nullptr)
-    *Dtrk1Eta                         = *(M.Dtrk1Eta);
-  if(Dtrk1dedx              != nullptr && M.Dtrk1dedx              != nullptr)
-    *Dtrk1dedx                        = *(M.Dtrk1dedx);
-  if(Dtrk1MassHypo          != nullptr && M.Dtrk1MassHypo          != nullptr)
-    *Dtrk1MassHypo                    = *(M.Dtrk1MassHypo);
-  if(Dtrk1PixelHit          != nullptr && M.Dtrk1PixelHit          != nullptr)
-    *Dtrk1PixelHit                    = *(M.Dtrk1PixelHit);
-  if(Dtrk1StripHit          != nullptr && M.Dtrk1StripHit          != nullptr)
-    *Dtrk1StripHit                    = *(M.Dtrk1StripHit);
-  if(Dtrk1PionScore         != nullptr && M.Dtrk1PionScore         != nullptr)
-    *Dtrk1PionScore                   = *(M.Dtrk1PionScore);
-  if(Dtrk1KaonScore         != nullptr && M.Dtrk1KaonScore         != nullptr)
-    *Dtrk1KaonScore                   = *(M.Dtrk1KaonScore);
-  if(Dtrk1ProtScore         != nullptr && M.Dtrk1ProtScore         != nullptr)
-    *Dtrk1ProtScore                   = *(M.Dtrk1ProtScore);
-  
   if(Dtrk2P                 != nullptr && M.Dtrk2P                 != nullptr)
     *Dtrk2P                           = *(M.Dtrk2P);
   if(Dtrk2Pt                != nullptr && M.Dtrk2Pt                != nullptr)
@@ -4848,6 +4855,9 @@ void LambdaCpksUPCTreeMessenger::CopyNonTrack(LambdaCpksUPCTreeMessenger &M)
     *Dtrk2KaonScore                   = *(M.Dtrk2KaonScore);
   if(Dtrk2ProtScore         != nullptr && M.Dtrk2ProtScore         != nullptr)
     *Dtrk2ProtScore                   = *(M.Dtrk2ProtScore);
+
+  if(DtktkResmass           != nullptr && M.DtktkResmass           != nullptr)
+    *DtktkResmass                     = *(M.DtktkResmass);
   
   if(DRestrk1P              != nullptr && M.DRestrk1P              != nullptr)
     *DRestrk1P                        = *(M.DRestrk1P);
@@ -5111,11 +5121,19 @@ bool LambdaCpkpiUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("VZError",              &VZError);
   Tree->SetBranchAddress("nVtx",                 &nVtx);
   Tree->SetBranchAddress("isL1ZDCOr",            &isL1ZDCOr);
+  Tree->SetBranchAddress("isL1ZDCOr_Min400_Max10000",     &isL1ZDCOr_Min400_Max10000);
+  Tree->SetBranchAddress("isL1ZDCOr_Max400_Pixel",     &isL1ZDCOr_Max400_Pixel);
+  Tree->SetBranchAddress("isL1ZDCOr_Max10000",     &isL1ZDCOr_Max10000);
   Tree->SetBranchAddress("isL1ZDCXORJet8",       &isL1ZDCXORJet8);
   Tree->SetBranchAddress("isL1ZDCXORJet12",      &isL1ZDCXORJet12);
   Tree->SetBranchAddress("isL1ZDCXORJet16",      &isL1ZDCXORJet16);
+  Tree->SetBranchAddress("isZeroBias",           &isZeroBias);
+  Tree->SetBranchAddress("isZeroBias_Min400_Max10000",    &isZeroBias_Min400_Max10000);
+  Tree->SetBranchAddress("isZeroBias_Max400_Pixel",    &isZeroBias_Max400_Pixel);
+  Tree->SetBranchAddress("isZeroBias_Max10000",    &isZeroBias_Max10000);
   Tree->SetBranchAddress("selectedBkgFilter",    &selectedBkgFilter);
   Tree->SetBranchAddress("selectedVtxFilter",    &selectedVtxFilter);
+  Tree->SetBranchAddress("ClusterCompatibilityFilter",    &ClusterCompatibilityFilter);
   Tree->SetBranchAddress("ZDCsumPlus",           &ZDCsumPlus);
   Tree->SetBranchAddress("ZDCsumMinus",          &ZDCsumMinus);
   Tree->SetBranchAddress("HFEMaxPlus",           &HFEMaxPlus);
@@ -5299,11 +5317,19 @@ bool LambdaCpkpiUPCTreeMessenger::SetBranch(TTree *T)
   Tree->Branch("VZError",               &VZError,               "VZError/F");
   Tree->Branch("nVtx",                  &nVtx,                  "nVtx/I");
   Tree->Branch("isL1ZDCOr",             &isL1ZDCOr,             "isL1ZDCOr/O");
+  Tree->Branch("isL1ZDCOr_Min400_Max10000",      &isL1ZDCOr_Min400_Max10000,      "isL1ZDCOr_Min400_Max10000/O");
+  Tree->Branch("isL1ZDCOr_Max400_Pixel",      &isL1ZDCOr_Max400_Pixel,      "isL1ZDCOr_Max400_Pixel/O");
+  Tree->Branch("isL1ZDCOr_Max10000",      &isL1ZDCOr_Max10000,      "isL1ZDCOr_Max10000/O");
   Tree->Branch("isL1ZDCXORJet8",        &isL1ZDCXORJet8,        "isL1ZDCXORJet8/O");
   Tree->Branch("isL1ZDCXORJet12",       &isL1ZDCXORJet12,       "isL1ZDCXORJet12/O");
   Tree->Branch("isL1ZDCXORJet16",       &isL1ZDCXORJet16,       "isL1ZDCXORJet16/O");
+  Tree->Branch("isZeroBias",            &isZeroBias,            "isZeroBias/O");
+  Tree->Branch("isZeroBias_Min400_Max10000",     &isZeroBias_Min400_Max10000,     "isZeroBias_Min400_Max10000/O");
+  Tree->Branch("isZeroBias_Max400_Pixel",     &isZeroBias_Max400_Pixel,     "isZeroBias_Max400_Pixel/O");
+  Tree->Branch("isZeroBias_Max10000",     &isZeroBias_Max10000,     "isZeroBias_Max10000/O");
   Tree->Branch("selectedBkgFilter",     &selectedBkgFilter,     "selectedBkgFilter/O");
   Tree->Branch("selectedVtxFilter",     &selectedVtxFilter,     "selectedVtxFilter/O");
+  Tree->Branch("ClusterCompatibilityFilter",     &ClusterCompatibilityFilter,     "ClusterCompatibilityFilter/O");
   Tree->Branch("ZDCgammaN",             &ZDCgammaN,             "ZDCgammaN/O");
   Tree->Branch("ZDCNgamma",             &ZDCNgamma,             "ZDCNgamma/O");
   Tree->Branch("gapgammaN",             &gapgammaN,             "gapgammaN/O");
@@ -5400,11 +5426,19 @@ void LambdaCpkpiUPCTreeMessenger::Clear()
   VZError = 0.;
   nVtx = 0;
   isL1ZDCOr = false;
+  isL1ZDCOr_Min400_Max10000 = false;
+  isL1ZDCOr_Max400_Pixel = false;
+  isL1ZDCOr_Max10000 = false;
   isL1ZDCXORJet8 = false;
   isL1ZDCXORJet12 = false;
   isL1ZDCXORJet16 = false;
+  isZeroBias = false;
+  isZeroBias_Min400_Max10000 = false;
+  isZeroBias_Max400_Pixel = false;
+  isZeroBias_Max10000 = false;
   selectedBkgFilter = false;
   selectedVtxFilter = false;
+  ClusterCompatibilityFilter = false;
   ZDCgammaN = false;
   ZDCNgamma = false;
   gapgammaN = false;
@@ -5497,11 +5531,19 @@ void LambdaCpkpiUPCTreeMessenger::CopyNonTrack(LambdaCpkpiUPCTreeMessenger &M)
   VZError              = M.VZError;
   nVtx                 = M.nVtx;
   isL1ZDCOr            = M.isL1ZDCOr;
+  isL1ZDCOr_Min400_Max10000 = M.isL1ZDCOr_Min400_Max10000;
+  isL1ZDCOr_Max400_Pixel = M.isL1ZDCOr_Max400_Pixel;
+  isL1ZDCOr_Max10000 = M.isL1ZDCOr_Max10000;
   isL1ZDCXORJet8       = M.isL1ZDCXORJet8;
   isL1ZDCXORJet12      = M.isL1ZDCXORJet12;
   isL1ZDCXORJet16      = M.isL1ZDCXORJet16;
+  isZeroBias           = M.isZeroBias;
+  isZeroBias_Min400_Max10000 = M.isZeroBias_Min400_Max10000;
+  isZeroBias_Max400_Pixel = M.isZeroBias_Max400_Pixel;
+  isZeroBias_Max10000 = M.isZeroBias_Max10000;
   selectedBkgFilter    = M.selectedBkgFilter;
   selectedVtxFilter    = M.selectedVtxFilter;
+  ClusterCompatibilityFilter    = M.ClusterCompatibilityFilter;
   ZDCsumPlus           = M.ZDCsumPlus;
   ZDCsumMinus          = M.ZDCsumMinus;
   HFEMaxPlus           = M.HFEMaxPlus;
