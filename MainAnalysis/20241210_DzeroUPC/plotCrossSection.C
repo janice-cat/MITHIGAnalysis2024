@@ -28,14 +28,15 @@ int main(int argc, char *argv[])
   float MinDzeroPT = CL.GetDouble("MinDzeroPT", 2);  // Minimum Dzero transverse momentum threshold for Dzero selection.
   float MaxDzeroPT = CL.GetDouble("MaxDzeroPT", 5);  // Maximum Dzero transverse momentum threshold for Dzero selection.
   bool IsGammaN = CL.GetBool("IsGammaN", true);      // GammaN analysis (or NGamma)
-  bool UseMaxFitUncert = CL.GetBool("UseMaxFitUncert", false);
-
   vector<string> inputPoints      = CL.GetStringVector("InputPoints",    ""); // Input corrected yields md files
 
+  /* [TODO::Split Systematics Workflow] Identify this part to be separated from the plotting macro! */
+  bool UseMaxFitUncert = CL.GetBool("UseMaxFitUncert", false);
   double         wSystLumi        = CL.GetDouble("wSystLumi", 0.05);             // Include luminosity systematics (relative uncertainty)
   double         wSystTrk         = CL.GetDouble("wSystTrk", 0.046);             // Include tracking systematics (relative uncertainty)
   double         wSystBR          = CL.GetDouble("wSystBR", 0.0076);             // Include branching ratio systematics (relative uncertainty)
   bool           wSystEvtSel      = CL.GetBool("wSystEvtSel", true);             // Include event selection systematics
+  double         wSystPromptFrac  = CL.GetDouble("wSystPromptFrac", 0.20);       // Include prompt-fraction data-MC systematics (20% is a conservative estimate for all bins, in the future we'll replace the rel. syst. to the new study)
   vector<string> wSystRapGapSel   = CL.GetStringVector("wSystRapGapSel", "systRapGapLoose,systRapGapTight");  // Include rapidity gap selection systematics -- the uncertainty is the average variation of the two
   string         wSystDsvpv       = CL.Get    ("wSystDsvpv", "systDsvpv");       // Include D selection systematics (with the variation on svpv significance). The input is the result directory name
   string         wSystDtrkPt      = CL.Get    ("wSystDtrkPt", "systDtrkPt");     // Include D selection systematics (with the variation on trkPt). The input is the result directory name
@@ -119,6 +120,17 @@ int main(int argc, char *argv[])
     }
   }
 
+  /* [TODO::Split Systematics Workflow] Identify this part to be separated from the plotting macro!
+   *   - The step-1 here can go into the Comp.C, which calculate the difference of the alternative versus nominal.
+   *   - The macro can be reused for different syst sources, different (pt,y) bins
+   *   - Expecting:
+   *      - Input: (nominal paths, systematics paths)
+   *      - What it does: diff all the pt*-y*_gammaN/Ngamma sub-folders
+   *      - Output: table-like structure
+   *                  | syst source | pT  | y   | gammaN | abs syst | rel syst |
+   *                  |-------------|-----|-----|--------|----------|----------|
+   *                  | rap gap     |(2,5)|(0,1)|   1    |   xxx    |   xxx%   |
+   */
   /////////////////////////////////
   // 1. Calculate the systematics uncertainties for each componenet
   /////////////////////////////////
@@ -126,52 +138,102 @@ int main(int argc, char *argv[])
   vector<vector<double> > systRapGapCorrectedYieldValues;
   for (auto rapGapConfig: wSystRapGapSel)
   {
-    systRapGapCorrectedYieldValues.push_back( 
-      getAltCorrectedYieldArr(inputPoints, 
-                    nominalSampleRST, rapGapConfig,
-                    MinDzeroPT, MaxDzeroPT, IsGammaN) 
-    );
+    if (rapGapConfig!="no") 
+    {
+      systRapGapCorrectedYieldValues.push_back( 
+        getAltCorrectedYieldArr(inputPoints, 
+                      nominalSampleRST, rapGapConfig,
+                      MinDzeroPT, MaxDzeroPT, IsGammaN) 
+      );
+    } else {
+      systRapGapCorrectedYieldValues.push_back( correctedYieldValues );
+    }
+
   }
 
   // Dsvpv
-  vector<double> systDsvpvCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
+  vector<double> systDsvpvCorrectedYieldValues = correctedYieldValues;
+  if (wSystDsvpv!="no") 
+  {
+    systDsvpvCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
                     nominalSampleRST, wSystDsvpv,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // DtrkPt
-  vector<double> systDtrkPtCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
+  vector<double> systDtrkPtCorrectedYieldValues = correctedYieldValues;
+  if (wSystDtrkPt!="no") 
+  {
+    systDtrkPtCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints, 
                     nominalSampleRST, wSystDtrkPt,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // Dalpha
-  vector<double> systDalphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systDalphaCorrectedYieldValues = correctedYieldValues;
+  if (wSystDalpha!="no") 
+  {
+    systDalphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalSampleRST, wSystDalpha,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // Dchi2cl
-  vector<double> systDchi2clCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systDchi2clCorrectedYieldValues = correctedYieldValues;
+  if (wSystDchi2cl!="no") 
+  {
+    systDchi2clCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalSampleRST, wSystDchi2cl,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
   // FitSiglMean
-  vector<double> systFitSiglMeanCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitSiglMeanCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitSiglMean!="no") 
+  {
+    systFitSiglMeanCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitSiglMean,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
   
   // FitSiglAlpha
-  vector<double> systFitSiglAlphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitSiglAlphaCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitSiglAlpha!="no") 
+  {
+    systFitSiglAlphaCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitSiglAlpha,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
   
   // FitPkBg
-  vector<double> systFitPkBgCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitPkBgCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitPkBg!="no") 
+  {
+    systFitPkBgCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitPkBg,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
   // FitMassWindow
-  vector<double> systFitMassWindowCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
+  vector<double> systFitMassWindowCorrectedYieldValues = correctedYieldValues;
+  if (wSystFitMassWindow!="no") 
+  {
+    systFitMassWindowCorrectedYieldValues = getAltCorrectedYieldArr(inputPoints,
                     nominalFitRST, wSystFitMassWindow,
                     MinDzeroPT, MaxDzeroPT, IsGammaN);
+  }
 
+  /* [TODO::Split Systematics Workflow] Identify this part to be separated from the plotting macro!
+   *   - The step-2 (after subtracting the nominal values): we will do sumSyst.C to cook up the total systematics
+   *   - We will want to print the decomposition of the systematics source by source, in .md, .tex, and plot them in stack histogram
+   *   - Expecting:
+   *      - Input: table-like structure
+   *                  | syst source | pT  | y   | gammaN | abs syst | rel syst |
+   *                  |-------------|-----|-----|--------|----------|----------|
+   *                  | rap gap     |(2,5)|(0,1)|   1    |   xxx    |   xxx%   |
+   *      - What it does: consider how to sum the sources
+   *      - Output: an array of the total systematics values, in bins of y
+   *                => We will parse this to the plotting macro
+   */
   vector<double> systEvtSelUncert(nPoints);
   vector<double> systRapGapUncert(nPoints);
   vector<double> systDsvpvUncert(nPoints);
@@ -242,7 +304,7 @@ int main(int argc, char *argv[])
     double systLumiUncert = wSystLumi * correctedYieldValues[i];
     double systTrkUncert  = wSystTrk * correctedYieldValues[i];
     double systBRUncert   = wSystBR * correctedYieldValues[i];
-    double systPromptFrac = 0.20 * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
+    double systPromptFrac = wSystPromptFrac * correctedYieldValues[i]; // [TODO] replaced the rel. syst. to the new study
     systTotUncert[i] = (
       systLumiUncert * systLumiUncert +
       systTrkUncert * systTrkUncert +
@@ -276,7 +338,7 @@ int main(int argc, char *argv[])
   hFrame->GetXaxis()->SetTitle("D^{0} y");
   hFrame->SetStats(0);
   hFrame->GetYaxis()->SetTitleOffset(1.5);
-  hFrame->GetYaxis()->SetRangeUser(0, 6.0);
+  hFrame->GetYaxis()->SetRangeUser(0, 3.5);
   hFrame->Draw();
 
   TGraphErrors* gr = new TGraphErrors(nPoints, yValues.data(), correctedYieldValues.data(), yErrors.data(), correctedYieldErrors.data());
@@ -297,36 +359,18 @@ int main(int argc, char *argv[])
   gr_uncert->SetFillColorAlpha(kRed,0.3); // Set color for uncertainty band (you can adjust it)
   gr_uncert->Draw("2 SAME"); // Draw the uncertainty band
 
-  /////////////////////////////////
-  // [TODO] Need to add a flag to decide whether to overlay the HIN-24-003 result
-  /////////////////////////////////
-  TGraphErrors* gr_ref = (IsGammaN)? &gr_ref_gammaN: &gr_ref_Ngamma;
-  gr_ref->SetMarkerStyle(20);
-  gr_ref->SetMarkerSize(1.2);
-  gr_ref->SetLineColor(kBlack);
-  gr_ref->SetMarkerColor(kBlack);
-  gr_ref->SetLineWidth(2);
+  TLegend* leg = new TLegend(0.2, 0.78, 0.55, 0.90);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+  leg->AddEntry(gr, "2025 Data", "P");
 
-  gr_ref->Draw("P E1 SAME");
-
-  // Create the uncertainty band (systematic)
-  TGraphErrors* gr_uncert_ref = (IsGammaN)? &gr_uncert_ref_gammaN: &gr_uncert_ref_Ngamma;
-  gr_uncert_ref->SetFillColorAlpha(kBlack,0.3); // Set color for uncertainty band (you can adjust it)
-  gr_uncert_ref->Draw("2 SAME"); // Draw the uncertainty band
+  drawPubCurves(IsGammaN, leg);
+  leg->Draw();
 
   TFile *outFile = new TFile(Form("%s/histograms_pt%d-%d_IsGammaN%o.root", PlotDir.c_str(), (int) MinDzeroPT, (int) MaxDzeroPT,
                    IsGammaN), "RECREATE");
   gr->SetName("correctedYield"); gr->Write();
   gr_uncert->SetName("correctedYieldSyst"); gr_uncert->Write();
-  gr_ref->SetName("RefCorrectedYield"); gr_ref->Write();
-  gr_uncert_ref->SetName("RefCorrectedYieldSyst"); gr_uncert_ref->Write();
-
-  TLegend* leg = new TLegend(0.2, 0.78, 0.55, 0.90);
-  leg->SetFillStyle(0);
-  leg->SetBorderSize(0);
-  leg->AddEntry(gr, "HIN-25-002", "P");
-  leg->AddEntry(gr_ref, "HIN-24-003", "P");
-  leg->Draw();
 
   TLatex latex;
   latex.SetNDC();

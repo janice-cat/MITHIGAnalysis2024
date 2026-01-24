@@ -2,6 +2,7 @@
 
 FitSettingCard=${1}
 FitDir=$(jq -r '.FitDir' $FitSettingCard)
+luminosity=$(jq -r '.luminosity' $FitSettingCard)
 
 # Extract the directory path for fullAnalysis
 MicroTreeDir=$(jq -r '.MicroTrees[0].dataInput' $FitSettingCard | grep -o '^[^/]*')
@@ -65,6 +66,7 @@ jq -c '.MicroTrees[]' $FitSettingCard | while read MicroTree; do
   echo '= Getting corrected yields:' >> $RstDir/fit.log
   echo '================================================' >> $RstDir/fit.log
   cmd="./CorrectedYields --rawYieldInput $RstDir/fit.root --effInput $effmcInput --Output $RstDir/correctedYields.md"
+  [ "$luminosity" != "null" ] && cmd="$cmd --luminosity $luminosity"
 
   echo "Executing >>>>>>"
   echo $cmd
