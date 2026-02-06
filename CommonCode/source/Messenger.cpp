@@ -119,6 +119,16 @@ bool HiEventTreeMessenger::Initialize()
    else                                 Ncoll = 0.;
    if(Tree->GetBranch("Npart"))         Tree->SetBranchAddress("Npart", &Npart);
    else                                 Npart = 0.;
+   if(Tree->GetBranch("ProcessID"))     Tree->SetBranchAddress("ProcessID", &ProcessID);
+   else                                 ProcessID = -999;
+   if(Tree->GetBranch("clusComp_nPixHits"))     Tree->SetBranchAddress("clusComp_nPixHits", &clusComp_nPixHits);
+   else                                 clusComp_nPixHits = -999;
+   if(Tree->GetBranch("clusComp_z0"))     Tree->SetBranchAddress("clusComp_z0", &clusComp_z0);
+   else                                 clusComp_z0 = nullptr;
+   if(Tree->GetBranch("clusComp_nHit"))     Tree->SetBranchAddress("clusComp_nHit", &clusComp_nHit);
+   else                                 clusComp_nHit = nullptr;
+   if(Tree->GetBranch("clusComp_chi"))     Tree->SetBranchAddress("clusComp_chi", &clusComp_chi);
+   else                                 clusComp_chi = nullptr;
    return true;
 }
 
@@ -1846,7 +1856,7 @@ bool SingleMuTreeMessenger::Initialize(){
     SingleMuIsTracker = nullptr;
     SingleMuHybridSoft = nullptr;
     SingleMuSoft = nullptr;
-
+    SingleMuIsHighPurity = nullptr;
     GenSingleMuPT = nullptr;
     GenSingleMuEta = nullptr;
     GenSingleMuPhi = nullptr;
@@ -1863,6 +1873,7 @@ bool SingleMuTreeMessenger::Initialize(){
     Tree->SetBranchAddress("recoIsGood", &SingleMuIsGood);
     Tree->SetBranchAddress("recoIsGlobal", &SingleMuIsGlobal);
     Tree->SetBranchAddress("recoIsTracker", &SingleMuIsTracker);
+    Tree->SetBranchAddress("innerIsHighPurityTrack", &SingleMuIsHighPurity);
     Tree->SetBranchAddress("recoIDHybridSoft", &SingleMuHybridSoft);
     Tree->SetBranchAddress("recoIDSoft", &SingleMuSoft);
 
@@ -2782,6 +2793,7 @@ bool DfinderMasterMessenger::Initialize()
     CheckAndSetBranch(Tree, Dmass);
     CheckAndSetBranch(Tree, Dchi2cl);
     CheckAndSetBranch(Tree, DsvpvDistance);
+    CheckAndSetBranch(Tree, DsvpvDisErr);
     CheckAndSetBranch(Tree, DsvpvDistance_2D);
     CheckAndSetBranch(Tree, DsvpvDisErr_2D);
     CheckAndSetBranch(Tree, Dip3D);
@@ -3539,7 +3551,7 @@ DzeroUPCTreeMessenger::DzeroUPCTreeMessenger(TTree *DzeroUPCTree, bool Debug)
 
 DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
 {
-   if(Initialized == true && WriteMode == true)
+  if (Initialized && WriteMode)
    {
       delete gammaN;
       delete Ngamma;
@@ -3550,7 +3562,7 @@ DzeroUPCTreeMessenger::~DzeroUPCTreeMessenger()
       delete DpassCut23PASSystDtrkPt;
       delete DpassCut23PASSystDalpha;
       delete DpassCut23PASSystDchi2cl;
-      delete DpassCutDefault; // included for backwards compatibility
+      // delete DpassCutDefault; // included for backwards compatibility
       delete DpassCutNominal;
       delete DpassCutLoose;
       delete DpassCutSystDsvpvSig;
@@ -3681,6 +3693,9 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    CheckAndSetBranch(Tree, Run);
    CheckAndSetBranch(Tree, Event);
    CheckAndSetBranch(Tree, Lumi);
+   CheckAndSetBranch(Tree, ProcessID);
+   CheckAndSetBranch(Tree, clusComp_nPixHits);
+   CheckAndSetBranch(Tree, clusComp_quality);
    CheckAndSetBranch(Tree, VX);
    CheckAndSetBranch(Tree, VY);
    CheckAndSetBranch(Tree, VZ);
@@ -3867,6 +3882,9 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("Run",                   &Run, "Run/I");
    Tree->Branch("Event",                 &Event, "Event/L");
    Tree->Branch("Lumi",                  &Lumi, "Lumi/I");
+   Tree->Branch("ProcessID",             &ProcessID, "ProcessID/I");
+   Tree->Branch("clusComp_nPixHits",     &clusComp_nPixHits, "clusComp_nPixHits/I");
+   Tree->Branch("clusComp_quality",      &clusComp_quality, "clusComp_quality/D");
    Tree->Branch("VX",                    &VX, "VX/F");
    Tree->Branch("VY",                    &VY, "VY/F");
    Tree->Branch("VZ",                    &VZ, "VZ/F");
@@ -3972,6 +3990,9 @@ void DzeroUPCTreeMessenger::Clear()
    Run = -999;
    Event = -999;
    Lumi = -999;
+   ProcessID = -999;
+   clusComp_nPixHits = 0;
+   clusComp_quality = 0;
    VX = 0.;
    VY = 0.;
    VZ = 0.;
@@ -4071,6 +4092,9 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    Run                  = M.Run;
    Event                = M.Event;
    Lumi                 = M.Lumi;
+   ProcessID            = M.ProcessID;
+   clusComp_nPixHits    = M.clusComp_nPixHits;
+   clusComp_quality     = M.clusComp_quality;
    VX                   = M.VX;
    VY                   = M.VY;
    VZ                   = M.VZ;
@@ -4367,6 +4391,7 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("Run",                  &Run);
   Tree->SetBranchAddress("Event",                &Event);
   Tree->SetBranchAddress("Lumi",                 &Lumi);
+  Tree->SetBranchAddress("ProcessID",            &ProcessID);
   Tree->SetBranchAddress("VX",                   &VX);
   Tree->SetBranchAddress("VY",                   &VY);
   Tree->SetBranchAddress("VZ",                   &VZ);
@@ -4564,6 +4589,7 @@ bool LambdaCpksUPCTreeMessenger::SetBranch(TTree *T)
   Tree->Branch("Run",                   &Run,                   "Run/I");
   Tree->Branch("Event",                 &Event,                 "Event/L");
   Tree->Branch("Lumi",                  &Lumi,                  "Lumi/I");
+  Tree->Branch("ProcessID",             &ProcessID,             "ProcessID/I");
   Tree->Branch("VX",                    &VX,                    "VX/F");
   Tree->Branch("VY",                    &VY,                    "VY/F");
   Tree->Branch("VZ",                    &VZ,                    "VZ/F");
@@ -4674,6 +4700,7 @@ void LambdaCpksUPCTreeMessenger::Clear()
   Run = -999;
   Event = -999;
   Lumi = -999;
+  ProcessID = -999;
   VX = 0.;
   VY = 0.;
   VZ = 0.;
@@ -4780,6 +4807,7 @@ void LambdaCpksUPCTreeMessenger::CopyNonTrack(LambdaCpksUPCTreeMessenger &M)
   Run                  = M.Run;
   Event                = M.Event;
   Lumi                 = M.Lumi;
+  ProcessID            = M.ProcessID;
   VX                   = M.VX;
   VY                   = M.VY;
   VZ                   = M.VZ;
@@ -5147,6 +5175,7 @@ bool LambdaCpkpiUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("Run",                  &Run);
   Tree->SetBranchAddress("Event",                &Event);
   Tree->SetBranchAddress("Lumi",                 &Lumi);
+  Tree->SetBranchAddress("ProcessID",            &ProcessID);
   Tree->SetBranchAddress("VX",                   &VX);
   Tree->SetBranchAddress("VY",                   &VY);
   Tree->SetBranchAddress("VZ",                   &VZ);
@@ -5348,6 +5377,7 @@ bool LambdaCpkpiUPCTreeMessenger::SetBranch(TTree *T)
   Tree->Branch("Run",                   &Run,                   "Run/I");
   Tree->Branch("Event",                 &Event,                 "Event/L");
   Tree->Branch("Lumi",                  &Lumi,                  "Lumi/I");
+  Tree->Branch("ProcessID",             &ProcessID,             "ProcessID/I");
   Tree->Branch("VX",                    &VX,                    "VX/F");
   Tree->Branch("VY",                    &VY,                    "VY/F");
   Tree->Branch("VZ",                    &VZ,                    "VZ/F");
@@ -5460,6 +5490,7 @@ void LambdaCpkpiUPCTreeMessenger::Clear()
   Run = -999;
   Event = -999;
   Lumi = -999;
+  ProcessID = -999;
   VX = 0.;
   VY = 0.;
   VZ = 0.;
@@ -5568,6 +5599,7 @@ void LambdaCpkpiUPCTreeMessenger::CopyNonTrack(LambdaCpkpiUPCTreeMessenger &M)
   Run                  = M.Run;
   Event                = M.Event;
   Lumi                 = M.Lumi;
+  ProcessID            = M.ProcessID;
   VX                   = M.VX;
   VY                   = M.VY;
   VZ                   = M.VZ;

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ $# -ne 8 ]]; then
-    echo "usage: ./tt-skim-checkfile.sh [executable file] [input file] [output dir] [output filename] [release] [IsData] [ApplyDRejection] [IsGammaNMCtype]" 
+if [[ $# -ne 10 ]]; then
+    echo "usage: ./tt-skim-checkfile.sh [executable file] [input file] [output dir] [output filename] [release] [IsData] [ApplyDRejection] [IsGammaNMCtype] [Year] [ApplyTriggerRejection]" 
     exit 1
 fi
 
@@ -13,6 +13,8 @@ CRELEASE=$5
 IsData=$6
 ApplyDRejection=$7
 IsGammaNMCtype=$8
+Year=$9
+ApplyTriggerRejection=${10}
 
 echo "SCRAM_ARCH:          "$SCRAM_ARCH
 echo "PWD:                 "$PWD
@@ -25,6 +27,8 @@ echo "DESTINATION:         "$DESTINATION
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 scramv1 project CMSSW $CRELEASE # cmsrel
 
+INFILE_NAME=$PWD/${INFILE##*/}
+
 [[ -d $CRELEASE/src ]] && {
     cd $CRELEASE/src
     eval `scram runtime -sh` # cmsenv
@@ -33,21 +37,23 @@ scramv1 project CMSSW $CRELEASE # cmsrel
     root --version
 
     input_file=$INFILE
+    rm -f $INFILE_NAME
     xrdcp $INFILE .
-    [[ -f $PWD/${INFILE##*/} ]] && input_file=$PWD/${INFILE##*/} || echo "xrdcp failed."
+    [[ -f $INFILE_NAME ]] && input_file=$INFILE_NAME || echo "xrdcp failed."
 
     set -x
     
     ./$EXEFILE --Input $input_file \
                --Output $OUTFILE \
                --RootPID DzeroUPC_dedxMap.root \
-               --ApplyTriggerRejection 0 \
+               --ApplyTriggerRejection $ApplyTriggerRejection \
                --ApplyEventRejection false \
-               --ApplyZDCGapRejection false \
+               --ApplyZDCGapRejection 0 \
                --ApplyDRejection $ApplyDRejection \
                --IsGammaNMCtype $IsGammaNMCtype \
-               --Year 2025 \
-               --IsData $IsData
+               --Year $Year \
+               --IsData $IsData \
+               --HideProgressBar true
 
     ls
     
@@ -61,6 +67,6 @@ scramv1 project CMSSW $CRELEASE # cmsrel
 
 rm -rf $EXEFILE $CRELEASE
 rm DzeroUPC_dedxMap.root
-rm $PWD/${INFILE##*/}
+rm $INFILE_NAME
 rm $OUTFILE
 rm -v x509*
