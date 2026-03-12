@@ -103,18 +103,22 @@ bool HiEventTreeMessenger::Initialize()
    else                                 hiHFPlus_pf = 0.;
    if(Tree->GetBranch("hiHFMinus_pf"))  Tree->SetBranchAddress("hiHFMinus_pf", &hiHFMinus_pf);
    else                                 hiHFMinus_pf = 0.;
+   if(Tree->GetBranch("hiHFPlus_pfle")) Tree->SetBranchAddress("hiHFPlus_pfle", &hiHFPlus_pfle);
+   else                                 hiHFPlus_pfle = -999.;
    if(Tree->GetBranch("hiHFPlus_pfle1")) Tree->SetBranchAddress("hiHFPlus_pfle1", &hiHFPlus_pfle1);
-   else                                 hiHFPlus_pfle1 = 0.;
+   else                                 hiHFPlus_pfle1 = -999.;
    if(Tree->GetBranch("hiHFPlus_pfle2")) Tree->SetBranchAddress("hiHFPlus_pfle2", &hiHFPlus_pfle2);
-   else                                 hiHFPlus_pfle2 = 0.;
+   else                                 hiHFPlus_pfle2 = -999.;
    if(Tree->GetBranch("hiHFPlus_pfle3")) Tree->SetBranchAddress("hiHFPlus_pfle3", &hiHFPlus_pfle3);
-   else                                 hiHFPlus_pfle3 = 0.;
+   else                                 hiHFPlus_pfle3 = -999.;
+   if(Tree->GetBranch("hiHFMinus_pfle")) Tree->SetBranchAddress("hiHFMinus_pfle", &hiHFMinus_pfle);
+   else                                 hiHFMinus_pfle = -999.;
    if(Tree->GetBranch("hiHFMinus_pfle1")) Tree->SetBranchAddress("hiHFMinus_pfle1", &hiHFMinus_pfle1);
-   else                                 hiHFMinus_pfle1 = 0.;
+   else                                 hiHFMinus_pfle1 = -999.;
    if(Tree->GetBranch("hiHFMinus_pfle2")) Tree->SetBranchAddress("hiHFMinus_pfle2", &hiHFMinus_pfle2);
-   else                                 hiHFMinus_pfle2 = 0.;
+   else                                 hiHFMinus_pfle2 = -999.;
    if(Tree->GetBranch("hiHFMinus_pfle3")) Tree->SetBranchAddress("hiHFMinus_pfle3", &hiHFMinus_pfle3);
-   else                                 hiHFMinus_pfle3 = 0.;
+   else                                 hiHFMinus_pfle3 = -999.;
    if(Tree->GetBranch("Ncoll"))         Tree->SetBranchAddress("Ncoll", &Ncoll);
    else                                 Ncoll = 0.;
    if(Tree->GetBranch("Npart"))         Tree->SetBranchAddress("Npart", &Npart);
@@ -997,6 +1001,9 @@ void TriggerTreeMessenger::FillTriggerNames()
    Name.push_back("HLT_HIUPC_SingleJet8_ZDC1nAsymXOR_MaxPixelCluster50000_v1");
    Name.push_back("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v8");
    Name.push_back("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v8");
+   Name.push_back("HLT_HIL1NotBptxOR_v10"); // v10 in goodZDC JSON, it begins from v8
+   Name.push_back("HLT_HIL1UnpairedBunchBptxMinus_v10");
+   Name.push_back("HLT_HIL1UnpairedBunchBptxPlus_v10");
 
    // 2018 triggers
    Name.push_back("HLT_HIMinimumBias_SinglePixelTrack_NpixBypass_part0_v1");
@@ -1278,12 +1285,11 @@ void TriggerTreeMessenger::FillTriggerNames()
    // muon triggers for mumu analysis
    Name.push_back("HLT_HIL3DoubleMuOpen_v1");
 
-   // 2025 HI ZB trigger
+   // 2025 HI trigger
    Name.push_back("HLT_HIUPC_ZeroBias_SinglePixelTrack_MaxPixelTrack_v16");
    Name.push_back("HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
    Name.push_back("HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v16");
    Name.push_back("HLT_HIUPC_ZeroBias_MaxPixelCluster10000_v5");
-
    Name.push_back("HLT_HIUPC_ZDC1nOR_SingLePixelTrack_MaxPixelTrack_v16");
    Name.push_back("HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v15");
    Name.push_back("HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v16");
@@ -1292,6 +1298,9 @@ void TriggerTreeMessenger::FillTriggerNames()
    Name.push_back("HLT_HIUPC_SingleJet12_ZDC1nAsymXOR_MaxPixelCluster10000_v4");
    Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nXOR_MaxPixelCluster10000_v4");
    Name.push_back("HLT_HIUPC_SingleJet16_ZDC1nAsymXOR_MaxPixelCluster10000_v4");
+   Name.push_back("HLT_HIL1NotBptxOR_v15");
+   Name.push_back("HLT_HIL1UnpairedBunchBptxMinus_v15");
+   Name.push_back("HLT_HIL1UnpairedBunchBptxPlus_v15");
 
    // 2018 ppref HI ZB Trigger
    Name.push_back("HLT_HIZeroBias_part0_v6");
@@ -3714,6 +3723,9 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    CheckAndSetBranch(Tree, isZeroBias_Min400_Max10000);
    CheckAndSetBranch(Tree, isZeroBias_Max400_Pixel);
    CheckAndSetBranch(Tree, isZeroBias_Max10000);
+   CheckAndSetBranch(Tree, isNotBptxOR);
+   CheckAndSetBranch(Tree, isUnpairedBunchBptxMinus);
+   CheckAndSetBranch(Tree, isUnpairedBunchBptxPlus);
    CheckAndSetBranch(Tree, selectedBkgFilter);
    CheckAndSetBranch(Tree, selectedVtxFilter);
    CheckAndSetBranch(Tree, ClusterCompatibilityFilter);
@@ -3721,7 +3733,13 @@ bool DzeroUPCTreeMessenger::Initialize(bool Debug)
    CheckAndSetBranch(Tree, ZDCsumPlus);
    CheckAndSetBranch(Tree, ZDCsumMinus);
    CheckAndSetBranch(Tree, HFEMaxPlus);
+   CheckAndSetBranch(Tree, HFEMaxPlus_forest);
+   CheckAndSetBranch(Tree, HFEMaxPlus_eta5);
+   CheckAndSetBranch(Tree, HFEMaxPlus_pt0p1);
    CheckAndSetBranch(Tree, HFEMaxMinus);
+   CheckAndSetBranch(Tree, HFEMaxMinus_forest);
+   CheckAndSetBranch(Tree, HFEMaxMinus_eta5);
+   CheckAndSetBranch(Tree, HFEMaxMinus_pt0p1);
    CheckAndSetBranch(Tree, ZDCgammaN);
    CheckAndSetBranch(Tree, ZDCNgamma);
    CheckAndSetBranch(Tree, gapgammaN);
@@ -3903,6 +3921,9 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("isZeroBias_Min400_Max10000",     &isZeroBias_Min400_Max10000, "isZeroBias_Min400_Max10000/O");
    Tree->Branch("isZeroBias_Max400_Pixel",     &isZeroBias_Max400_Pixel, "isZeroBias_Max400_Pixel/O");
    Tree->Branch("isZeroBias_Max10000",     &isZeroBias_Max10000, "isZeroBias_Max10000/O");
+   Tree->Branch("isNotBptxOR",     &isNotBptxOR, "isNotBptxOR/O");
+   Tree->Branch("isUnpairedBunchBptxMinus",     &isUnpairedBunchBptxMinus, "isUnpairedBunchBptxMinus/O");
+   Tree->Branch("isUnpairedBunchBptxPlus",     &isUnpairedBunchBptxPlus, "isUnpairedBunchBptxPlus/O");
    Tree->Branch("selectedBkgFilter",     &selectedBkgFilter, "selectedBkgFilter/O");
    Tree->Branch("selectedVtxFilter",     &selectedVtxFilter, "selectedVtxFilter/O");
    Tree->Branch("ClusterCompatibilityFilter",     &ClusterCompatibilityFilter, "ClusterCompatibilityFilter/O");
@@ -3916,7 +3937,13 @@ bool DzeroUPCTreeMessenger::SetBranch(TTree *T)
    Tree->Branch("ZDCsumPlus",            &ZDCsumPlus, "ZDCsumPlus/F");
    Tree->Branch("ZDCsumMinus",           &ZDCsumMinus, "ZDCsumMinus/F");
    Tree->Branch("HFEMaxPlus",            &HFEMaxPlus, "HFEMaxPlus/F");
-   Tree->Branch("HFEMaxMinus",           &HFEMaxMinus, "HFEMaxMinus/F");
+   Tree->Branch("HFEMaxPlus_forest",            &HFEMaxPlus_forest, "HFEMaxPlus_forest/F");
+   Tree->Branch("HFEMaxPlus_eta5",            &HFEMaxPlus_eta5, "HFEMaxPlus_eta5/F");
+   Tree->Branch("HFEMaxPlus_pt0p1",            &HFEMaxPlus_pt0p1, "HFEMaxPlus_pt0p1/F");
+   Tree->Branch("HFEMaxMinus",            &HFEMaxMinus, "HFEMaxMinus/F");
+   Tree->Branch("HFEMaxMinus_forest",            &HFEMaxMinus_forest, "HFEMaxMinus_forest/F");
+   Tree->Branch("HFEMaxMinus_eta5",            &HFEMaxMinus_eta5, "HFEMaxMinus_eta5/F");
+   Tree->Branch("HFEMaxMinus_pt0p1",            &HFEMaxMinus_pt0p1, "HFEMaxMinus_pt0p1/F");
    Tree->Branch("nTrackInAcceptanceHP",  &nTrackInAcceptanceHP, "nTrackInAcceptanceHP/I");
 
    Tree->Branch("Dsize",                 &Dsize);
@@ -4011,6 +4038,9 @@ void DzeroUPCTreeMessenger::Clear()
    isZeroBias_Min400_Max10000 = false;
    isZeroBias_Max400_Pixel = false;
    isZeroBias_Max10000 = false;
+   isNotBptxOR = false;
+   isUnpairedBunchBptxMinus = false;
+   isUnpairedBunchBptxPlus = false;
    selectedBkgFilter = false;
    selectedVtxFilter = false;
    ClusterCompatibilityFilter = false;
@@ -4023,8 +4053,14 @@ void DzeroUPCTreeMessenger::Clear()
    Ngamma->clear();
    ZDCsumPlus = -9999.;
    ZDCsumMinus = -9999.;
-   HFEMaxPlus = 9999.;
-   HFEMaxMinus = 9999.;
+   HFEMaxPlus = -9999.;
+   HFEMaxPlus_forest = -9999.;
+   HFEMaxPlus_eta5 = -9999.;
+   HFEMaxPlus_pt0p1 = -9999.;
+   HFEMaxMinus = -9999.;
+   HFEMaxMinus_forest = -9999.;
+   HFEMaxMinus_eta5 = -9999.;
+   HFEMaxMinus_pt0p1 = -9999.;
    nTrackInAcceptanceHP = 0;
    Dsize = 0;
    Dpt->clear();
@@ -4113,6 +4149,9 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    isZeroBias_Min400_Max10000 = M.isZeroBias_Min400_Max10000;
    isZeroBias_Max400_Pixel = M.isZeroBias_Max400_Pixel;
    isZeroBias_Max10000 = M.isZeroBias_Max10000;
+   isNotBptxOR = M.isNotBptxOR;
+   isUnpairedBunchBptxMinus = M.isUnpairedBunchBptxMinus;
+   isUnpairedBunchBptxPlus = M.isUnpairedBunchBptxPlus;
    selectedBkgFilter    = M.selectedBkgFilter;
    selectedVtxFilter    = M.selectedVtxFilter;
    ClusterCompatibilityFilter    = M.ClusterCompatibilityFilter;
@@ -4120,7 +4159,13 @@ void DzeroUPCTreeMessenger::CopyNonTrack(DzeroUPCTreeMessenger &M)
    ZDCsumPlus           = M.ZDCsumPlus;
    ZDCsumMinus          = M.ZDCsumMinus;
    HFEMaxPlus           = M.HFEMaxPlus;
-   HFEMaxMinus          = M.HFEMaxMinus;
+   HFEMaxPlus_forest           = M.HFEMaxPlus_forest;
+   HFEMaxPlus_eta5           = M.HFEMaxPlus_eta5;
+   HFEMaxPlus_pt0p1           = M.HFEMaxPlus_pt0p1;
+   HFEMaxMinus           = M.HFEMaxMinus;
+   HFEMaxMinus_forest           = M.HFEMaxMinus_forest;
+   HFEMaxMinus_eta5           = M.HFEMaxMinus_eta5;
+   HFEMaxMinus_pt0p1           = M.HFEMaxMinus_pt0p1;
    ZDCgammaN            = M.ZDCgammaN;
    ZDCNgamma            = M.ZDCNgamma;
    gapgammaN            = M.gapgammaN;
@@ -4202,6 +4247,218 @@ bool DzeroUPCTreeMessenger::FillEntry()
    Tree->Fill();
    Clear();
 
+   return true;
+}
+
+// ============================================================================
+// Write/Read Skim: DzeroUPCMicroTreeMessenger
+// Optimized version of skim messenger for faster microtree generation
+// ============================================================================
+
+DzeroUPCMicroTreeMessenger::DzeroUPCMicroTreeMessenger(TFile &File, std::string TreeName, bool Debug)
+{
+   Initialized = false;
+   WriteMode = false;
+
+   Tree = (TTree *)File.Get(TreeName.c_str());
+   Initialize(Debug);
+}
+
+DzeroUPCMicroTreeMessenger::DzeroUPCMicroTreeMessenger(TFile *File, std::string TreeName, bool Debug)
+{
+   Initialized = false;
+   WriteMode = false;
+
+   if(File != nullptr)
+      Tree = (TTree *)File->Get(TreeName.c_str());
+   else
+      Tree = nullptr;
+   Initialize(Debug);
+}
+
+DzeroUPCMicroTreeMessenger::DzeroUPCMicroTreeMessenger(TTree *DzeroUPCTree, bool Debug)
+{
+   Initialized = false;
+   WriteMode = false;
+
+   Initialize(DzeroUPCTree, Debug);
+}
+
+bool DzeroUPCMicroTreeMessenger::Initialize(TTree *DzeroUPCTree, bool Debug)
+{
+   Tree = DzeroUPCTree;
+   return Initialize(Debug);
+}
+
+bool DzeroUPCMicroTreeMessenger::Initialize(bool Debug)
+{
+   if(Tree == nullptr)
+      return false;
+
+   Initialized = true;
+   Ngamma = nullptr;
+   gammaN = nullptr;
+   Dpt = nullptr;
+   DpassCut23PAS = nullptr;
+   DpassCut23LowPt = nullptr;
+   DpassCut23PASSystDsvpvSig = nullptr;
+   DpassCut23PASSystDtrkPt = nullptr;
+   DpassCut23PASSystDalpha = nullptr;
+   DpassCut23PASSystDchi2cl = nullptr;
+   DpassCutDefault = nullptr; // included for backwards compatibility
+   DpassCutNominal = nullptr;
+   DpassCutLoose = nullptr;
+   DpassCutSystDsvpvSig = nullptr;
+   DpassCutSystDtrkPt = nullptr;
+   DpassCutSystDalpha = nullptr;
+   DpassCutSystDdtheta = nullptr;
+   DpassCutSystDalphaDdtheta = nullptr;
+   DpassCutSystDchi2cl = nullptr;
+   Dy = nullptr;
+   Dmass = nullptr;
+   Dtrk1P = nullptr;
+   Dtrk1Pt = nullptr;
+   Dtrk1PtErr = nullptr;
+   Dtrk1Eta = nullptr;
+   Dtrk1dedx = nullptr;
+   Dtrk1MassHypo = nullptr;
+   Dtrk1PixelHit = nullptr;
+   Dtrk1StripHit = nullptr;
+   Dtrk1PionScore = nullptr;
+   Dtrk1KaonScore = nullptr;
+   Dtrk1ProtScore = nullptr;
+   Dtrk2P = nullptr;
+   Dtrk2Pt = nullptr;
+   Dtrk2PtErr = nullptr;
+   Dtrk2Eta = nullptr;
+   Dtrk2dedx = nullptr;
+   Dtrk2MassHypo = nullptr;
+   Dtrk2PixelHit = nullptr;
+   Dtrk2StripHit = nullptr;
+   Dtrk2PionScore = nullptr;
+   Dtrk2KaonScore = nullptr;
+   Dtrk2ProtScore = nullptr;
+   Dchi2cl = nullptr;
+   DsvpvDistance = nullptr;
+   DsvpvDisErr = nullptr;
+   DsvpvDistance_2D = nullptr;
+   DsvpvDisErr_2D = nullptr;
+   Dip3D = nullptr;
+   Dip3derr = nullptr;
+   Dalpha = nullptr;
+   Ddtheta = nullptr;
+   Dgen = nullptr;
+   DisSignalCalc = nullptr;
+   DisSignalCalcPrompt = nullptr;
+   DisSignalCalcFeeddown = nullptr;
+   Gpt = nullptr;
+   Gy = nullptr;
+   GisSignalCalc = nullptr;
+   GisSignalCalcPrompt = nullptr;
+   GisSignalCalcFeeddown = nullptr;
+
+   Tree->SetBranchStatus("*", 0);
+   CheckAndSetBranch(Tree, Run);
+   CheckAndSetBranch(Tree, Event);
+   CheckAndSetBranch(Tree, Lumi);
+//   CheckAndSetBranch(Tree, ProcessID);
+//   CheckAndSetBranch(Tree, clusComp_nPixHits);
+//   CheckAndSetBranch(Tree, clusComp_quality);
+//   CheckAndSetBranch(Tree, VX);
+//   CheckAndSetBranch(Tree, VY);
+//   CheckAndSetBranch(Tree, VZ);
+//   CheckAndSetBranch(Tree, VXError);
+//   CheckAndSetBranch(Tree, VYError);
+//   CheckAndSetBranch(Tree, VZError);
+   CheckAndSetBranch(Tree, nVtx);
+   CheckAndSetBranch(Tree, isL1ZDCOr);
+   CheckAndSetBranch(Tree, isL1ZDCOr_Min400_Max10000);
+   CheckAndSetBranch(Tree, isL1ZDCOr_Max400_Pixel);
+//   CheckAndSetBranch(Tree, isL1ZDCOr_Max10000);
+   CheckAndSetBranch(Tree, isL1ZDCXORJet8);
+   CheckAndSetBranch(Tree, isL1ZDCXORJet12);
+   CheckAndSetBranch(Tree, isL1ZDCXORJet16);
+//   CheckAndSetBranch(Tree, isZeroBias);
+//   CheckAndSetBranch(Tree, isZeroBias_Min400_Max10000);
+//   CheckAndSetBranch(Tree, isZeroBias_Max400_Pixel);
+//   CheckAndSetBranch(Tree, isZeroBias_Max10000);
+   CheckAndSetBranch(Tree, selectedBkgFilter);
+   CheckAndSetBranch(Tree, selectedVtxFilter);
+   CheckAndSetBranch(Tree, ClusterCompatibilityFilter);
+   CheckAndSetBranch(Tree, cscTightHalo2015Filter);
+   CheckAndSetBranch(Tree, ZDCsumPlus);
+   CheckAndSetBranch(Tree, ZDCsumMinus);
+   CheckAndSetBranch(Tree, HFEMaxPlus);
+   CheckAndSetBranch(Tree, HFEMaxPlus_forest);
+   CheckAndSetBranch(Tree, HFEMaxPlus_eta5);
+   CheckAndSetBranch(Tree, HFEMaxPlus_pt0p1);
+   CheckAndSetBranch(Tree, HFEMaxMinus);
+   CheckAndSetBranch(Tree, HFEMaxMinus_forest);
+   CheckAndSetBranch(Tree, HFEMaxMinus_eta5);
+   CheckAndSetBranch(Tree, HFEMaxMinus_pt0p1);
+   CheckAndSetBranch(Tree, ZDCgammaN);
+   CheckAndSetBranch(Tree, ZDCNgamma);
+   CheckAndSetBranch(Tree, gapgammaN);
+   CheckAndSetBranch(Tree, gapNgamma);
+   CheckAndSetBranch(Tree, gammaN);
+   CheckAndSetBranch(Tree, Ngamma);
+   CheckAndSetBranch(Tree, nTrackInAcceptanceHP);
+   CheckAndSetBranch(Tree, Dsize);
+   CheckAndSetBranch(Tree, Dpt);
+   CheckAndSetBranch(Tree, Dy);
+   CheckAndSetBranch(Tree, Dmass);
+//   CheckAndSetBranch(Tree, Dtrk1P);
+   CheckAndSetBranch(Tree, Dtrk1Pt);
+   CheckAndSetBranch(Tree, Dtrk1PtErr);
+//   CheckAndSetBranch(Tree, Dtrk1Eta);
+//   CheckAndSetBranch(Tree, Dtrk1dedx);
+//   CheckAndSetBranch(Tree, Dtrk1MassHypo);
+   CheckAndSetBranch(Tree, Dtrk1PixelHit);
+   CheckAndSetBranch(Tree, Dtrk1StripHit);
+//   CheckAndSetBranch(Tree, Dtrk1PionScore);
+//   CheckAndSetBranch(Tree, Dtrk1KaonScore);
+//   CheckAndSetBranch(Tree, Dtrk1ProtScore);
+   CheckAndSetBranch(Tree, Dtrk2P);
+   CheckAndSetBranch(Tree, Dtrk2Pt);
+   CheckAndSetBranch(Tree, Dtrk2PtErr);
+//   CheckAndSetBranch(Tree, Dtrk2Eta);
+//   CheckAndSetBranch(Tree, Dtrk2dedx);
+//   CheckAndSetBranch(Tree, Dtrk2MassHypo);
+   CheckAndSetBranch(Tree, Dtrk2PixelHit);
+   CheckAndSetBranch(Tree, Dtrk2StripHit);
+//   CheckAndSetBranch(Tree, Dtrk2PionScore);
+//   CheckAndSetBranch(Tree, Dtrk2KaonScore);
+//   CheckAndSetBranch(Tree, Dtrk2ProtScore);
+//   CheckAndSetBranch(Tree, Dchi2cl);
+//   CheckAndSetBranch(Tree, DsvpvDistance);
+//   CheckAndSetBranch(Tree, DsvpvDisErr);
+//   CheckAndSetBranch(Tree, DsvpvDistance_2D);
+//   CheckAndSetBranch(Tree, DsvpvDisErr_2D);
+//   CheckAndSetBranch(Tree, Dip3D);
+//   CheckAndSetBranch(Tree, Dip3derr);
+   CheckAndSetBranch(Tree, Dalpha);
+   CheckAndSetBranch(Tree, Ddtheta);
+   CheckAndSetBranch(Tree, DpassCut23PAS);
+   CheckAndSetBranch(Tree, DpassCut23LowPt);
+   CheckAndSetBranch(Tree, DpassCut23PASSystDsvpvSig);
+   CheckAndSetBranch(Tree, DpassCut23PASSystDtrkPt);
+   CheckAndSetBranch(Tree, DpassCut23PASSystDalpha);
+   CheckAndSetBranch(Tree, DpassCut23PASSystDchi2cl);
+//   CheckAndSetBranch(Tree, DpassCutNominal);
+//   CheckAndSetBranch(Tree, DpassCutDefault); // Cuts for backwards compatibility
+//   CheckAndSetBranch(Tree, DpassCutLoose);
+//   CheckAndSetBranch(Tree, DpassCutSystDsvpvSig);
+//   CheckAndSetBranch(Tree, DpassCutSystDtrkPt);
+//   CheckAndSetBranch(Tree, DpassCutSystDalpha);
+//   CheckAndSetBranch(Tree, DpassCutSystDdtheta);
+//   CheckAndSetBranch(Tree, DpassCutSystDalphaDdtheta);
+//   CheckAndSetBranch(Tree, DpassCutSystDchi2cl);
+   CheckAndSetBranch(Tree, Dgen);
+//   CheckAndSetBranch(Tree, DisSignalCalc);
+   CheckAndSetBranch(Tree, Gsize);
+   CheckAndSetBranch(Tree, Gpt);
+   CheckAndSetBranch(Tree, Gy);
+   CheckAndSetBranch(Tree, GisSignalCalc);
    return true;
 }
 
@@ -4409,7 +4666,7 @@ bool LambdaCpksUPCTreeMessenger::Initialize(bool Debug)
   Tree->SetBranchAddress("isZeroBias",           &isZeroBias);
   Tree->SetBranchAddress("isZeroBias_Min400_Max10000",    &isZeroBias_Min400_Max10000);
   Tree->SetBranchAddress("isZeroBias_Max400_Pixel",    &isZeroBias_Max400_Pixel);
-  Tree->SetBranchAddress("isZeroBias_Max10000",    &isZeroBias_Max10000);
+  Tree->SetBranchAddress("isZeroBias_Max10000",    &isZeroBias_Max10000);  
   Tree->SetBranchAddress("selectedBkgFilter",    &selectedBkgFilter);
   Tree->SetBranchAddress("selectedVtxFilter",    &selectedVtxFilter);
   Tree->SetBranchAddress("ClusterCompatibilityFilter",    &ClusterCompatibilityFilter);

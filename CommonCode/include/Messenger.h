@@ -81,9 +81,11 @@ public:
    float hiHF_pf;
    float hiHFPlus_pf;
    float hiHFMinus_pf;
+   float hiHFPlus_pfle;
    float hiHFPlus_pfle1;
    float hiHFPlus_pfle2;
    float hiHFPlus_pfle3;
+   float hiHFMinus_pfle;
    float hiHFMinus_pfle1;
    float hiHFMinus_pfle2;
    float hiHFMinus_pfle3;
@@ -1112,11 +1114,19 @@ public:
    bool isL1ZDCXORJet8, isL1ZDCXORJet12, isL1ZDCXORJet16;
    bool isL1ZDCOr, isL1ZDCOr_Min400_Max10000, isL1ZDCOr_Max400_Pixel, isL1ZDCOr_Max10000;
    bool isZeroBias, isZeroBias_Min400_Max10000, isZeroBias_Max400_Pixel, isZeroBias_Max10000;
+   bool isNotBptxOR, isUnpairedBunchBptxMinus, isUnpairedBunchBptxPlus;
    bool selectedBkgFilter, selectedVtxFilter, ClusterCompatibilityFilter, cscTightHalo2015Filter;
    float ZDCsumPlus;
    float ZDCsumMinus;
    float HFEMaxPlus;
+   float HFEMaxPlus_forest;
+   float HFEMaxPlus_eta5;
+   float HFEMaxPlus_pt0p1;
    float HFEMaxMinus;
+   float HFEMaxMinus_forest;
+   float HFEMaxMinus_eta5;
+   float HFEMaxMinus_pt0p1;
+
    //booleans
    bool ZDCgammaN, ZDCNgamma;
    bool gapgammaN, gapNgamma;
@@ -1235,6 +1245,19 @@ public:
    bool Ngamma_EThreshSyst15()  { if (this->Ngamma->size()!=N_gapEThresh) return false; return this->Ngamma->at(7); }
    bool Ngamma_EThreshCustom(float threshold)  { return ( this->ZDCNgamma && this->HFEMaxMinus <= threshold ); }
 
+};
+
+class DzeroUPCMicroTreeMessenger: public DzeroUPCTreeMessenger
+{
+private:
+   bool WriteMode;
+   bool Initialized;
+public:
+   DzeroUPCMicroTreeMessenger(TFile &File, std::string TreeName = "tree", bool Debug = false);
+   DzeroUPCMicroTreeMessenger(TFile *File, std::string TreeName = "tree", bool Debug = false);
+   DzeroUPCMicroTreeMessenger(TTree *DzeroUPCTree = nullptr, bool Debug = false);
+   bool Initialize(TTree *DzeroUPCTree, bool Debug = false);
+   bool Initialize(bool Debug = false);
 };
 
 class LambdaCpksUPCTreeMessenger
