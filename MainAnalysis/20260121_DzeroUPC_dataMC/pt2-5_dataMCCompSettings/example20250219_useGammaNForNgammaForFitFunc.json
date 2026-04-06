@@ -1,0 +1,75 @@
+{
+  "MicroTreeDir": "fullAnalysis",
+  "sideBand": "SB",
+  "sideBandEdge": 6.0,
+  "vars": [
+    {
+      "var": "Dpt",
+      "xTitle": "D_{p_{T}} (GeV/c)",
+      "nbins": 10,
+      "xmin": 1.5,
+      "xmax": 5.5,
+      "filesuffix": "Dpt"
+    },
+    {
+      "var": "DsvpvDistance",
+      "xTitle": "DsvpvDistance (cm)",
+      "bins": "0,0.1,0.2,0.5,3",
+      "filesuffix": "DsvpvDistance"
+    },
+    {
+      "var": "DsvpvDisErr",
+      "xTitle": "DsvpvDisErr (cm)",
+      "nbins": 6,
+      "xmin": 0,
+      "xmax": 0.1,
+      "filesuffix": "DsvpvDisErr"
+    },
+    {
+      "var": "DsvpvDistance/DsvpvDisErr",
+      "xTitle": "DsvpvDistance/DsvpvDisErr",
+      "nbins": 6,
+      "xmin": 2.2,
+      "xmax": 7,
+      "filesuffix": "DsvpvSignificance"
+    },
+    {
+      "var": "Dalpha",
+      "xTitle": "Dalpha",
+      "nbins": 5,
+      "xmin": 0,
+      "xmax": 0.25,
+      "filesuffix": "Dalpha"
+    },
+    {
+      "var": "Dchi2cl",
+      "xTitle": "Dchi2cl",
+      "nbins": 5,
+      "xmin": 0,
+      "xmax": 1,
+      "filesuffix": "Dchi2cl"
+    }
+  ],
+  "tasks": [
+    {
+      "Data": {
+        "sampleInput": "pt2-5_y-2-2_IsGammaN1/Data.root",
+        "massFitResult": "pt2-5_y-2-2_IsGammaN1/MassFit/fit.root"
+      },
+      "MC": {
+        "sampleInput": "pt2-5_y-2-2_IsGammaN1/MC.root",
+        "massFitResult": "pt2-5_y-2-2_IsGammaN1/MassFit_MC/fit.root"
+      }
+    },
+    {
+      "Data": {
+        "sampleInput": "pt2-5_y-2-2_IsGammaN0/Data.root",
+        "massFitResult": "pt2-5_y-2-2_IsGammaN0/MassFit/fit.root"
+      },
+      "MC": {
+        "sampleInput": "pt2-5_y-2-2_IsGammaN1/MC.root",
+        "massFitResult": "pt2-5_y-2-2_IsGammaN1/MassFit_MC/fit.root"
+      }
+    }
+  ]
+}
