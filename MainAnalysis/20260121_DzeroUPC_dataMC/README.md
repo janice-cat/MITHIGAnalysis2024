@@ -20,14 +20,13 @@ Other `.C` files in this directory are **not** part of the default `make` target
 
 ### Preparing micro trees for analysis
 - **`DzeroUPC.cpp`** (`ExecuteDzeroUPC`)
-	- Applies event selections (trigger, background/vtx filters, rapidity-gap logic, `nVtx`, etc.) and D selections (`DpassCut23PAS` and syst variants, optional track filters when branches exist).
-	- Fills `hDmass`, efficiency histograms, optional HF vs. multiplicity 2D maps when `DoSystRapGap > 9`, and a **`TNtuple`** (`Dmass`, `Dgen`, kinematics, topology) for mass fits.
-	- This driver is intentionally **slim**: it does not expose every switch (e.g. BDT / `HFMaxRapDefn`) that other UPC D⁰ drivers in the repo may add—extend `DzeroUPC.cpp` / `include/parameter.h` here if you need them.
+	- Same feature set as **`MainAnalysis/20241210_DzeroUPC`**, but uses **`DzeroUPCTreeMessenger`** (not **`DzeroUPCMicroTreeMessenger`**) so **`Dchi2cl`**, **`DsvpvDistance`**, and **`DsvpvDisErr`** are loaded: the 8-column `TNtuple` for **`sidebandSubtraction.C`** would otherwise dereference null pointers (the micro-tree messenger omits those branches for I/O). Triggers through `isL1ZDCXORJet16`, **`BkgFilterChoice`**, **`HFMaxRapDefn`**, nominal gap at HF 16 GeV, **`DoBDTD`** / **`BDTCutValue`**, optional track filters, optional HF vs. multiplicity maps when `DoSystRapGap > 9`.
+	- Fills multi-bin `hDmass` histograms, efficiency blocks, and an 8-branch **`TNtuple`** `Dmass:Dgen:Dpt:Dy:Dalpha:Dchi2cl:DsvpvDistance:DsvpvDisErr` for **`massfit.C`** / **`sidebandSubtraction.C`**.
 
 ### Mass fit
 - **`massfit.C`** (`MassFit`)
 	- Performs the 1D mass fit (RooFit).
-	- Controlled by `massfit.sh` and a JSON card listing `dataInput`, `fitmcInputs` (and optional template inputs, `RstDir`, etc.) per `(pt, y)` bin.
+	- **`massfit.sh`** matches **`20241210_DzeroUPC`**: optional top-level **`luminosity`** / **`PDFraction`**; per-bin **`effmcInput`**, optional **`RstDir`**; after each fit, runs **`CorrectedYields`** when **`effmcInput`** is set (place the `CorrectedYields` binary on `PATH` or in this directory).
 
 ### Data vs. MC shape comparison
 - **`dataMCComp.sh`**
