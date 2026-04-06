@@ -145,9 +145,9 @@ public:
       : inf(new TFile(filename)), MDzeroUPC(new DzeroUPCTreeMessenger(*inf, string("Tree"))), title(mytitle),
         outf(new TFile(outFilename, "recreate")) {
     outf->cd();
-    // 8 columns: needed by sidebandSubtraction.C / dataMCComp (Dpt, Dsvpv*, …)
+    // 9 columns: sidebandSubtraction.C / dataMCComp (Dpt, Dsvpv*, …) + Dmva_BDT
     nt = new TNtuple("nt", "D0 mass tree",
-                     "Dmass:Dgen:Dpt:Dy:Dalpha:Dchi2cl:DsvpvDistance:DsvpvDisErr");
+                     "Dmass:Dgen:Dpt:Dy:Dalpha:Dchi2cl:DsvpvDistance:DsvpvDisErr:Dmva_BDT");
     nt->SetAutoFlush(200000);
     nt->SetAutoSave(200000000);
     nt->SetDirectory(outf);
@@ -300,11 +300,14 @@ public:
           hDmass->Fill((*MDzeroUPC->Dmass)[j]);
           hDmass24003Bins->Fill((*MDzeroUPC->Dmass)[j]);
           hDmass25002Bins->Fill((*MDzeroUPC->Dmass)[j]);
+          float dmvaBdt =
+              (MDzeroUPC->Dmva_BDT != nullptr) ? MDzeroUPC->Dmva_BDT->at(j) : -999.f;
           if (!par.IsData) {
             nt->Fill((*MDzeroUPC->Dmass)[j], (*MDzeroUPC->Dgen)[j],
                      (*MDzeroUPC->Dpt)[j], (*MDzeroUPC->Dy)[j],
                      (*MDzeroUPC->Dalpha)[j], (*MDzeroUPC->Dchi2cl)[j],
-                     (*MDzeroUPC->DsvpvDistance)[j], (*MDzeroUPC->DsvpvDisErr)[j]);
+                     (*MDzeroUPC->DsvpvDistance)[j], (*MDzeroUPC->DsvpvDisErr)[j],
+                     dmvaBdt);
             if (MDzeroUPC->Dgen->at(j) == 23333) {
               hNumDEff->Fill(1, GptGyWeight*MultWeight);
             }
@@ -312,7 +315,8 @@ public:
             nt->Fill((*MDzeroUPC->Dmass)[j], 0,
                      (*MDzeroUPC->Dpt)[j], (*MDzeroUPC->Dy)[j],
                      (*MDzeroUPC->Dalpha)[j], (*MDzeroUPC->Dchi2cl)[j],
-                     (*MDzeroUPC->DsvpvDistance)[j], (*MDzeroUPC->DsvpvDisErr)[j]);
+                     (*MDzeroUPC->DsvpvDistance)[j], (*MDzeroUPC->DsvpvDisErr)[j],
+                     dmvaBdt);
 
           // Fill HF E_max distributions for data
           if(doHFEmaxDistributions && par.IsData) {
